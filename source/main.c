@@ -4,8 +4,6 @@
     #define SDL_MAIN_HANDLED
 #endif
 
-#include "core.h"
-
 #include <glad/glad.h>
 #include <SDL2/SDL.h>
 
@@ -18,10 +16,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "core.h"
 #include "shader.h"
 #include "fileops.h"
-
-#define sizeofarray(array, type) (sizeof(array) / sizeof(type))
+#include "mesh.h"
 
 // system
 bool should_quit = false;
@@ -37,26 +35,34 @@ int frameDelay;
 
 // mesh
 i32 indices[] = { 
-    #include "models/cubeIndices.txt"
-    // #include "models/rubberIndices.h"
+    // #include "models/cubeIndices.txt"
+    // #include "models/shipIndices.txt"
+    #include "models/rubberIndices.txt"
 };
 
 f32 vertices[] = {
-    #include "models/cubeVertices.txt"
-    // #include "models/rubberVertices.h"
+    // #include "models/cubeVertices.txt"
+    // #include "models/shipVertices.txt"
+    #include "models/rubberVertices.txt"
 };
 
-u32 vao;
-u32 vbo;
-u32 ebo;
+// u32 vao;
+// u32 vbo;
+// u32 ebo;
+// i32 vertex_count;
+
 u32 shader_program;
 u32 texture;
+Mesh mesh;
 mat4 model;
 mat4 view;
 mat4 proj;
 vec3 pos;
+vec3 vel;
 f32 angle;
-i32 vertex_count;
+f32 speed;
+
+Mesh mesh2;
 
 // camera
 vec3 camera_position = {0};
@@ -67,23 +73,16 @@ vec3 camera_target = {0};
 vec3 camera_direction = {0};
 
 void setup() {
-    //  MESH
-    //-------------------------------------------
-    vertex_count = sizeofarray(indices, i32);
-    printf("Vertex Count = %d", vertex_count);
-
     //  SHADER
     //-------------------------------------------
     fops_read("resource/simple.vert");
     u32 vertex_shader = shader_compile(fops_buffer, GL_VERTEX_SHADER);
     // printf("%s", fops_buffer);
-
     fops_read("resource/simple.frag");
     u32 fragment_shader = shader_compile(fops_buffer, GL_FRAGMENT_SHADER);
     // printf("%s", fops_buffer);
-
+    // shader_program = shader_link(vertex_shader, fragment_shader);
     shader_program = shader_link(vertex_shader, fragment_shader);
-
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
 
@@ -92,16 +91,14 @@ void setup() {
     // uint32_t texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    int32_t width, height, n_channels;
-    uint8_t *data = stbi_load("resource/cgfx.png", &width, &height, &n_channels, 0);
-    // uint8_t *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
-    // uint8_t *data = stbi_load("resource/awesomeface.png", &width, &height, &n_channels, 0);
+    i32 width, height, n_channels;
+    // u8 *data = stbi_load("resource/cgfx.png", &width, &height, &n_channels, 0);
+    u8 *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
+    // u8 *data = stbi_load("resource/awesomeface.png", &width, &height, &n_channels, 0);
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -112,6 +109,13 @@ void setup() {
 
     //  GL BUFFERS
     //-------------------------------------------
+    mesh = meshCreate(vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+    mesh2 = meshCreate(vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+    // vertex_count = sizeofarray(indices, i32);
+    // printf("Vertex Count = %d", vertex_count);
+    // printf("GLSizei= %lld", sizeof(GLsizei));
+
+    /*
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
@@ -133,9 +137,11 @@ void setup() {
     glEnableVertexAttribArray(1);  
 
     glBindVertexArray(0);
+    */
 
     // XFORMS
     //--------------------------------------------
+    // camera look at dir
     camera_position[2] = 10.0f;
     glm_vec3_sub(camera_direction, camera_position, camera_direction);
     glm_vec3_normalize(camera_direction);
@@ -146,14 +152,16 @@ void setup() {
 
     // camera up
     glm_vec3_cross(camera_direction, camera_right, camera_up);
-
     camera_forward[2] = -1.0f;
 
-    // mesh
+    // setup MVP
     glm_mat4_identity(model);
     glm_mat4_identity(view);
     glm_mat4_identity(proj);
-    glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, proj );   
+    glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, proj);
+
+    speed = 4.f;
+    pos[0] = -5.f;
 }
 
 void input() {
@@ -169,16 +177,34 @@ void input() {
                     should_quit = true;
                 }
                 if(event.key.keysym.sym == SDLK_a) {
-                    pos[0] -= 1.0f;
+                    vel[0] = -1.f;
                 }
                 if(event.key.keysym.sym == SDLK_d) {
-                    pos[0] += 1.0f;
+                    vel[0] = 1.f;
                 }
                 if(event.key.keysym.sym == SDLK_w) {
-                    pos[1] += 1.0f;
+                    vel[1] = 1.f;
                 }
                 if(event.key.keysym.sym == SDLK_s) {
-                    pos[1] -= 1.0f;
+                    vel[1] = -1.f;
+                }
+                break;
+            }
+            case SDL_KEYUP: {
+                if(event.key.keysym.sym == SDLK_ESCAPE) {
+                    should_quit = true;
+                }
+                if(event.key.keysym.sym == SDLK_a) {
+                    vel[0] = 0.f;
+                }
+                if(event.key.keysym.sym == SDLK_d) {
+                    vel[0] = 0.f;
+                }
+                if(event.key.keysym.sym == SDLK_w) {
+                    vel[1] = 0.f;
+                }
+                if(event.key.keysym.sym == SDLK_s) {
+                    vel[1] = 0.f;
                 }
                 break;
             }
@@ -187,6 +213,7 @@ void input() {
             }
         }
     }
+    return;
 }
 
 void update() {
@@ -203,18 +230,20 @@ void update() {
     framePrevTime = SDL_GetTicks();
     // printf("prev: %d, delay: %d\n", framePrevTime, frameDelay);   
 
-    // update
-    glm_vec3_dup(camera_position, camera_target);
-    glm_vec3_sub(camera_target, (vec3){0.0f, 0.0f, 100.0f}, camera_target);
-    // glm_lookat(camera_position, camera_target, camera_up, view);
+    pos[0] += speed * vel[0] * deltaTime;
+    pos[1] += speed * vel[1] * deltaTime;
+    angle += .01f;
+
     vec3 camera_new_location;
     glm_vec3_add(camera_position, camera_forward, camera_new_location);
     glm_lookat(camera_position, camera_new_location, camera_up, view);
+
+    // transforms S T R
     glm_mat4_identity(model);
-    // glm_translate(model, (vec3){0.f, 0.f, 0.f});
+    glm_scale_uni(model, 1.f);
     glm_translate(model, pos);
-    angle += .01f;
     glm_rotate(model, angle, (vec3){1.f, 1.f, 0.f});
+    // glm_rotate(model, 3.141592f * .5f, (vec3){0.f, 1.f, 0.f});
 }
 
 void render() {
@@ -223,10 +252,8 @@ void render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     // bind
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glUseProgram(shader_program);
-    glBindVertexArray(vao);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     // uniforms
     uint32_t view_location = glGetUniformLocation(shader_program, "view");
     glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
@@ -234,9 +261,26 @@ void render() {
     glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
     uint32_t model_location = glGetUniformLocation(shader_program, "model");
     glUniformMatrix4fv(model_location, 1, GL_FALSE, model[0]);
+
     // draw
+    meshRender(&mesh, texture, shader_program);
+
+    glm_mat4_identity(model);
+    view_location = glGetUniformLocation(shader_program, "view");
+    glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
+    proj_location = glGetUniformLocation(shader_program, "proj");
+    glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
+    model_location = glGetUniformLocation(shader_program, "model");
+    glUniformMatrix4fv(model_location, 1, GL_FALSE, model[0]);
+    meshRender(&mesh2, texture, shader_program);
+    /*
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glUseProgram(shader_program);
+    glBindVertexArray(mesh.vao);
     glDrawElements(GL_TRIANGLES, vertex_count, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+    */
+
     // end
     SDL_GL_SwapWindow(window);
 }
