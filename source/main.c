@@ -57,8 +57,8 @@ Mesh mesh;
 mat4 model;
 mat4 view;
 mat4 proj;
-vec3 pos;
-vec3 vel;
+// vec3 pos;
+// vec3 vel;
 f32 angle;
 f32 speed;
 
@@ -161,7 +161,7 @@ void setup() {
     glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, proj);
 
     speed = 4.f;
-    pos[0] = -5.f;
+    mesh.pos[0] = -5.f;
 }
 
 void input() {
@@ -177,16 +177,16 @@ void input() {
                     should_quit = true;
                 }
                 if(event.key.keysym.sym == SDLK_a) {
-                    vel[0] = -1.f;
+                    mesh.vel[0] = -1.f;
                 }
                 if(event.key.keysym.sym == SDLK_d) {
-                    vel[0] = 1.f;
+                    mesh.vel[0] = 1.f;
                 }
                 if(event.key.keysym.sym == SDLK_w) {
-                    vel[1] = 1.f;
+                    mesh.vel[1] = 1.f;
                 }
                 if(event.key.keysym.sym == SDLK_s) {
-                    vel[1] = -1.f;
+                    mesh.vel[1] = -1.f;
                 }
                 break;
             }
@@ -195,16 +195,16 @@ void input() {
                     should_quit = true;
                 }
                 if(event.key.keysym.sym == SDLK_a) {
-                    vel[0] = 0.f;
+                    mesh.vel[0] = 0.f;
                 }
                 if(event.key.keysym.sym == SDLK_d) {
-                    vel[0] = 0.f;
+                    mesh.vel[0] = 0.f;
                 }
                 if(event.key.keysym.sym == SDLK_w) {
-                    vel[1] = 0.f;
+                    mesh.vel[1] = 0.f;
                 }
                 if(event.key.keysym.sym == SDLK_s) {
-                    vel[1] = 0.f;
+                    mesh.vel[1] = 0.f;
                 }
                 break;
             }
@@ -230,8 +230,8 @@ void update() {
     framePrevTime = SDL_GetTicks();
     // printf("prev: %d, delay: %d\n", framePrevTime, frameDelay);   
 
-    pos[0] += speed * vel[0] * deltaTime;
-    pos[1] += speed * vel[1] * deltaTime;
+    mesh.pos[0] += speed * mesh.vel[0] * deltaTime;
+    mesh.pos[1] += speed * mesh.vel[1] * deltaTime;
     angle += .01f;
 
     vec3 camera_new_location;
@@ -241,9 +241,10 @@ void update() {
     // transforms S T R
     glm_mat4_identity(model);
     glm_scale_uni(model, 1.f);
-    glm_translate(model, pos);
+    glm_translate(model, mesh.pos);
     glm_rotate(model, angle, (vec3){1.f, 1.f, 0.f});
     // glm_rotate(model, 3.141592f * .5f, (vec3){0.f, 1.f, 0.f});
+    mesh2.pos[0] += .01f;
 }
 
 void render() {
@@ -261,10 +262,10 @@ void render() {
     glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
     uint32_t model_location = glGetUniformLocation(shader_program, "model");
     glUniformMatrix4fv(model_location, 1, GL_FALSE, model[0]);
-
     // draw
     meshRender(&mesh, texture, shader_program);
 
+    // uniforms
     glm_mat4_identity(model);
     view_location = glGetUniformLocation(shader_program, "view");
     glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
@@ -272,7 +273,9 @@ void render() {
     glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
     model_location = glGetUniformLocation(shader_program, "model");
     glUniformMatrix4fv(model_location, 1, GL_FALSE, model[0]);
+    // draw
     meshRender(&mesh2, texture, shader_program);
+
     /*
     glBindTexture(GL_TEXTURE_2D, texture);
     glUseProgram(shader_program);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <cglm/vec3.h>
 
 #include "core.h"
 
@@ -10,6 +11,8 @@ typedef struct {
     u32 ebo;
     u32 vertex_count;
     u32 index_count;
+    vec3 pos;
+    vec3 vel;
 } Mesh;
 
 /*
