@@ -1,5 +1,5 @@
-# cgfx 
-C graphics programming template using SDL2 & OpenGL:  
+# glsandbox
+C graphics programming with SDL2 & OpenGL:  
 Compiles to Win64 MacOS Linux with `compile_commands.json` for clangd LSP support.
 
 ### Linux & Darwin Run:
