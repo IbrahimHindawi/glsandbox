@@ -230,15 +230,16 @@ void update() {
     framePrevTime = SDL_GetTicks();
     // printf("prev: %d, delay: %d\n", framePrevTime, frameDelay);   
 
-    mesh.pos[0] += speed * mesh.vel[0] * deltaTime;
-    mesh.pos[1] += speed * mesh.vel[1] * deltaTime;
-    angle += .01f;
-
+    // camera
     vec3 camera_new_location;
     glm_vec3_add(camera_position, camera_forward, camera_new_location);
     glm_lookat(camera_position, camera_new_location, camera_up, view);
 
-    // transforms S T R
+    // transformations
+    mesh.pos[0] += speed * mesh.vel[0] * deltaTime;
+    mesh.pos[1] += speed * mesh.vel[1] * deltaTime;
+    angle += .01f;
+    // S T R
     glm_mat4_identity(model);
     glm_scale_uni(model, 1.f);
     glm_translate(model, mesh.pos);
