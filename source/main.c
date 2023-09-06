@@ -53,16 +53,19 @@ f32 vertices[] = {
 
 u32 shader_program;
 u32 texture;
-Mesh mesh;
-mat4 model;
+// Mesh mesh;
+// Mesh mesh2;
+Meshes meshes;
+XForms xforms;
+// mat4 model;
 mat4 view;
 mat4 proj;
 // vec3 pos;
 // vec3 vel;
 f32 angle;
 f32 speed;
+f32 randspeeds[256];
 
-Mesh mesh2;
 
 // camera
 vec3 camera_position = {0};
@@ -109,8 +112,9 @@ void setup() {
 
     //  GL BUFFERS
     //-------------------------------------------
-    mesh = meshCreate(vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
-    mesh2 = meshCreate(vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+    // mesh = meshCreate(vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+    // mesh2 = meshCreate(vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+    meshesCreate(&meshes, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
     // vertex_count = sizeofarray(indices, i32);
     // printf("Vertex Count = %d", vertex_count);
     // printf("GLSizei= %lld", sizeof(GLsizei));
@@ -155,13 +159,22 @@ void setup() {
     camera_forward[2] = -1.0f;
 
     // setup MVP
-    glm_mat4_identity(model);
+    // glm_mat4_identity(model);
     glm_mat4_identity(view);
     glm_mat4_identity(proj);
     glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, proj);
 
     speed = 4.f;
-    mesh.pos[0] = -5.f;
+    for(i32 i = 0; i < N; ++i) {
+        randspeeds[i] = .0001f * rand();
+        if (randspeeds[i] < 2.f) { randspeeds[i] *= -1.f; }
+        // printf("%f\n", randspeeds[i]);
+        xforms.pos[i][0] = randspeeds[i];
+        xforms.pos[i][1] = -randspeeds[N - i];
+        printf("{%f, %f}\n", randspeeds[i], -randspeeds[i]);
+    }
+
+    // mesh.pos[0] = -5.f;
 }
 
 void input() {
@@ -177,16 +190,24 @@ void input() {
                     should_quit = true;
                 }
                 if(event.key.keysym.sym == SDLK_a) {
-                    mesh.vel[0] = -1.f;
+                    for(i32 i = 0; i < N; ++i) {
+                        xforms.vel[i][0] = -1.f;
+                    }
                 }
                 if(event.key.keysym.sym == SDLK_d) {
-                    mesh.vel[0] = 1.f;
+                    for(i32 i = 0; i < N; ++i) {
+                        xforms.vel[i][0] = 1.f;
+                    }
                 }
                 if(event.key.keysym.sym == SDLK_w) {
-                    mesh.vel[1] = 1.f;
+                    for(i32 i = 0; i < N; ++i) {
+                        xforms.vel[i][1] = 1.f;
+                    }
                 }
                 if(event.key.keysym.sym == SDLK_s) {
-                    mesh.vel[1] = -1.f;
+                    for(i32 i = 0; i < N; ++i) {
+                        xforms.vel[i][1] = -1.f;
+                    }
                 }
                 break;
             }
@@ -195,16 +216,24 @@ void input() {
                     should_quit = true;
                 }
                 if(event.key.keysym.sym == SDLK_a) {
-                    mesh.vel[0] = 0.f;
+                    for(i32 i = 0; i < N; ++i) {
+                        xforms.vel[i][0] = 0.f;
+                    }
                 }
                 if(event.key.keysym.sym == SDLK_d) {
-                    mesh.vel[0] = 0.f;
+                    for(i32 i = 0; i < N; ++i) {
+                        xforms.vel[i][0] = 0.f;
+                    }
                 }
                 if(event.key.keysym.sym == SDLK_w) {
-                    mesh.vel[1] = 0.f;
+                    for(i32 i = 0; i < N; ++i) {
+                        xforms.vel[i][1] = 0.f;
+                    }
                 }
                 if(event.key.keysym.sym == SDLK_s) {
-                    mesh.vel[1] = 0.f;
+                    for(i32 i = 0; i < N; ++i) {
+                        xforms.vel[i][1] = 0.f;
+                    }
                 }
                 break;
             }
@@ -235,17 +264,19 @@ void update() {
     glm_vec3_add(camera_position, camera_forward, camera_new_location);
     glm_lookat(camera_position, camera_new_location, camera_up, view);
 
-    // transformations
-    mesh.pos[0] += speed * mesh.vel[0] * deltaTime;
-    mesh.pos[1] += speed * mesh.vel[1] * deltaTime;
     angle += .01f;
-    // S T R
-    glm_mat4_identity(model);
-    glm_scale_uni(model, 1.f);
-    glm_translate(model, mesh.pos);
-    glm_rotate(model, angle, (vec3){1.f, 1.f, 0.f});
-    // glm_rotate(model, 3.141592f * .5f, (vec3){0.f, 1.f, 0.f});
-    mesh2.pos[0] += .01f;
+    for(i32 i = 0; i < N; ++i) {
+        // transformations
+        xforms.pos[i][0] += xforms.vel[i][0] * deltaTime;
+        xforms.pos[i][1] += xforms.vel[i][1] * deltaTime;
+
+        // S T R
+        glm_mat4_identity(xforms.model[i]);
+        glm_scale_uni(xforms.model[i], 1.f);
+        glm_translate(xforms.model[i], xforms.pos[i]);
+        glm_rotate(xforms.model[i], angle, (vec3){1.f, 1.f, 0.f});
+        // glm_rotate(xforms.model[i], 3.141592f * .5f, (vec3){0.f, 1.f, 0.f});
+    }
 }
 
 void render() {
@@ -256,26 +287,33 @@ void render() {
     // bind
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    // uniforms
-    uint32_t view_location = glGetUniformLocation(shader_program, "view");
-    glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
-    uint32_t proj_location = glGetUniformLocation(shader_program, "proj");
-    glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
-    uint32_t model_location = glGetUniformLocation(shader_program, "model");
-    glUniformMatrix4fv(model_location, 1, GL_FALSE, model[0]);
-    // draw
-    meshRender(&mesh, texture, shader_program);
+    for(i32 i = 0; i < N; ++i) {
+        // uniforms
+        uint32_t view_location = glGetUniformLocation(shader_program, "view");
+        glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
+        uint32_t proj_location = glGetUniformLocation(shader_program, "proj");
+        glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
+        uint32_t model_location = glGetUniformLocation(shader_program, "model");
+        glUniformMatrix4fv(model_location, 1, GL_FALSE, xforms.model[i][0]);
+        // draw
+        // meshRender(&mesh, texture, shader_program);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glUseProgram(shader_program);
+        glBindVertexArray(meshes.vao[i]);
+        glDrawElements(GL_TRIANGLES, meshes.index_count[i], GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
 
-    // uniforms
-    glm_mat4_identity(model);
-    view_location = glGetUniformLocation(shader_program, "view");
-    glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
-    proj_location = glGetUniformLocation(shader_program, "proj");
-    glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
-    model_location = glGetUniformLocation(shader_program, "model");
-    glUniformMatrix4fv(model_location, 1, GL_FALSE, model[0]);
-    // draw
-    meshRender(&mesh2, texture, shader_program);
+    // // uniforms
+    // glm_mat4_identity(model);
+    // view_location = glGetUniformLocation(shader_program, "view");
+    // glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
+    // proj_location = glGetUniformLocation(shader_program, "proj");
+    // glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
+    // model_location = glGetUniformLocation(shader_program, "model");
+    // glUniformMatrix4fv(model_location, 1, GL_FALSE, model[0]);
+    // // draw
+    // meshRender(&mesh2, texture, shader_program);
 
     /*
     glBindTexture(GL_TEXTURE_2D, texture);
