@@ -56,7 +56,8 @@ void meshRender(Mesh *mesh, u32 texture, u32 shader_program) {
     glBindVertexArray(0);
 }
 
-#define N 256
+#define M 22
+#define N (M * M)
 typedef struct {
     u32 vao[N];
     u32 vbo[N];

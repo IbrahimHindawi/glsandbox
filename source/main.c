@@ -63,8 +63,6 @@ mat4 proj;
 // vec3 pos;
 // vec3 vel;
 f32 angle;
-f32 speed;
-f32 randspeeds[256];
 
 
 // camera
@@ -146,7 +144,7 @@ void setup() {
     // XFORMS
     //--------------------------------------------
     // camera look at dir
-    camera_position[2] = 10.0f;
+    camera_position[2] = 30.0f;
     glm_vec3_sub(camera_direction, camera_position, camera_direction);
     glm_vec3_normalize(camera_direction);
 
@@ -164,17 +162,22 @@ void setup() {
     glm_mat4_identity(proj);
     glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, proj);
 
-    speed = 4.f;
-    for(i32 i = 0; i < N; ++i) {
-        randspeeds[i] = .0001f * rand();
-        if (randspeeds[i] < 2.f) { randspeeds[i] *= -1.f; }
-        // printf("%f\n", randspeeds[i]);
-        xforms.pos[i][0] = randspeeds[i];
-        xforms.pos[i][1] = -randspeeds[N - i];
-        printf("{%f, %f}\n", randspeeds[i], -randspeeds[i]);
+    // initalize positions
+    f32 a = 0.f;
+    f32 b = -1.f;
+    const f32 s = 1.f;
+    const i32 f = M;
+    for(i32 i = 0; i < f; ++i) {
+        for(i32 j = 0; j < f; ++j) {
+            b += 1.f;
+            xforms.pos[i + j * f][0] = a * s - f/2;
+            xforms.pos[i + j * f][1] = b * s - f/2;
+            // xforms.pos[i + j * f][2] = 0.f;
+            printf("{%f, %f}\n", a*s, b*s);
+        }
+        a += 1.f;
+        b = -1.f;
     }
-
-    // mesh.pos[0] = -5.f;
 }
 
 void input() {
@@ -191,22 +194,22 @@ void input() {
                 }
                 if(event.key.keysym.sym == SDLK_a) {
                     for(i32 i = 0; i < N; ++i) {
-                        xforms.vel[i][0] = -1.f;
+                        xforms.vel[i][0] = -2.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_d) {
                     for(i32 i = 0; i < N; ++i) {
-                        xforms.vel[i][0] = 1.f;
+                        xforms.vel[i][0] = 2.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_w) {
                     for(i32 i = 0; i < N; ++i) {
-                        xforms.vel[i][1] = 1.f;
+                        xforms.vel[i][1] = 2.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_s) {
                     for(i32 i = 0; i < N; ++i) {
-                        xforms.vel[i][1] = -1.f;
+                        xforms.vel[i][1] = -2.f;
                     }
                 }
                 break;
