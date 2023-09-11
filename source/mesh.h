@@ -1,5 +1,6 @@
 #pragma once
 
+#include <math.h>
 #include <glad/glad.h>
 #include <cglm/vec3.h>
 #include <cglm/affine.h>
@@ -122,19 +123,21 @@ typedef struct {
     hkArray model; // mat4
 } gameArchetype;
 
-void gameArchetypeInitalize(i32 n, gameArchetype *archetype) {
-    archetype->vao = hkArrayCreate(sizeof(u32), n);
-    archetype->vbo = hkArrayCreate(sizeof(u32), n);
-    archetype->ebo = hkArrayCreate(sizeof(u32), n);
-    archetype->vertex_count = hkArrayCreate(sizeof(u32), n);
-    archetype->index_count = hkArrayCreate(sizeof(u32), n);
-    archetype->pos = hkArrayCreate(sizeof(vec3), n);
-    archetype->vel = hkArrayCreate(sizeof(vec3), n);
-    archetype->model = hkArrayCreate(sizeof(mat4), n);
+void gameArchetypeInitalize(gameArchetype *archetype, i32 n) {
+    const u32 edge = n * n;
+    archetype->vao = hkArrayCreate(sizeof(u32), edge);
+    archetype->vbo = hkArrayCreate(sizeof(u32), edge);
+    archetype->ebo = hkArrayCreate(sizeof(u32), edge);
+    archetype->vertex_count = hkArrayCreate(sizeof(u32), edge);
+    archetype->index_count = hkArrayCreate(sizeof(u32), edge);
+    archetype->pos = hkArrayCreate(sizeof(vec3), edge);
+    archetype->vel = hkArrayCreate(sizeof(vec3), edge);
+    archetype->model = hkArrayCreate(sizeof(mat4), edge);
 }
 
 void gameArchetypeCreate(gameArchetype *archetype, f32 *vertices, u32 vertex_count, i32 *indices, u32 index_count) {
-    for(i32 i = 0; i < N; ++i) {
+    const i32 n = archetype->index_count.length; 
+    for(i32 i = 0; i < n; ++i) {
         ((u32 *)archetype->vertex_count.data)[i] = vertex_count;
         ((u32 *)archetype->index_count.data)[i] = index_count;
 
@@ -168,7 +171,7 @@ void gameArchetypeSetupPositions(gameArchetype *archetype) {
     f32 a = 0.f;
     f32 b = -1.f;
     const f32 s = 1.f;
-    const i32 f = M;
+    const i32 f = sqrt(archetype->index_count.length);
     for(i32 i = 0; i < f; ++i) {
         for(i32 j = 0; j < f; ++j) {
             b += 1.f;

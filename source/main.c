@@ -118,7 +118,7 @@ void setup() {
     // mesh = meshCreate(vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
     // mesh2 = meshCreate(vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
     // meshesCreate(&meshes, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
-    gameArchetypeInitalize(N, &archetype);
+    gameArchetypeInitalize(&archetype, 22);
     gameArchetypeCreate(&archetype, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
     // vertex_count = sizeofarray(indices, i32);
     // printf("Vertex Count = %d", vertex_count);
