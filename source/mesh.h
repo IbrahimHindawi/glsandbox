@@ -109,6 +109,8 @@ void meshesCreate(Meshes *meshes, f32 *vertices, u32 vertex_count, i32 *indices,
     return;
 }
 
+// Archetype V2
+////////////////////////////////////////////////////////////////
 typedef struct {
     hkArray vao; // u32
     hkArray vbo; // u32
