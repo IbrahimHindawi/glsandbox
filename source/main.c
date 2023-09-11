@@ -118,7 +118,7 @@ void setup() {
     // mesh = meshCreate(vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
     // mesh2 = meshCreate(vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
     // meshesCreate(&meshes, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
-    gameArchetypeInitalize(&archetype, 22);
+    gameArchetypeInitalize(&archetype, 60);
     gameArchetypeCreate(&archetype, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
     // vertex_count = sizeofarray(indices, i32);
     // printf("Vertex Count = %d", vertex_count);
@@ -271,16 +271,13 @@ void update() {
     // printf("ticks: %d, ", SDL_GetTicks());
     framePrevTime = SDL_GetTicks();
     // printf("prev: %d, delay: %d\n", framePrevTime, frameDelay);   
+    printf("FPS: %f.\n", 1000.f / (1000.f * deltaTime));
+    // printf("delta: %f.\n", deltaTime);   
 
     // camera
     vec3 camera_new_location;
     glm_vec3_add(camera_position, camera_forward, camera_new_location);
     glm_lookat(camera_position, camera_new_location, camera_up, view);
-
-    // AI
-    for(i32 i = 0; i < N; ++i) {
-        // meshes.vel[i][0] = -2.f;
-    }
 
     gameArchetypeUpdate(&archetype, deltaTime, &angle);
     /*

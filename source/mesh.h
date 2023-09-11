@@ -178,6 +178,7 @@ void gameArchetypeSetupPositions(gameArchetype *archetype) {
             vec3 *posvector = archetype->pos.data;
             posvector[i + j * f][0] = a * s - f/2;
             posvector[i + j * f][1] = b * s - f/2;
+            posvector[i + j * f][2] = -50.f;
             // archetype->pos.data[i + j * f][0] = a * s - f/2;
             // meshes.pos[i + j * f][1] = b * s - f/2;
             // meshes.pos[i + j * f][2] = 0.f;
