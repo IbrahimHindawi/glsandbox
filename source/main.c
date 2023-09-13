@@ -62,6 +62,7 @@ u32 texture;
 // Meshes meshes;
 // XForms xforms;
 gameArchetype archetype;
+gameArchetype archetypeHero;
 // mat4 model;
 mat4 view;
 mat4 proj;
@@ -120,6 +121,9 @@ void setup() {
     // meshesCreate(&meshes, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
     gameArchetypeInitalize(&archetype, 60);
     gameArchetypeCreate(&archetype, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+
+    gameArchetypeInitalize(&archetypeHero, 1);
+    gameArchetypeCreate(&archetypeHero, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
     // vertex_count = sizeofarray(indices, i32);
     // printf("Vertex Count = %d", vertex_count);
     // printf("GLSizei= %lld", sizeof(GLsizei));
@@ -205,21 +209,25 @@ void input() {
                 if(event.key.keysym.sym == SDLK_a) {
                     for(i32 i = 0; i < N; ++i) {
                         // meshes.vel[i][0] = -2.f;
+                        ((vec3 *)archetypeHero.vel.data)[0][0] = -2.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_d) {
                     for(i32 i = 0; i < N; ++i) {
                         // meshes.vel[i][0] = 2.f;
+                        ((vec3 *)archetypeHero.vel.data)[0][0] = 2.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_w) {
                     for(i32 i = 0; i < N; ++i) {
                         // meshes.vel[i][1] = 2.f;
+                        ((vec3 *)archetypeHero.vel.data)[0][1] = 2.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_s) {
                     for(i32 i = 0; i < N; ++i) {
                         // meshes.vel[i][1] = -2.f;
+                        ((vec3 *)archetypeHero.vel.data)[0][1] = -2.f;
                     }
                 }
                 break;
@@ -231,21 +239,25 @@ void input() {
                 if(event.key.keysym.sym == SDLK_a) {
                     for(i32 i = 0; i < N; ++i) {
                         // meshes.vel[i][0] = 0.f;
+                        ((vec3 *)archetypeHero.vel.data)[0][0] = 0.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_d) {
                     for(i32 i = 0; i < N; ++i) {
                         // meshes.vel[i][0] = 0.f;
+                        ((vec3 *)archetypeHero.vel.data)[0][0] = 0.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_w) {
                     for(i32 i = 0; i < N; ++i) {
                         // meshes.vel[i][1] = 0.f;
+                        ((vec3 *)archetypeHero.vel.data)[0][1] = 0.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_s) {
                     for(i32 i = 0; i < N; ++i) {
                         // meshes.vel[i][1] = 0.f;
+                        ((vec3 *)archetypeHero.vel.data)[0][1] = 0.f;
                     }
                 }
                 break;
@@ -280,6 +292,7 @@ void update() {
     glm_lookat(camera_position, camera_new_location, camera_up, view);
 
     gameArchetypeUpdate(&archetype, deltaTime, &angle);
+    gameArchetypeUpdate(&archetypeHero, deltaTime, &angle);
     /*
     // component update
     angle += .01f;
@@ -306,6 +319,7 @@ void render() {
     // bind
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     gameArchetypeRender(&archetype, shader_program, view, proj, texture);
+    gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
     /*
     for(i32 i = 0; i < N; ++i) {
         // uniforms
