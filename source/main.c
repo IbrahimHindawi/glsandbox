@@ -46,30 +46,13 @@ f32 vertices[] = {
     #include "models/rubberVertices.txt"
 };
 
-// u32 vao;
-// u32 vbo;
-// u32 ebo;
-// i32 vertex_count;
-
 u32 shader_program;
 u32 texture;
-// Mesh mesh;
-// Mesh mesh2;
-// Player
-// Meshes meshes;
-// XForms xforms;
-// NPC
-// Meshes meshes;
-// XForms xforms;
 gameArchetype archetype;
 gameArchetype archetypeHero;
-// mat4 model;
 mat4 view;
 mat4 proj;
-// vec3 pos;
-// vec3 vel;
 f32 angle;
-
 
 // camera
 vec3 camera_position = {0};
@@ -116,46 +99,17 @@ void setup() {
 
     //  GL BUFFERS
     //-------------------------------------------
-    // mesh = meshCreate(vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
-    // mesh2 = meshCreate(vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
-    // meshesCreate(&meshes, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
-    gameArchetypeInitalize(&archetype, 60);
+    gameArchetypeInitalize(&archetype, 3);
     gameArchetypeCreate(&archetype, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
 
     gameArchetypeInitalize(&archetypeHero, 1);
     gameArchetypeCreate(&archetypeHero, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
-    // vertex_count = sizeofarray(indices, i32);
-    // printf("Vertex Count = %d", vertex_count);
-    // printf("GLSizei= %lld", sizeof(GLsizei));
-
-    /*
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
-
-    glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // pos
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(f32), (void*)0);
-    glEnableVertexAttribArray(0);  
-
-    // tex
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(f32), (void*)(sizeof(f32) * 3));
-    glEnableVertexAttribArray(1);  
-
-    glBindVertexArray(0);
-    */
 
     // XFORMS
     //--------------------------------------------
+    camera_position[2] = 10.0f;
+
     // camera look at dir
-    camera_position[2] = 30.0f;
     glm_vec3_sub(camera_direction, camera_position, camera_direction);
     glm_vec3_normalize(camera_direction);
 
@@ -174,27 +128,11 @@ void setup() {
     glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, proj);
 
     gameArchetypeSetupPositions(&archetype);
-    /*
-    // initalize positions
-    f32 a = 0.f;
-    f32 b = -1.f;
-    const f32 s = 1.f;
-    const i32 f = M;
-    for(i32 i = 0; i < f; ++i) {
-        for(i32 j = 0; j < f; ++j) {
-            b += 1.f;
-            meshes.pos[i + j * f][0] = a * s - f/2;
-            meshes.pos[i + j * f][1] = b * s - f/2;
-            // meshes.pos[i + j * f][2] = 0.f;
-            printf("{%f, %f}\n", a*s, b*s);
-        }
-        a += 1.f;
-        b = -1.f;
-    }
-    */
 }
 
 void input() {
+    const i64 n = archetypeHero.index_count.length; 
+    vec3 *vel = ((vec3 *)archetypeHero.vel.data);
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
@@ -207,27 +145,23 @@ void input() {
                     should_quit = true;
                 }
                 if(event.key.keysym.sym == SDLK_a) {
-                    for(i32 i = 0; i < N; ++i) {
-                        // meshes.vel[i][0] = -2.f;
-                        ((vec3 *)archetypeHero.vel.data)[0][0] = -2.f;
+                    for(i32 i = 0; i < n; ++i) {
+                        vel[0][0] = -2.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_d) {
-                    for(i32 i = 0; i < N; ++i) {
-                        // meshes.vel[i][0] = 2.f;
-                        ((vec3 *)archetypeHero.vel.data)[0][0] = 2.f;
+                    for(i32 i = 0; i < n; ++i) {
+                        vel[0][0] = 2.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_w) {
-                    for(i32 i = 0; i < N; ++i) {
-                        // meshes.vel[i][1] = 2.f;
-                        ((vec3 *)archetypeHero.vel.data)[0][1] = 2.f;
+                    for(i32 i = 0; i < n; ++i) {
+                        vel[0][1] = 2.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_s) {
-                    for(i32 i = 0; i < N; ++i) {
-                        // meshes.vel[i][1] = -2.f;
-                        ((vec3 *)archetypeHero.vel.data)[0][1] = -2.f;
+                    for(i32 i = 0; i < n; ++i) {
+                        vel[0][1] = -2.f;
                     }
                 }
                 break;
@@ -237,27 +171,23 @@ void input() {
                     should_quit = true;
                 }
                 if(event.key.keysym.sym == SDLK_a) {
-                    for(i32 i = 0; i < N; ++i) {
-                        // meshes.vel[i][0] = 0.f;
-                        ((vec3 *)archetypeHero.vel.data)[0][0] = 0.f;
+                    for(i32 i = 0; i < n; ++i) {
+                        vel[0][0] = 0.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_d) {
-                    for(i32 i = 0; i < N; ++i) {
-                        // meshes.vel[i][0] = 0.f;
-                        ((vec3 *)archetypeHero.vel.data)[0][0] = 0.f;
+                    for(i32 i = 0; i < n; ++i) {
+                        vel[0][0] = 0.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_w) {
-                    for(i32 i = 0; i < N; ++i) {
-                        // meshes.vel[i][1] = 0.f;
-                        ((vec3 *)archetypeHero.vel.data)[0][1] = 0.f;
+                    for(i32 i = 0; i < n; ++i) {
+                        vel[0][1] = 0.f;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_s) {
-                    for(i32 i = 0; i < N; ++i) {
-                        // meshes.vel[i][1] = 0.f;
-                        ((vec3 *)archetypeHero.vel.data)[0][1] = 0.f;
+                    for(i32 i = 0; i < n; ++i) {
+                        vel[0][1] = 0.f;
                     }
                 }
                 break;
@@ -282,9 +212,7 @@ void update() {
     }
     // printf("ticks: %d, ", SDL_GetTicks());
     framePrevTime = SDL_GetTicks();
-    // printf("prev: %d, delay: %d\n", framePrevTime, frameDelay);   
-    printf("FPS: %f.\n", 1000.f / (1000.f * deltaTime));
-    // printf("delta: %f.\n", deltaTime);   
+    printf("FPS: %f.\n", 999.f / (1000.f * deltaTime));
 
     // camera
     vec3 camera_new_location;
@@ -293,22 +221,6 @@ void update() {
 
     gameArchetypeUpdate(&archetype, deltaTime, &angle);
     gameArchetypeUpdate(&archetypeHero, deltaTime, &angle);
-    /*
-    // component update
-    angle += .01f;
-    for(i32 i = 0; i < N; ++i) {
-        // transformations
-        meshes.pos[i][0] += meshes.vel[i][0] * deltaTime;
-        meshes.pos[i][1] += meshes.vel[i][1] * deltaTime;
-
-        // S T R
-        glm_mat4_identity(meshes.model[i]);
-        glm_scale_uni(meshes.model[i], 1.f);
-        glm_translate(meshes.model[i], meshes.pos[i]);
-        glm_rotate(meshes.model[i], angle, (vec3){1.f, 1.f, 0.f});
-        // glm_rotate(meshes.model[i], 3.141592f * .5f, (vec3){0.f, 1.f, 0.f});
-    }
-    */
 }
 
 void render() {
@@ -320,44 +232,6 @@ void render() {
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     gameArchetypeRender(&archetype, shader_program, view, proj, texture);
     gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
-    /*
-    for(i32 i = 0; i < N; ++i) {
-        // uniforms
-        uint32_t view_location = glGetUniformLocation(shader_program, "view");
-        glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
-        uint32_t proj_location = glGetUniformLocation(shader_program, "proj");
-        glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
-        uint32_t model_location = glGetUniformLocation(shader_program, "model");
-        glUniformMatrix4fv(model_location, 1, GL_FALSE, meshes.model[i][0]);
-        // draw
-        // meshRender(&mesh, texture, shader_program);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glUseProgram(shader_program);
-        glBindVertexArray(meshes.vao[i]);
-        glDrawElements(GL_TRIANGLES, meshes.index_count[i], GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
-    }
-    */
-
-    // // uniforms
-    // glm_mat4_identity(model);
-    // view_location = glGetUniformLocation(shader_program, "view");
-    // glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
-    // proj_location = glGetUniformLocation(shader_program, "proj");
-    // glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
-    // model_location = glGetUniformLocation(shader_program, "model");
-    // glUniformMatrix4fv(model_location, 1, GL_FALSE, model[0]);
-    // // draw
-    // meshRender(&mesh2, texture, shader_program);
-
-    /*
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glUseProgram(shader_program);
-    glBindVertexArray(mesh.vao);
-    glDrawElements(GL_TRIANGLES, vertex_count, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-    */
-
     // end
     SDL_GL_SwapWindow(window);
 }
@@ -381,7 +255,7 @@ int main(int argc, char *argv[]) {
 
     // Creates a SDL window
     //-------------------------------------------
-    window = SDL_CreateWindow("cgfx", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 640, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("glsandbox", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 640, SDL_WINDOW_OPENGL);
 
     // Checks if window has been created; if not, exits program
     //-------------------------------------------
