@@ -150,23 +150,19 @@ void input() {
             case SDL_KEYDOWN: {
                 if(event.key.keysym.sym == SDLK_ESCAPE) {
                     should_quit = true;
-                }
-                if(event.key.keysym.sym == SDLK_a) {
+                } else if(event.key.keysym.sym == SDLK_a) {
                     for(i32 i = 0; i < n; ++i) {
                         vel[0][0] = -base;
                     }
-                }
-                if(event.key.keysym.sym == SDLK_d) {
+                } else if(event.key.keysym.sym == SDLK_d) {
                     for(i32 i = 0; i < n; ++i) {
                         vel[0][0] = base;
                     }
-                }
-                if(event.key.keysym.sym == SDLK_w) {
+                } else if(event.key.keysym.sym == SDLK_w) {
                     for(i32 i = 0; i < n; ++i) {
                         vel[0][1] = base;
                     }
-                }
-                if(event.key.keysym.sym == SDLK_s) {
+                } else if(event.key.keysym.sym == SDLK_s) {
                     for(i32 i = 0; i < n; ++i) {
                         vel[0][1] = -base;
                     }
@@ -176,25 +172,25 @@ void input() {
             case SDL_KEYUP: {
                 if(event.key.keysym.sym == SDLK_ESCAPE) {
                     should_quit = true;
-                }
-                if(event.key.keysym.sym == SDLK_a) {
+                } else if(event.key.keysym.sym == SDLK_a) {
                     for(i32 i = 0; i < n; ++i) {
-                        vel[0][0] = 0.f;
+                        if(vel[0][0] < 0.f)
+                            vel[0][0] = 0.f;
                     }
-                }
-                if(event.key.keysym.sym == SDLK_d) {
+                } else if(event.key.keysym.sym == SDLK_d) {
                     for(i32 i = 0; i < n; ++i) {
-                        vel[0][0] = 0.f;
+                        if(vel[0][0] > 0.f)
+                            vel[0][0] = 0.f;
                     }
-                }
-                if(event.key.keysym.sym == SDLK_w) {
+                } else if(event.key.keysym.sym == SDLK_w) {
                     for(i32 i = 0; i < n; ++i) {
-                        vel[0][1] = 0.f;
+                        if(vel[0][1] > 0.f)
+                            vel[0][1] = 0.f;
                     }
-                }
-                if(event.key.keysym.sym == SDLK_s) {
+                } else if(event.key.keysym.sym == SDLK_s) {
                     for(i32 i = 0; i < n; ++i) {
-                        vel[0][1] = 0.f;
+                        if(vel[0][1] < 0.f)
+                            vel[0][1] = 0.f;
                     }
                 }
                 break;
