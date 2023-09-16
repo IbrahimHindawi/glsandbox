@@ -205,14 +205,13 @@ void gameArchetypeSetupPositionsAsGrid(gameArchetype *archetype) {
     }
 }
 
-void gameArchetypeSetupPositionsAsLine(gameArchetype *archetype) {
+void gameArchetypeSetupPositionsAsLine(gameArchetype *archetype, const f32 s) {
     // initalize positions
     f32 a = -1.f;
     vec3 *pos = archetype->pos.data;
     const i32 n = (i32)archetype->index_count.length;
     const f32 f = (2.f / (n - 1));
     // printf("factor %f\n", f);
-    const f32 s = 2.f;
     for(i32 i = 0; i < n; ++i) {
         pos[i][0] = a * s;
         // printf("step %f\n", a);
@@ -221,30 +220,46 @@ void gameArchetypeSetupPositionsAsLine(gameArchetype *archetype) {
 }
 
 void gameArchetypeSetupVelocities(gameArchetype *archetype) {
-    const f32 s = 1.f;
     const i64 n = archetype->index_count.length;
     for(i32 i = 0; i < n; ++i) {
         ((vec3 *)archetype->vel.data)[i][0] = 1.f;
-        // ((vec3 *)archetype->vel.data)[i][1] = 1.f;
     }
 }
 
-void gameArchetypeUpdate(gameArchetype *archetype, f32 deltaTime, f32 *angle) {
+void gameArchetypeUpdate(gameArchetype *archetype, f32 deltaTime, f32 speed) {
     vec3 *pos = ((vec3 *)archetype->pos.data);
     vec3 *vel = ((vec3 *)archetype->vel.data);
-    *angle += .01f;
+    mat4 *model = ((mat4 *)archetype->model.data);
     const i64 n = archetype->index_count.length; 
     for(i32 i = 0; i < n; ++i) {
         // transformations
-        pos[i][0] += vel[i][0] * deltaTime;
-        pos[i][1] += vel[i][1] * deltaTime;
+        pos[i][0] += vel[i][0] * speed * deltaTime;
+        pos[i][1] += vel[i][1] * speed * deltaTime;
 
         // S T R
-        glm_mat4_identity(&((mat4 *)archetype->model.data)[i][0]);
-        glm_scale_uni(&((mat4 *)archetype->model.data)[i][0], 1.f);
-        glm_translate(&((mat4 *)archetype->model.data)[i][0], pos[i]);
-        glm_rotate(&((mat4 *)archetype->model.data)[i][0], *angle, (vec3){1.f, 1.f, 0.f});
-        // glm_rotate(meshes.model[i], 3.141592f * .5f, (vec3){0.f, 1.f, 0.f});
+        glm_mat4_identity(&model[i][0]);
+        glm_scale_uni(&model[i][0], .15f);
+        glm_translate(&model[i][0], pos[i]);
+        glm_rotate(&model[i][0], pi * 0.5f, (vec3){1.f, 0.f, 0.f});
+    }
+}
+
+void gameArchetypeUpdatePlayer(gameArchetype *archetype, f32 deltaTime, f32 speed) {
+    vec3 *pos = ((vec3 *)archetype->pos.data);
+    vec3 *vel = ((vec3 *)archetype->vel.data);
+    mat4 *model = ((mat4 *)archetype->model.data);
+    const i64 n = archetype->index_count.length; 
+    for(i32 i = 0; i < n; ++i) {
+        // transformations
+        pos[i][0] += vel[i][0] * speed * deltaTime;
+        pos[i][1] += vel[i][1] * speed * deltaTime;
+
+        // S T R
+        glm_mat4_identity(&model[i][0]);
+        glm_scale_uni(&model[i][0], .15f);
+        glm_translate(&model[i][0], pos[i]);
+        glm_rotate(&model[i][0], pi * .5f, (vec3){1.f, 0.f, 0.f});
+        glm_rotate(&model[i][0], pi, (vec3){0.f, 1.f, 0.f});
     }
 }
 
@@ -267,4 +282,3 @@ void gameArchetypeRender(gameArchetype *archetype, u32 shader_program, mat4 view
         glBindVertexArray(0);
     }
 }
-

@@ -36,14 +36,14 @@ int frameDelay;
 // mesh
 i32 indices[] = { 
     // #include "models/cubeIndices.txt"
-    // #include "models/shipIndices.txt"
-    #include "models/rubberIndices.txt"
+    #include "models/shipIndices.txt"
+    // #include "models/rubberIndices.txt"
 };
 
 f32 vertices[] = {
     // #include "models/cubeVertices.txt"
-    // #include "models/shipVertices.txt"
-    #include "models/rubberVertices.txt"
+    #include "models/shipVertices.txt"
+    // #include "models/rubberVertices.txt"
 };
 
 u32 shader_program;
@@ -87,7 +87,8 @@ void setup() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     i32 width, height, n_channels;
     // u8 *data = stbi_load("resource/cgfx.png", &width, &height, &n_channels, 0);
-    u8 *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
+    // u8 *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
+    u8 *data = stbi_load("resource/Ship_BaseColor.png", &width, &height, &n_channels, 0);
     // u8 *data = stbi_load("resource/awesomeface.png", &width, &height, &n_channels, 0);
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -129,13 +130,16 @@ void setup() {
     gameArchetypeCreate(&archetypeHero, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
 
     // gameArchetypeSetupPositionsAsGrid(&archetype);
-    gameArchetypeSetupPositionsAsLine(&archetype);
-    // gameArchetypeSetupVelocities(&archetype);
+    gameArchetypeSetupPositionsAsLine(&archetype, 15.f);
+    gameArchetypeSetupVelocities(&archetype);
+
+    ((vec3 *)archetypeHero.pos.data)[0][1] = -20.f;
 }
 
 void input() {
-    const i64 n = archetypeHero.index_count.length; 
     vec3 *vel = ((vec3 *)archetypeHero.vel.data);
+    const i64 n = archetypeHero.index_count.length; 
+    const f32 base = 1.f;
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
@@ -149,22 +153,22 @@ void input() {
                 }
                 if(event.key.keysym.sym == SDLK_a) {
                     for(i32 i = 0; i < n; ++i) {
-                        vel[0][0] = -2.f;
+                        vel[0][0] = -base;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_d) {
                     for(i32 i = 0; i < n; ++i) {
-                        vel[0][0] = 2.f;
+                        vel[0][0] = base;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_w) {
                     for(i32 i = 0; i < n; ++i) {
-                        vel[0][1] = 2.f;
+                        vel[0][1] = base;
                     }
                 }
                 if(event.key.keysym.sym == SDLK_s) {
                     for(i32 i = 0; i < n; ++i) {
-                        vel[0][1] = -2.f;
+                        vel[0][1] = -base;
                     }
                 }
                 break;
@@ -222,8 +226,8 @@ void update() {
     glm_vec3_add(camera_position, camera_forward, camera_new_location);
     glm_lookat(camera_position, camera_new_location, camera_up, view);
 
-    gameArchetypeUpdate(&archetype, deltaTime, &angle);
-    gameArchetypeUpdate(&archetypeHero, deltaTime, &angle);
+    gameArchetypeUpdate(&archetype, deltaTime, 4.f);
+    gameArchetypeUpdatePlayer(&archetypeHero, deltaTime, 16.f);
 }
 
 void render() {
