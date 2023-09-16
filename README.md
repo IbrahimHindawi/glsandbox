@@ -2,6 +2,10 @@
 C graphics programming with SDL2 & OpenGL:  
 Compiles to Win64 MacOS Linux with `compile_commands.json` for clangd LSP support.
 
+
+https://github.com/IbrahimHindawi/glsandbox/assets/26623065/7b372a7a-7ddb-4b3d-827e-d9dfd9b7d43b
+
+
 ### Linux & Darwin Run:
 * `mkdir build`
 * `cd build`
