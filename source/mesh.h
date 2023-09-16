@@ -124,6 +124,17 @@ typedef struct {
 } gameArchetype;
 
 void gameArchetypeInitalize(gameArchetype *archetype, i32 n) {
+    archetype->vao = hkArrayCreate(sizeof(u32), n);
+    archetype->vbo = hkArrayCreate(sizeof(u32), n);
+    archetype->ebo = hkArrayCreate(sizeof(u32), n);
+    archetype->vertex_count = hkArrayCreate(sizeof(u32), n);
+    archetype->index_count = hkArrayCreate(sizeof(u32), n);
+    archetype->pos = hkArrayCreate(sizeof(vec3), n);
+    archetype->vel = hkArrayCreate(sizeof(vec3), n);
+    archetype->model = hkArrayCreate(sizeof(mat4), n);
+}
+
+void gameArchetypeInitalizeGrid(gameArchetype *archetype, i32 n) {
     const u32 edge = n * n;
     archetype->vao = hkArrayCreate(sizeof(u32), edge);
     archetype->vbo = hkArrayCreate(sizeof(u32), edge);
@@ -169,7 +180,7 @@ void gameArchetypeCreate(gameArchetype *archetype, f32 *vertices, u32 vertex_cou
     return;
 }
 
-void gameArchetypeSetupPositions(gameArchetype *archetype) {
+void gameArchetypeSetupPositionsAsGrid(gameArchetype *archetype) {
     // initalize positions
     f32 a = 0.f;
     f32 b = -1.f;
@@ -182,6 +193,8 @@ void gameArchetypeSetupPositions(gameArchetype *archetype) {
             posvector[i + j * f][0] = a * s - f/2;
             posvector[i + j * f][1] = b * s - f/2;
             // posvector[i + j * f][2] = -50.f;
+            // ((vec3 *)archetype->vel.data)[i][0] = -1.f;
+            // ((vec3 *)archetype->vel.data)[i][1] = 0.f;
             // archetype->pos.data[i + j * f][0] = a * s - f/2;
             // meshes.pos[i + j * f][1] = b * s - f/2;
             // meshes.pos[i + j * f][2] = 0.f;
@@ -189,6 +202,30 @@ void gameArchetypeSetupPositions(gameArchetype *archetype) {
         }
         a += 1.f;
         b = -1.f;
+    }
+}
+
+void gameArchetypeSetupPositionsAsLine(gameArchetype *archetype) {
+    // initalize positions
+    f32 a = -1.f;
+    vec3 *pos = archetype->pos.data;
+    const i32 n = (i32)archetype->index_count.length;
+    const f32 f = (2.f / (n - 1));
+    // printf("factor %f\n", f);
+    const f32 s = 2.f;
+    for(i32 i = 0; i < n; ++i) {
+        pos[i][0] = a * s;
+        // printf("step %f\n", a);
+        a += f;
+    }
+}
+
+void gameArchetypeSetupVelocities(gameArchetype *archetype) {
+    const f32 s = 1.f;
+    const i64 n = archetype->index_count.length;
+    for(i32 i = 0; i < n; ++i) {
+        ((vec3 *)archetype->vel.data)[i][0] = 1.f;
+        // ((vec3 *)archetype->vel.data)[i][1] = 1.f;
     }
 }
 

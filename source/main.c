@@ -97,13 +97,6 @@ void setup() {
     }
     STBI_FREE(data);
 
-    //  GL BUFFERS
-    //-------------------------------------------
-    gameArchetypeInitalize(&archetype, 3);
-    gameArchetypeCreate(&archetype, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
-
-    gameArchetypeInitalize(&archetypeHero, 1);
-    gameArchetypeCreate(&archetypeHero, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
 
     // XFORMS
     //--------------------------------------------
@@ -127,7 +120,17 @@ void setup() {
     glm_mat4_identity(proj);
     glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, proj);
 
-    gameArchetypeSetupPositions(&archetype);
+    //  ARCHETYPE
+    //-------------------------------------------
+    gameArchetypeInitalize(&archetype, 6);
+    gameArchetypeCreate(&archetype, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+
+    gameArchetypeInitalize(&archetypeHero, 1);
+    gameArchetypeCreate(&archetypeHero, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+
+    // gameArchetypeSetupPositionsAsGrid(&archetype);
+    gameArchetypeSetupPositionsAsLine(&archetype);
+    // gameArchetypeSetupVelocities(&archetype);
 }
 
 void input() {
@@ -212,7 +215,7 @@ void update() {
     }
     // printf("ticks: %d, ", SDL_GetTicks());
     framePrevTime = SDL_GetTicks();
-    printf("FPS: %f.\n", 999.f / (1000.f * deltaTime));
+    // printf("FPS: %f.\n", 999.f / (1000.f * deltaTime));
 
     // camera
     vec3 camera_new_location;
