@@ -131,7 +131,7 @@ void setup() {
 
     // gameArchetypeSetupPositionsAsGrid(&archetype);
     gameArchetypeSetupPositionsAsLine(&archetype, 15.f);
-    gameArchetypeSetupVelocities(&archetype);
+    // gameArchetypeSetupVelocities(&archetype);
 
     ((vec3 *)archetypeHero.pos.data)[0][1] = -20.f;
 }
@@ -222,6 +222,7 @@ void update() {
     glm_vec3_add(camera_position, camera_forward, camera_new_location);
     glm_lookat(camera_position, camera_new_location, camera_up, view);
 
+    gameArchetypeSetupVelocities(&archetype, SDL_GetTicks() / 1000.f);
     gameArchetypeUpdate(&archetype, deltaTime, 4.f);
     gameArchetypeUpdatePlayer(&archetypeHero, deltaTime, 16.f);
 }
