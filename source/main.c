@@ -48,7 +48,7 @@ f32 vertices[] = {
 
 u32 shader_program;
 u32 texture;
-gameArchetype archetype;
+gameArchetype archetypeEnemy;
 gameArchetype archetypeHero;
 mat4 view;
 mat4 proj;
@@ -123,15 +123,15 @@ void setup() {
 
     //  ARCHETYPE
     //-------------------------------------------
-    gameArchetypeInitalize(&archetype, 6);
-    gameArchetypeCreate(&archetype, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+    gameArchetypeInitalize(&archetypeEnemy, 6);
+    gameArchetypeCreate(&archetypeEnemy, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
 
     gameArchetypeInitalize(&archetypeHero, 1);
     gameArchetypeCreate(&archetypeHero, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
 
-    // gameArchetypeSetupPositionsAsGrid(&archetype);
-    gameArchetypeSetupPositionsAsLine(&archetype, 15.f);
-    // gameArchetypeSetupVelocities(&archetype);
+    // gameArchetypeSetupPositionsAsGrid(&archetypeEnemy);
+    gameArchetypeSetupPositionsAsLine(&archetypeEnemy, 15.f);
+    // gameArchetypeSetupVelocities(&archetypeEnemy);
 
     ((vec3 *)archetypeHero.pos.data)[0][1] = -20.f;
 }
@@ -222,8 +222,8 @@ void update() {
     glm_vec3_add(camera_position, camera_forward, camera_new_location);
     glm_lookat(camera_position, camera_new_location, camera_up, view);
 
-    gameArchetypeSetupVelocities(&archetype, SDL_GetTicks() / 1000.f);
-    gameArchetypeUpdate(&archetype, deltaTime, 4.f);
+    gameArchetypeSetupVelocities(&archetypeEnemy, SDL_GetTicks() / 1000.f);
+    gameArchetypeUpdate(&archetypeEnemy, deltaTime, 4.f);
     gameArchetypeUpdatePlayer(&archetypeHero, deltaTime, 16.f);
 }
 
@@ -234,7 +234,7 @@ void render() {
     glEnable(GL_DEPTH_TEST);
     // bind
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    gameArchetypeRender(&archetype, shader_program, view, proj, texture);
+    gameArchetypeRender(&archetypeEnemy, shader_program, view, proj, texture);
     gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
     // end
     SDL_GL_SwapWindow(window);
