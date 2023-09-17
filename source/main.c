@@ -121,19 +121,21 @@ void setup() {
     glm_mat4_identity(proj);
     glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, proj);
 
-    //  ARCHETYPE
+    //  ARCHETYPES
     //-------------------------------------------
-    gameArchetypeInitalize(&archetypeEnemy, 6);
-    gameArchetypeCreate(&archetypeEnemy, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+    gameArchetypeInitializeMemory(&archetypeEnemy, 6);
+    gameArchetypeInitializeMemoryRenderer(&archetypeEnemy, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
 
-    gameArchetypeInitalize(&archetypeHero, 1);
-    gameArchetypeCreate(&archetypeHero, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+    gameArchetypeInitializeMemory(&archetypeHero, 1);
+    gameArchetypeInitializeMemoryRenderer(&archetypeHero, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
 
     // gameArchetypeSetupPositionsAsGrid(&archetypeEnemy);
     gameArchetypeSetupPositionsAsLine(&archetypeEnemy, 15.f);
-    // gameArchetypeSetupVelocities(&archetypeEnemy);
-
+    // gameArchetypeUpdateVelocities(&archetypeEnemy);
     ((vec3 *)archetypeHero.pos.data)[0][1] = -20.f;
+
+    gameArchetypeSetupCollisionBoxes(&archetypeEnemy, 2.f, 2.f);
+    gameArchetypeSetupCollisionBoxes(&archetypeHero, 2.f, 2.f);
 }
 
 void input() {
@@ -222,9 +224,24 @@ void update() {
     glm_vec3_add(camera_position, camera_forward, camera_new_location);
     glm_lookat(camera_position, camera_new_location, camera_up, view);
 
-    gameArchetypeSetupVelocities(&archetypeEnemy, SDL_GetTicks() / 1000.f);
+    // update enemy
+    gameArchetypeUpdateVelocities(&archetypeEnemy, SDL_GetTicks() / 1000.f);
+    gameArchetypeUpdateColliders(&archetypeEnemy);
+    gameArchetypeUpdateColliders(&archetypeHero);
+
+    // integrate movement
     gameArchetypeUpdate(&archetypeEnemy, deltaTime, 4.f);
     gameArchetypeUpdatePlayer(&archetypeHero, deltaTime, 16.f);
+
+    // check collisions
+    i32 coll_id = gameArchetypeCheckCollisions(&archetypeHero, &archetypeEnemy);
+    // printf("collision id = %d\n", coll_id);
+    if (coll_id != -1) {
+        ((vec3 *)archetypeEnemy.pos.data)[coll_id][0] = -1000.f;
+        ((vec3 *)archetypeEnemy.pos.data)[coll_id][1] = -1000.f;
+        // printf("collision id = %d\n", coll_id);
+        coll_id = -1;
+    }
 }
 
 void render() {

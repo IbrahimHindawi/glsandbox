@@ -120,10 +120,11 @@ typedef struct {
     hkArray index_count;  // u32
     hkArray pos; // vec3
     hkArray vel; // vec3
+    hkArray box; // vec4
     hkArray model; // mat4
 } gameArchetype;
 
-void gameArchetypeInitalize(gameArchetype *archetype, i32 n) {
+void gameArchetypeInitializeMemory(gameArchetype *archetype, i32 n) {
     archetype->vao = hkArrayCreate(sizeof(u32), n);
     archetype->vbo = hkArrayCreate(sizeof(u32), n);
     archetype->ebo = hkArrayCreate(sizeof(u32), n);
@@ -131,10 +132,11 @@ void gameArchetypeInitalize(gameArchetype *archetype, i32 n) {
     archetype->index_count = hkArrayCreate(sizeof(u32), n);
     archetype->pos = hkArrayCreate(sizeof(vec3), n);
     archetype->vel = hkArrayCreate(sizeof(vec3), n);
+    archetype->box = hkArrayCreate(sizeof(vec4), n);
     archetype->model = hkArrayCreate(sizeof(mat4), n);
 }
 
-void gameArchetypeInitalizeGrid(gameArchetype *archetype, i32 n) {
+void gameArchetypeInitializeMemoryGrid(gameArchetype *archetype, i32 n) {
     const u32 edge = n * n;
     archetype->vao = hkArrayCreate(sizeof(u32), edge);
     archetype->vbo = hkArrayCreate(sizeof(u32), edge);
@@ -146,7 +148,7 @@ void gameArchetypeInitalizeGrid(gameArchetype *archetype, i32 n) {
     archetype->model = hkArrayCreate(sizeof(mat4), edge);
 }
 
-void gameArchetypeCreate(gameArchetype *archetype, f32 *vertices, u32 vertex_count, i32 *indices, u32 index_count) {
+void gameArchetypeInitializeMemoryRenderer(gameArchetype *archetype, f32 *vertices, u32 vertex_count, i32 *indices, u32 index_count) {
     const i64 n = archetype->index_count.length; 
     u32 *vao = ((u32 *)archetype->vao.data);
     u32 *vbo = ((u32 *)archetype->vbo.data);
@@ -205,6 +207,19 @@ void gameArchetypeSetupPositionsAsGrid(gameArchetype *archetype) {
     }
 }
 
+void gameArchetypeSetupCollisionBoxes(gameArchetype *archetype, const f32 box_width, const f32 box_height) {
+    const i64 n = archetype->index_count.length;
+    vec4 *box = (vec4 *)archetype->box.data;
+    const vec3 *pos = (vec3 *)archetype->pos.data;
+    for(i32 i = 0; i < n; ++i) {
+        box[i][0] = pos[i][0];
+        box[i][1] = pos[i][1];
+        box[i][2] = box_width;
+        box[i][3] = box_height;
+        // printf("{%f, %f, %f, %f}\n", box[i][0], box[i][1], box[i][2], box[i][3]);
+    }
+}
+
 void gameArchetypeSetupPositionsAsLine(gameArchetype *archetype, const f32 s) {
     // initalize positions
     f32 a = -1.f;
@@ -219,13 +234,65 @@ void gameArchetypeSetupPositionsAsLine(gameArchetype *archetype, const f32 s) {
     }
 }
 
-void gameArchetypeSetupVelocities(gameArchetype *archetype, f32 time) {
+void gameArchetypeUpdateVelocities(gameArchetype *archetype, f32 time) {
     const i64 n = archetype->index_count.length;
     for(i32 i = 0; i < n; ++i) {
         f32 new_vel = sin(time);
         // printf("%f\n", new_vel);
         ((vec3 *)archetype->vel.data)[i][0] = new_vel;
     }
+}
+
+void gameArchetypeUpdateColliders(gameArchetype *archetype) {
+    const i64 n = archetype->index_count.length;
+    vec4 *box = (vec4 *)archetype->box.data;
+    const vec3 *pos = (vec3 *)archetype->pos.data;
+    for(i32 i = 0; i < n; ++i) {
+        box[i][0] = pos[i][0];
+        box[i][1] = pos[i][1];
+        // printf("{%f, %f, %f, %f}\n", box[i][0], box[i][1], box[i][2], box[i][3]);
+    }
+    // printf("\n");
+}
+
+int boxAABBCollision(vec4 boxa, vec4 boxb) {
+    if (boxa[0] < boxb[0] + boxb[2] &&
+        boxa[0] + boxa[2] > boxb[0] &&
+        boxa[1] < boxb[1] + boxb[3] &&
+        boxa[1] + boxa[3] > boxb[1]) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+i32 gameArchetypeCheckCollisions(gameArchetype *archetypeA, gameArchetype *archetypeB) {
+    const i64 na = archetypeA->index_count.length;
+    vec4 *boxa = (vec4 *)archetypeA->box.data;
+
+    const i64 nb = archetypeB->index_count.length;
+    vec4 *boxb = (vec4 *)archetypeB->box.data;
+    // printf("%lld, %lld\n", na, nb);
+
+    i32 coll_id = -1;
+    for(i32 i = 0; i < na; ++i) {
+        for(i32 j = 0; j < nb; ++j) {
+            if(boxAABBCollision(boxa[i], boxb[j])) {
+                // printf("boxa {%f, %f, %f, %f}\n", boxa[i][0], boxa[i][1], boxa[i][2], boxa[i][3]);
+                // printf("boxb {%f, %f, %f, %f}\n", boxb[j][0], boxb[j][1], boxb[j][2], boxb[j][3]);
+                printf("HIT!\n");
+                coll_id = j;
+                printf("collision id = %d\n", coll_id);
+                break;
+            } else {
+                coll_id = -1;
+            }
+        }
+        // printf("{%f, %f, %f, %f}\n", box[i][0], box[i][1], box[i][2], box[i][3]);
+    }
+    // printf("\n");
+    printf("returned collision id = %d\n", coll_id);
+    return coll_id;
 }
 
 void gameArchetypeUpdate(gameArchetype *archetype, f32 deltaTime, f32 speed) {
