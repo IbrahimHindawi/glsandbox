@@ -306,6 +306,8 @@ int main(int argc, char *argv[]) {
 
     /* Frees memory */
     SDL_DestroyWindow(window);
+    gameArchetypeDeinitializeMemory(&archetypeHero);
+    gameArchetypeDeinitializeMemory(&archetypeEnemy);
 
     /* Shuts down all SDL subsystems */
     SDL_Quit(); 

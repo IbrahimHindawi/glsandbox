@@ -148,6 +148,18 @@ void gameArchetypeInitializeMemoryGrid(gameArchetype *archetype, i32 n) {
     archetype->model = hkArrayCreate(sizeof(mat4), edge);
 }
 
+void gameArchetypeDeinitializeMemory(gameArchetype *archetype) {
+    hkArrayDestroy(&archetype->vao);
+    hkArrayDestroy(&archetype->vbo);
+    hkArrayDestroy(&archetype->ebo);
+    hkArrayDestroy(&archetype->vertex_count);
+    hkArrayDestroy(&archetype->index_count);
+    hkArrayDestroy(&archetype->pos);
+    hkArrayDestroy(&archetype->vel);
+    hkArrayDestroy(&archetype->box);
+    hkArrayDestroy(&archetype->model);
+}
+
 void gameArchetypeInitializeMemoryRenderer(gameArchetype *archetype, f32 *vertices, u32 vertex_count, i32 *indices, u32 index_count) {
     const i64 n = archetype->index_count.length; 
     u32 *vao = ((u32 *)archetype->vao.data);
@@ -280,9 +292,9 @@ i32 gameArchetypeCheckCollisions(gameArchetype *archetypeA, gameArchetype *arche
             if(boxAABBCollision(boxa[i], boxb[j])) {
                 // printf("boxa {%f, %f, %f, %f}\n", boxa[i][0], boxa[i][1], boxa[i][2], boxa[i][3]);
                 // printf("boxb {%f, %f, %f, %f}\n", boxb[j][0], boxb[j][1], boxb[j][2], boxb[j][3]);
-                printf("HIT!\n");
+                // printf("HIT!\n");
                 coll_id = j;
-                printf("collision id = %d\n", coll_id);
+                // printf("collision id = %d\n", coll_id);
                 break;
             } else {
                 coll_id = -1;
@@ -291,7 +303,7 @@ i32 gameArchetypeCheckCollisions(gameArchetype *archetypeA, gameArchetype *arche
         // printf("{%f, %f, %f, %f}\n", box[i][0], box[i][1], box[i][2], box[i][3]);
     }
     // printf("\n");
-    printf("returned collision id = %d\n", coll_id);
+    // printf("returned collision id = %d\n", coll_id);
     return coll_id;
 }
 
