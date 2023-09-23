@@ -232,6 +232,30 @@ void gameArchetypeSetupCollisionBoxes(gameArchetype *archetype, const f32 box_wi
     }
 }
 
+void gameArchetypeSetupPositions(gameArchetype *archetype, vec3 p) {
+    // initalize velocities
+    vec3 *pos = (vec3 *)archetype->pos.data;
+    const i32 n = (i32)archetype->index_count.length;
+    for(i32 i = 0; i < n; ++i) {
+        pos[i][0] = p[0];
+        pos[i][1] = p[1];
+        pos[i][2] = p[2];
+        // printf("step %f\n", a);
+    }
+}
+
+void gameArchetypeSetupVelocities(gameArchetype *archetype, vec3 v) {
+    // initalize velocities
+    vec3 *vel = (vec3 *)archetype->vel.data;
+    const i32 n = (i32)archetype->index_count.length;
+    for(i32 i = 0; i < n; ++i) {
+        vel[i][0] = v[0];
+        vel[i][1] = v[1];
+        vel[i][2] = v[2];
+        // printf("step %f\n", a);
+    }
+}
+
 void gameArchetypeSetupPositionsAsLine(gameArchetype *archetype, const f32 s) {
     // initalize positions
     f32 a = -1.f;
@@ -295,13 +319,15 @@ i32 gameArchetypeCheckCollisions(gameArchetype *archetypeA, gameArchetype *arche
                 // printf("HIT!\n");
                 coll_id = j;
                 // printf("collision id = %d\n", coll_id);
-                break;
+                // break;
+                goto collision_exit;
             } else {
                 coll_id = -1;
             }
         }
         // printf("{%f, %f, %f, %f}\n", box[i][0], box[i][1], box[i][2], box[i][3]);
     }
+collision_exit:
     // printf("\n");
     // printf("returned collision id = %d\n", coll_id);
     return coll_id;
@@ -362,4 +388,17 @@ void gameArchetypeRender(gameArchetype *archetype, u32 shader_program, mat4 view
         glDrawElements(GL_TRIANGLES, ((u32 *)archetype->index_count.data)[i], GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
+}
+
+void gameSpawnProjectileAtEntity(gameArchetype *archetypeHero, gameArchetype *archetypeProjectile, i32 id) {
+    vec3 *pos = ((vec3 *)archetypeHero->pos.data);
+    vec3 *projectile_pos = ((vec3 *)archetypeProjectile->pos.data);
+    const i64 projectile_length = archetypeProjectile->index_count.length; 
+    static i32 current_projectile_pool_index = 0;
+    projectile_pos[current_projectile_pool_index][0] = pos[id][0];
+    projectile_pos[current_projectile_pool_index][1] = pos[id][1];
+    projectile_pos[current_projectile_pool_index][2] = pos[id][2];
+    current_projectile_pool_index = (current_projectile_pool_index + 1) % projectile_length;
+    // printf("%d\n", current_projectile_pool_index);
+    return;
 }

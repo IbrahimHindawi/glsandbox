@@ -47,14 +47,10 @@ f32 vertices[] = {
 
 // streak
 i32 streak_indices[] = { 
-    // #include "models/cubeIndices.txt"
     #include "models/streakIndices.txt"
-    // #include "models/rubberIndices.txt"
 };
 f32 streak_vertices[] = {
-    // #include "models/cubeVertices.txt"
     #include "models/streakVertices.txt"
-    // #include "models/rubberVertices.txt"
 };
 
 gameArchetype archetypeEnemy;
@@ -156,7 +152,7 @@ void setup() {
     glm_mat4_identity(proj);
     glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, proj);
 
-    //  ARCHETYPES
+    //  setup(Archetypes)
     //-------------------------------------------
     gameArchetypeInitializeMemory(&archetypeEnemy, 6);
     gameArchetypeInitializeMemoryRenderer(&archetypeEnemy, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
@@ -169,14 +165,13 @@ void setup() {
 
     // gameArchetypeSetupPositionsAsGrid(&archetypeEnemy);
     gameArchetypeSetupPositionsAsLine(&archetypeEnemy, 15.f);
-    // gameArchetypeSetupPositionsAsLine(&archetypeProjectile, 5.f);
     ((vec3 *)archetypeHero.pos.data)[0][1] = -20.f;
-    // ((vec3 *)archetypeProjectile.pos.data)[0][0] = 0.f;
-    ((vec3 *)archetypeProjectile.pos.data)[0][1] = 20.f;
+    gameArchetypeSetupPositions(&archetypeProjectile, (vec3){-100.f, -100.f, 0.f});
+    gameArchetypeSetupVelocities(&archetypeProjectile, (vec3){0.f, 10.f, 0.f});
 
     gameArchetypeSetupCollisionBoxes(&archetypeEnemy, 3.f, 3.f);
     gameArchetypeSetupCollisionBoxes(&archetypeHero, 3.f, 3.f);
-    gameArchetypeSetupCollisionBoxes(&archetypeProjectile, 1.f, 1.f);
+    gameArchetypeSetupCollisionBoxes(&archetypeProjectile, 3.f, 3.f);
 }
 
 void input() {
@@ -208,6 +203,10 @@ void input() {
                 } else if(event.key.keysym.sym == SDLK_s) {
                     for(i32 i = 0; i < n; ++i) {
                         vel[0][1] = -base;
+                    }
+                } else if(event.key.keysym.sym == SDLK_SPACE) {
+                    for(i32 i = 0; i < n; ++i) {
+                        gameSpawnProjectileAtEntity(&archetypeHero, &archetypeProjectile, 0);
                     }
                 }
                 break;
@@ -267,22 +266,37 @@ void update() {
 
     // update enemy
     gameArchetypeUpdateVelocities(&archetypeEnemy, SDL_GetTicks() / 1000.f);
-    gameArchetypeUpdateColliders(&archetypeEnemy);
     gameArchetypeUpdateColliders(&archetypeHero);
+    gameArchetypeUpdateColliders(&archetypeEnemy);
+    gameArchetypeUpdateColliders(&archetypeProjectile);
 
     // integrate movement
-    gameArchetypeUpdate(&archetypeEnemy, deltaTime, 4.f);
-    gameArchetypeUpdate(&archetypeProjectile, deltaTime, 4.f);
     gameArchetypeUpdatePlayer(&archetypeHero, deltaTime, 16.f);
+    gameArchetypeUpdate(&archetypeEnemy, deltaTime, 4.f);
+    gameArchetypeUpdate(&archetypeProjectile, deltaTime, 5.f);
 
-    // check collisions
-    i32 coll_id = gameArchetypeCheckCollisions(&archetypeHero, &archetypeEnemy);
-    // printf("collision id = %d\n", coll_id);
-    if (coll_id != -1) {
-        ((vec3 *)archetypeEnemy.pos.data)[coll_id][0] = -1000.f;
-        ((vec3 *)archetypeEnemy.pos.data)[coll_id][1] = -1000.f;
+    {
+        // check collisions
+        i32 coll_id = gameArchetypeCheckCollisions(&archetypeHero, &archetypeEnemy);
         // printf("collision id = %d\n", coll_id);
-        coll_id = -1;
+        if (coll_id != -1) {
+            ((vec3 *)archetypeEnemy.pos.data)[coll_id][0] = -1000.f;
+            ((vec3 *)archetypeEnemy.pos.data)[coll_id][1] = -1000.f;
+            // printf("collision id = %d\n", coll_id);
+            coll_id = -1;
+        }
+    }
+    {
+        // check collisions
+        i32 coll_id = gameArchetypeCheckCollisions(&archetypeProjectile, &archetypeEnemy);
+        // printf("collision id = %d\n", coll_id);
+        if (coll_id != -1) {
+            // printf("hit collision id = %d\n", coll_id);
+            ((vec3 *)archetypeEnemy.pos.data)[coll_id][0] = -1000.f;
+            ((vec3 *)archetypeEnemy.pos.data)[coll_id][1] = -1000.f;
+            // printf("collision id = %d\n", coll_id);
+            coll_id = -1;
+        }
     }
 }
 
