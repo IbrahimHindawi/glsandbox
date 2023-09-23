@@ -249,7 +249,7 @@ void gameArchetypeSetupPositionsAsLine(gameArchetype *archetype, const f32 s) {
 void gameArchetypeUpdateVelocities(gameArchetype *archetype, f32 time) {
     const i64 n = archetype->index_count.length;
     for(i32 i = 0; i < n; ++i) {
-        f32 new_vel = sin(time);
+        f32 new_vel = (f32)sin(time);
         // printf("%f\n", new_vel);
         ((vec3 *)archetype->vel.data)[i][0] = new_vel;
     }

@@ -39,17 +39,31 @@ i32 indices[] = {
     #include "models/shipIndices.txt"
     // #include "models/rubberIndices.txt"
 };
-
 f32 vertices[] = {
     // #include "models/cubeVertices.txt"
     #include "models/shipVertices.txt"
     // #include "models/rubberVertices.txt"
 };
 
-u32 shader_program;
-u32 texture;
+// streak
+i32 streak_indices[] = { 
+    // #include "models/cubeIndices.txt"
+    #include "models/streakIndices.txt"
+    // #include "models/rubberIndices.txt"
+};
+f32 streak_vertices[] = {
+    // #include "models/cubeVertices.txt"
+    #include "models/streakVertices.txt"
+    // #include "models/rubberVertices.txt"
+};
+
 gameArchetype archetypeEnemy;
 gameArchetype archetypeHero;
+gameArchetype archetypeProjectile;
+
+u32 shader_program;
+u32 texture;
+u32 texture2;
 mat4 view;
 mat4 proj;
 f32 angle;
@@ -78,25 +92,46 @@ void setup() {
 
     // TEXTURE
     //-------------------------------------------
-    // uint32_t texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    i32 width, height, n_channels;
-    // u8 *data = stbi_load("resource/cgfx.png", &width, &height, &n_channels, 0);
-    // u8 *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
-    u8 *data = stbi_load("resource/Ship_BaseColor.png", &width, &height, &n_channels, 0);
-    // u8 *data = stbi_load("resource/awesomeface.png", &width, &height, &n_channels, 0);
-    if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-        printf("failed to load texture.");
+    {
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        i32 width, height, n_channels;
+        // u8 *data = stbi_load("resource/cgfx.png", &width, &height, &n_channels, 0);
+        // u8 *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
+        u8 *data = stbi_load("resource/Ship_BaseColor.png", &width, &height, &n_channels, 0);
+        // u8 *data = stbi_load("resource/awesomeface.png", &width, &height, &n_channels, 0);
+        if (data) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        } else {
+            printf("failed to load texture.");
+        }
+        STBI_FREE(data);
     }
-    STBI_FREE(data);
+    {
+        glGenTextures(1, &texture2);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        i32 width, height, n_channels;
+        // u8 *data = stbi_load("resource/cgfx.png", &width, &height, &n_channels, 0);
+        // u8 *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
+        u8 *data = stbi_load("resource/green.png", &width, &height, &n_channels, 0);
+        // u8 *data = stbi_load("resource/awesomeface.png", &width, &height, &n_channels, 0);
+        if (data) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        } else {
+            printf("failed to load texture2.");
+        }
+        STBI_FREE(data);
+    }
 
 
     // XFORMS
@@ -129,13 +164,19 @@ void setup() {
     gameArchetypeInitializeMemory(&archetypeHero, 1);
     gameArchetypeInitializeMemoryRenderer(&archetypeHero, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
 
+    gameArchetypeInitializeMemory(&archetypeProjectile, 100);
+    gameArchetypeInitializeMemoryRenderer(&archetypeProjectile, streak_vertices, sizeofarray(streak_vertices, f32), streak_indices, sizeofarray(streak_indices, i32));
+
     // gameArchetypeSetupPositionsAsGrid(&archetypeEnemy);
     gameArchetypeSetupPositionsAsLine(&archetypeEnemy, 15.f);
-    // gameArchetypeUpdateVelocities(&archetypeEnemy);
+    // gameArchetypeSetupPositionsAsLine(&archetypeProjectile, 5.f);
     ((vec3 *)archetypeHero.pos.data)[0][1] = -20.f;
+    // ((vec3 *)archetypeProjectile.pos.data)[0][0] = 0.f;
+    ((vec3 *)archetypeProjectile.pos.data)[0][1] = 20.f;
 
-    gameArchetypeSetupCollisionBoxes(&archetypeEnemy, 2.f, 2.f);
-    gameArchetypeSetupCollisionBoxes(&archetypeHero, 2.f, 2.f);
+    gameArchetypeSetupCollisionBoxes(&archetypeEnemy, 3.f, 3.f);
+    gameArchetypeSetupCollisionBoxes(&archetypeHero, 3.f, 3.f);
+    gameArchetypeSetupCollisionBoxes(&archetypeProjectile, 1.f, 1.f);
 }
 
 void input() {
@@ -231,6 +272,7 @@ void update() {
 
     // integrate movement
     gameArchetypeUpdate(&archetypeEnemy, deltaTime, 4.f);
+    gameArchetypeUpdate(&archetypeProjectile, deltaTime, 4.f);
     gameArchetypeUpdatePlayer(&archetypeHero, deltaTime, 16.f);
 
     // check collisions
@@ -253,6 +295,7 @@ void render() {
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     gameArchetypeRender(&archetypeEnemy, shader_program, view, proj, texture);
     gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
+    gameArchetypeRender(&archetypeProjectile, shader_program, view, proj, texture2);
     // end
     SDL_GL_SwapWindow(window);
 }
@@ -308,6 +351,7 @@ int main(int argc, char *argv[]) {
     SDL_DestroyWindow(window);
     gameArchetypeDeinitializeMemory(&archetypeHero);
     gameArchetypeDeinitializeMemory(&archetypeEnemy);
+    gameArchetypeDeinitializeMemory(&archetypeProjectile);
 
     /* Shuts down all SDL subsystems */
     SDL_Quit(); 
