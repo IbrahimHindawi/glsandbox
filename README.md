@@ -1,4 +1,5 @@
-# glsandbox
+# Space Shooter
+Attempt at making a game with C and OpenGL.  
 C graphics programming with SDL2 & OpenGL:  
 Compiles to Win64 MacOS Linux with `compile_commands.json` for clangd LSP support.
 
