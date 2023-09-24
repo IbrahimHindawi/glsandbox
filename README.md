@@ -1,5 +1,6 @@
 # Space Shooter
 Attempt at making a game with C and OpenGL.  
+
 https://github.com/IbrahimHindawi/glsandbox/assets/26623065/5d890510-36f5-4b4f-9d63-05279b3fe3b8
 
 C graphics programming with SDL2 & OpenGL:  
