@@ -19,7 +19,8 @@
 #include "core.h"
 #include "shader.h"
 #include "fileops.h"
-#include "mesh.h"
+// #include "mesh.h"
+#include "gameArchetype.h"
 
 // system
 bool should_quit = false;
