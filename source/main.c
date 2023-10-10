@@ -34,16 +34,26 @@ const float frameTimef32 = 1000.f / FPS;
 int framePrevTime;
 int frameDelay;
 
-// mesh
-i32 indices[] = { 
+// ship
+i32 ship_indices[] = { 
     // #include "models/cubeIndices.txt"
     #include "models/shipIndices.txt"
     // #include "models/rubberIndices.txt"
+    /*
+    0, 1, 3,
+    1, 2, 3
+    */
 };
-f32 vertices[] = {
+f32 ship_vertices[] = {
     // #include "models/cubeVertices.txt"
     #include "models/shipVertices.txt"
     // #include "models/rubberVertices.txt"
+    /*
+     1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
+     1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+    -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+    -1.0f, 0.0f,  1.0f, 0.0f, 1.0f,
+    */
 };
 
 // streak
@@ -54,9 +64,22 @@ f32 streak_vertices[] = {
     #include "models/streakVertices.txt"
 };
 
+// box
+i32 box_indices[] = { 
+    0, 1, 3,
+    1, 2, 3
+};
+f32 box_vertices[] = {
+     1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
+     1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+    -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+    -1.0f, 0.0f,  1.0f, 0.0f, 1.0f,
+};
+
 gameArchetype archetypeEnemy;
 gameArchetype archetypeHero;
 gameArchetype archetypeProjectile;
+gameArchetype archetypeColliders;
 
 u32 shader_program;
 u32 texture;
@@ -119,7 +142,7 @@ void setup() {
         i32 width, height, n_channels;
         // u8 *data = stbi_load("resource/cgfx.png", &width, &height, &n_channels, 0);
         // u8 *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
-        u8 *data = stbi_load("resource/green.png", &width, &height, &n_channels, 0);
+        u8 *data = stbi_load("resource/green.jpg", &width, &height, &n_channels, 0);
         // u8 *data = stbi_load("resource/awesomeface.png", &width, &height, &n_channels, 0);
         if (data) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -130,39 +153,49 @@ void setup() {
         STBI_FREE(data);
     }
 
-
     // XFORMS
     //--------------------------------------------
     camera_position[2] = 10.0f;
-
     // camera look at dir
     glm_vec3_sub(camera_direction, camera_position, camera_direction);
     glm_vec3_normalize(camera_direction);
-
     // camera right
     glm_vec3_cross((vec3){0.0f, 1.0f, 0.0f}, camera_direction, camera_right);
     glm_vec3_normalize(camera_right);
-
     // camera up
     glm_vec3_cross(camera_direction, camera_right, camera_up);
     camera_forward[2] = -1.0f;
-
     // setup MVP
     // glm_mat4_identity(model);
     glm_mat4_identity(view);
     glm_mat4_identity(proj);
     glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, proj);
 
-    //  setup(Archetypes)
+    //  ARCHETYPES
     //-------------------------------------------
     gameArchetypeInitializeMemory(&archetypeEnemy, 6);
-    gameArchetypeInitializeMemoryRenderer(&archetypeEnemy, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+    gameArchetypeInitializeMemoryRenderer(&archetypeEnemy, 
+            ship_vertices, sizeofarray(ship_vertices, f32), 
+            ship_indices, sizeofarray(ship_indices, i32));
+    gameArchetypeInitializeMemoryRendererDebug(&archetypeEnemy, 
+            box_vertices, sizeofarray(box_vertices, f32), 
+            box_indices, sizeofarray(box_vertices, f32));
 
     gameArchetypeInitializeMemory(&archetypeHero, 1);
-    gameArchetypeInitializeMemoryRenderer(&archetypeHero, vertices, sizeofarray(vertices, f32), indices, sizeofarray(indices, i32));
+    gameArchetypeInitializeMemoryRenderer(&archetypeHero, 
+            ship_vertices, sizeofarray(ship_vertices, f32), 
+            ship_indices, sizeofarray(ship_indices, i32));
+    gameArchetypeInitializeMemoryRendererDebug(&archetypeHero, 
+            box_vertices, sizeofarray(box_vertices, f32), 
+            box_indices, sizeofarray(box_vertices, f32));
 
     gameArchetypeInitializeMemory(&archetypeProjectile, 100);
-    gameArchetypeInitializeMemoryRenderer(&archetypeProjectile, streak_vertices, sizeofarray(streak_vertices, f32), streak_indices, sizeofarray(streak_indices, i32));
+    gameArchetypeInitializeMemoryRenderer(&archetypeProjectile, 
+            streak_vertices, sizeofarray(streak_vertices, f32), 
+            streak_indices, sizeofarray(streak_indices, i32));
+    gameArchetypeInitializeMemoryRendererDebug(&archetypeProjectile,
+            box_vertices, sizeofarray(box_vertices, f32), 
+            box_indices, sizeofarray(box_vertices, f32));
 
     // gameArchetypeSetupPositionsAsGrid(&archetypeEnemy);
     gameArchetypeSetupPositionsAsLine(&archetypeEnemy, 15.f);
@@ -309,7 +342,11 @@ void render() {
     // bind
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     gameArchetypeRender(&archetypeEnemy, shader_program, view, proj, texture);
+    gameArchetypeRenderBoxes(&archetypeEnemy, shader_program, view, proj, texture2);
+
     gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
+    gameArchetypeRenderBoxes(&archetypeHero, shader_program, view, proj, texture2);
+
     gameArchetypeRender(&archetypeProjectile, shader_program, view, proj, texture2);
     // end
     SDL_GL_SwapWindow(window);

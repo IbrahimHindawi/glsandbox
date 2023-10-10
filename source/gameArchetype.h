@@ -14,15 +14,25 @@
 // Archetype V2
 ////////////////////////////////////////////////////////////////
 typedef struct {
+    // graphics
     hkArray vao; // u32
     hkArray vbo; // u32
     hkArray ebo; // u32
     hkArray vertex_count; // u32
     hkArray index_count;  // u32
+    // game
     hkArray pos; // vec3
     hkArray vel; // vec3
-    hkArray box; // vec4
     hkArray model; // mat4
+    hkArray box; // vec4
+// #ifdef DEBUG
+    // debug: box drawing data should be taken from above array
+    hkArray vao_box_collider; // u32
+    hkArray vbo_box_collider; // u32
+    hkArray ebo_box_collider; // u32
+    // vertex_count == 4
+    // index_count == 6
+// #endif
 } gameArchetype;
 
 void gameArchetypeInitializeMemory(gameArchetype *archetype, i32 n) {
@@ -35,6 +45,11 @@ void gameArchetypeInitializeMemory(gameArchetype *archetype, i32 n) {
     archetype->vel = hkArrayCreate(sizeof(vec3), n);
     archetype->box = hkArrayCreate(sizeof(vec4), n);
     archetype->model = hkArrayCreate(sizeof(mat4), n);
+// #ifdef DEBUG
+    archetype->vao_box_collider = hkArrayCreate(sizeof(u32), n);
+    archetype->vbo_box_collider = hkArrayCreate(sizeof(u32), n);
+    archetype->ebo_box_collider = hkArrayCreate(sizeof(u32), n);
+// #endif DEBUG
 }
 
 void gameArchetypeInitializeMemoryGrid(gameArchetype *archetype, i32 n) {
@@ -47,6 +62,11 @@ void gameArchetypeInitializeMemoryGrid(gameArchetype *archetype, i32 n) {
     archetype->pos = hkArrayCreate(sizeof(vec3), edge);
     archetype->vel = hkArrayCreate(sizeof(vec3), edge);
     archetype->model = hkArrayCreate(sizeof(mat4), edge);
+// #ifdef DEBUG
+    archetype->vao_box_collider = hkArrayCreate(sizeof(u32), edge);
+    archetype->vbo_box_collider = hkArrayCreate(sizeof(u32), edge);
+    archetype->ebo_box_collider = hkArrayCreate(sizeof(u32), edge);
+// #endif DEBUG
 }
 
 void gameArchetypeDeinitializeMemory(gameArchetype *archetype) {
@@ -59,6 +79,11 @@ void gameArchetypeDeinitializeMemory(gameArchetype *archetype) {
     hkArrayDestroy(&archetype->vel);
     hkArrayDestroy(&archetype->box);
     hkArrayDestroy(&archetype->model);
+// #ifdef DEBUG
+    hkArrayDestroy(&archetype->vao_box_collider);
+    hkArrayDestroy(&archetype->vbo_box_collider);
+    hkArrayDestroy(&archetype->ebo_box_collider);
+// #endif DEBUG
 }
 
 void gameArchetypeInitializeMemoryRenderer(gameArchetype *archetype, f32 *vertices, u32 vertex_count, i32 *indices, u32 index_count) {
@@ -69,6 +94,8 @@ void gameArchetypeInitializeMemoryRenderer(gameArchetype *archetype, f32 *vertic
     for(i32 i = 0; i < n; ++i) {
         ((u32 *)archetype->vertex_count.data)[i] = vertex_count;
         ((u32 *)archetype->index_count.data)[i] = index_count;
+        // printf("vertex count = %d.\n", vertex_count);
+        // printf("index count = %d.\n", index_count);
 
         glGenVertexArrays(1, &vao[i]);
         glGenBuffers(1, &vbo[i]);
@@ -92,6 +119,44 @@ void gameArchetypeInitializeMemoryRenderer(gameArchetype *archetype, f32 *vertic
 
         glBindVertexArray(0);
     }
+    return;
+}
+
+void gameArchetypeInitializeMemoryRendererDebug(gameArchetype *archetype, f32 *vertices, u32 vertex_count, i32 *indices, u32 index_count) {
+// #ifdef DEBUG
+    const i64 n = archetype->index_count.length; 
+    u32 *vao = ((u32 *)archetype->vao_box_collider.data);
+    u32 *vbo = ((u32 *)archetype->vbo_box_collider.data);
+    u32 *ebo = ((u32 *)archetype->ebo_box_collider.data);
+    for(i32 i = 0; i < n; ++i) {
+        // const u32 vertex_count = 4;
+        // const u32 index_count = 6;
+        // printf("vertex count = %d.\n", vertex_count * sizeof(u32));
+        // printf("index count = %d.\n", index_count * sizeof(u32));
+
+        glGenVertexArrays(1, &vao[i]);
+        glGenBuffers(1, &vbo[i]);
+        glGenBuffers(1, &ebo[i]);
+
+        glBindVertexArray(vao[i]);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo[i]);
+        glBufferData(GL_ARRAY_BUFFER, vertex_count * sizeof(f32), vertices, GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[i]);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * sizeof(i32), indices, GL_STATIC_DRAW);
+
+        // pos
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(f32), (void*)0);
+        glEnableVertexAttribArray(0);  
+
+        // tex
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(f32), (void*)(sizeof(f32) * 3));
+        glEnableVertexAttribArray(1);  
+
+        glBindVertexArray(0);
+    }
+// #endif DEBUG
     return;
 }
 
@@ -129,6 +194,8 @@ void gameArchetypeSetupCollisionBoxes(gameArchetype *archetype, const f32 box_wi
         box[i][1] = pos[i][1];
         box[i][2] = box_width;
         box[i][3] = box_height;
+// #ifdef DEBUG
+// #endif DEBUG
         // printf("{%f, %f, %f, %f}\n", box[i][0], box[i][1], box[i][2], box[i][3]);
     }
 }
@@ -287,6 +354,29 @@ void gameArchetypeRender(gameArchetype *archetype, u32 shader_program, mat4 view
         glUseProgram(shader_program);
         glBindVertexArray(((u32 *)archetype->vao.data)[i]);
         glDrawElements(GL_TRIANGLES, ((u32 *)archetype->index_count.data)[i], GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
+}
+
+void gameArchetypeRenderBoxes(gameArchetype *archetype, u32 shader_program, mat4 view, mat4 proj, u32 texture) {
+    const i64 n = archetype->index_count.length; 
+    for(i32 i = 0; i < n; ++i) {
+        // uniforms
+        uint32_t view_location = glGetUniformLocation(shader_program, "view");
+        glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
+        uint32_t proj_location = glGetUniformLocation(shader_program, "proj");
+        glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
+        uint32_t model_location = glGetUniformLocation(shader_program, "model");
+        glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
+        // mat4 model;
+        // glm_mat4_identity(model);
+        // glUniformMatrix4fv(model_location, 1, GL_FALSE, model[0]);
+        // draw
+        // meshRender(&mesh, texture, shader_program);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glUseProgram(shader_program);
+        glBindVertexArray(((u32 *)archetype->vao_box_collider.data)[i]);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
 }
