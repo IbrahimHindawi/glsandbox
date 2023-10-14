@@ -381,9 +381,10 @@ int main(int argc, char *argv[]) {
 
     // Setup OpenGL
     //-------------------------------------------
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
 
     // Creates a SDL window
@@ -402,6 +403,18 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Failed to load GL: %s\n", SDL_GetError());
         return 1;
     }
+    // printf("%d\n", GL_CONTEXT_FLAG_DEBUG_BIT);
+    // int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    // printf("%d\n", flags & GL_CONTEXT_FLAG_DEBUG_BIT);
+
+    int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+        glEnable(GL_DEBUG_OUTPUT);
+        glDebugMessageCallback(glDebugOutput, NULL);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+    }
+
 
     puts("OpenGL loaded");
     printf("Vendor: %s\n", glGetString(GL_VENDOR));
