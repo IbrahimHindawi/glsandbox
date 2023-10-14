@@ -19,6 +19,7 @@
 #include "core.h"
 #include "shader.h"
 #include "fileops.h"
+#include "renderops.h"
 // #include "mesh.h"
 #include "gameArchetype.h"
 
@@ -351,6 +352,7 @@ void update() {
 void render() {
     // begin
     glClearColor(.05f, .05f, .05f, 1.f);
+    ropsCheckError_();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     // bind
@@ -361,7 +363,7 @@ void render() {
     gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
     // gameArchetypeRenderBoxes(&archetypeHero, shader_program, view, proj, texture2);
 
-    gameArchetypeRender(&archetypeProjectile, shader_program_starfield, view, proj, texture2);
+    gameArchetypeRender(&archetypeProjectile, shader_program, view, proj, texture2);
     // gameArchetypeRenderBoxes(&archetypeProjectile, shader_program, view, proj, texture2);
     // end
     SDL_GL_SwapWindow(window);

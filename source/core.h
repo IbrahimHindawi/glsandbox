@@ -21,3 +21,5 @@ typedef size_t usize;
 #define sizeofarray(array, type) (sizeof(array) / sizeof(type))
 
 #define pi 3.141592f
+
+#define stringify(s) #s

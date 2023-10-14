@@ -1,11 +1,14 @@
 // star
 #version 330 core
 out vec4 FragColor;
-out int id;
 in vec2 Coord;
 uniform sampler2D utexture;
 
 void main() {
-    // FragColor = texture(utexture, Coord);
-    FragColor = vec4(0.8, 0.5, 0.1f, 1.0f);
+    // FragColor = vec4(0.5f, 0.0f, 0.5f, 1.f);
+    vec2 newCoord = Coord;
+    // newCoord.x *= -1.f;
+    newCoord.y *= -1.f; // flip texture!
+    // FragColor = texture(utexture, newCoord);
+    FragColor = vec4(0.5f, 0.0f, 0.5f, 1.f);
 }
