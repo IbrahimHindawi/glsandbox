@@ -350,11 +350,10 @@ void gameArchetypeRender(gameArchetype *archetype, u32 shader_program, mat4 view
         glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
         // draw
         // meshRender(&mesh, texture, shader_program);
-        glBindTexture(GL_TEXTURE_2D, texture);
         glUseProgram(shader_program);
         glBindVertexArray(((u32 *)archetype->vao.data)[i]);
+        glBindTexture(GL_TEXTURE_2D, texture);
         glDrawElements(GL_TRIANGLES, ((u32 *)archetype->index_count.data)[i], GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
     }
 }
 
