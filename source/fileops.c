@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "fileops.h"
 
 
@@ -10,6 +11,10 @@ void fops_read(const char *file_path) {
 #else
     fileptr = fopen(file_path, "r");
 #endif
+    fseek(fileptr, 0L, SEEK_END);
+    u64 filesize = ftell(fileptr);
+    fseek(fileptr, 0L, SEEK_SET);
+    assert(filesize <= fops_buffer_size);
     if (fileptr != NULL) {
         size_t newlen = fread(fops_buffer, sizeof(char), fops_buffer_size, fileptr);
         if (ferror(fileptr) != 0) {
