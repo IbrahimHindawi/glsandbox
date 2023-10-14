@@ -8,7 +8,7 @@
     const char* error_string = stringify(error_string); \
     u64 error_string_len = strlen(stringify(error_string)); \
     memcpy_s((error_string_buffer), error_string_len, stringify(error_string), error_string_len); \
-} \
+}
 
 
 GLenum ropsCheckError(const char *file, int line)
@@ -35,7 +35,7 @@ GLenum ropsCheckError(const char *file, int line)
                 error_string_create(ROPS_GL_INVALID_FRAMEBUFFER_OPERATION, error_buffer);
             } break;
         }
-        printf("ropsError: %s\nfile: %s\nline: %d\n", error_buffer, file, line);
+        printf("RopsError: %s File: %s Line: %d\n", error_buffer, file, line);
     }
     return errorCode;
 }
