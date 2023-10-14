@@ -341,6 +341,7 @@ void gameArchetypeUpdatePlayer(gameArchetype *archetype, f32 deltaTime, f32 spee
 void gameArchetypeRender(gameArchetype *archetype, u32 shader_program, mat4 view, mat4 proj, u32 texture) {
     const i64 n = archetype->index_count.length; 
     for(i32 i = 0; i < n; ++i) {
+        glUseProgram(shader_program);
         // uniforms
         uint32_t view_location = glGetUniformLocation(shader_program, "view");
         glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
@@ -350,7 +351,6 @@ void gameArchetypeRender(gameArchetype *archetype, u32 shader_program, mat4 view
         glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
         // draw
         // meshRender(&mesh, texture, shader_program);
-        glUseProgram(shader_program);
         glBindVertexArray(((u32 *)archetype->vao.data)[i]);
         glBindTexture(GL_TEXTURE_2D, texture);
         glDrawElements(GL_TRIANGLES, ((u32 *)archetype->index_count.data)[i], GL_UNSIGNED_INT, 0);
