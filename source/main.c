@@ -122,7 +122,7 @@ void setup() {
         i32 width, height, n_channels;
         // u8 *data = stbi_load("resource/cgfx.png", &width, &height, &n_channels, 0);
         // u8 *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
-        u8 *data = stbi_load("resource/Ship_BaseColor.png", &width, &height, &n_channels, 0);
+        u8 *data = stbi_load("resource/Ship_BaseColor_low.png", &width, &height, &n_channels, 0);
         // u8 *data = stbi_load("resource/awesomeface.png", &width, &height, &n_channels, 0);
         if (data) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
