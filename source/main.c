@@ -358,13 +358,13 @@ void render() {
     // bind
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     gameArchetypeRender(&archetypeEnemy, shader_program, view, proj, texture);
-    // gameArchetypeRenderBoxes(&archetypeEnemy, shader_program, view, proj, texture2);
+    gameArchetypeRenderBoxes(&archetypeEnemy, shader_program_starfield, view, proj, texture2);
 
     gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
-    // gameArchetypeRenderBoxes(&archetypeHero, shader_program, view, proj, texture2);
+    gameArchetypeRenderBoxes(&archetypeHero, shader_program_starfield, view, proj, texture2);
 
     gameArchetypeRender(&archetypeProjectile, shader_program, view, proj, texture2);
-    // gameArchetypeRenderBoxes(&archetypeProjectile, shader_program, view, proj, texture2);
+    gameArchetypeRenderBoxes(&archetypeProjectile, shader_program_starfield, view, proj, texture2);
     // end
     SDL_GL_SwapWindow(window);
 }

@@ -360,6 +360,7 @@ void gameArchetypeRender(gameArchetype *archetype, u32 shader_program, mat4 view
 void gameArchetypeRenderBoxes(gameArchetype *archetype, u32 shader_program, mat4 view, mat4 proj, u32 texture) {
     const i64 n = archetype->index_count.length; 
     for(i32 i = 0; i < n; ++i) {
+        glUseProgram(shader_program);
         // uniforms
         uint32_t view_location = glGetUniformLocation(shader_program, "view");
         glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
@@ -374,13 +375,11 @@ void gameArchetypeRenderBoxes(gameArchetype *archetype, u32 shader_program, mat4
         // glUniformMatrix4fv(model_location, 1, GL_FALSE, model[0]);
         // draw
         // meshRender(&mesh, texture, shader_program);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glUseProgram(shader_program);
-        glBindVertexArray(((u32 *)archetype->vao_box_collider.data)[i]);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glBindVertexArray(((u32 *)archetype->vao_box_collider.data)[i]);
+        glBindTexture(GL_TEXTURE_2D, texture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glBindVertexArray(0);
     }
 }
 
