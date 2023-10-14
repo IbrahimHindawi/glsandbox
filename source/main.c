@@ -82,6 +82,7 @@ gameArchetype archetypeProjectile;
 gameArchetype archetypeColliders;
 
 u32 shader_program;
+u32 shader_program_starfield;
 u32 texture;
 u32 texture2;
 mat4 view;
@@ -99,17 +100,30 @@ vec3 camera_direction = {0};
 void setup() {
     //  SHADER
     //-------------------------------------------
-    fops_read("resource/simple.vert");
-    u32 vertex_shader = shader_compile(fops_buffer, GL_VERTEX_SHADER);
-    // printf("%s", fops_buffer);
-    fops_read("resource/simple.frag");
-    u32 fragment_shader = shader_compile(fops_buffer, GL_FRAGMENT_SHADER);
-    // printf("%s", fops_buffer);
-    // shader_program = shader_link(vertex_shader, fragment_shader);
-    shader_program = shader_link(vertex_shader, fragment_shader);
-    glDeleteShader(vertex_shader);
-    glDeleteShader(fragment_shader);
-
+    {
+        fops_read("resource/simple.vert");
+        u32 vertex_shader = shader_compile(fops_buffer, GL_VERTEX_SHADER);
+        // printf("%s", fops_buffer);
+        fops_read("resource/simple.frag");
+        u32 fragment_shader = shader_compile(fops_buffer, GL_FRAGMENT_SHADER);
+        // printf("%s", fops_buffer);
+        // shader_program = shader_link(vertex_shader, fragment_shader);
+        shader_program = shader_link(vertex_shader, fragment_shader);
+        glDeleteShader(vertex_shader);
+        glDeleteShader(fragment_shader);
+    }
+    {
+        fops_read("resource/starfield.vert");
+        u32 vertex_shader = shader_compile(fops_buffer, GL_VERTEX_SHADER);
+        // printf("%s", fops_buffer);
+        fops_read("resource/starfield.frag");
+        u32 fragment_shader = shader_compile(fops_buffer, GL_FRAGMENT_SHADER);
+        // printf("%s", fops_buffer);
+        // shader_program = shader_link(vertex_shader, fragment_shader);
+        shader_program_starfield = shader_link(vertex_shader, fragment_shader);
+        glDeleteShader(vertex_shader);
+        glDeleteShader(fragment_shader);
+    }
     // TEXTURE
     //-------------------------------------------
     {
@@ -342,12 +356,13 @@ void render() {
     // bind
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     gameArchetypeRender(&archetypeEnemy, shader_program, view, proj, texture);
-    gameArchetypeRenderBoxes(&archetypeEnemy, shader_program, view, proj, texture2);
+    // gameArchetypeRenderBoxes(&archetypeEnemy, shader_program, view, proj, texture2);
 
     gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
-    gameArchetypeRenderBoxes(&archetypeHero, shader_program, view, proj, texture2);
+    // gameArchetypeRenderBoxes(&archetypeHero, shader_program, view, proj, texture2);
 
-    gameArchetypeRender(&archetypeProjectile, shader_program, view, proj, texture2);
+    gameArchetypeRender(&archetypeProjectile, shader_program_starfield, view, proj, texture2);
+    // gameArchetypeRenderBoxes(&archetypeProjectile, shader_program, view, proj, texture2);
     // end
     SDL_GL_SwapWindow(window);
 }
