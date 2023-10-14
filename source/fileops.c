@@ -14,6 +14,7 @@ void fops_read(const char *file_path) {
     fseek(fileptr, 0L, SEEK_END);
     u64 filesize = ftell(fileptr);
     fseek(fileptr, 0L, SEEK_SET);
+    // printf("filesize = %lld\n", filesize);
     assert(filesize <= fops_buffer_size);
     if (fileptr != NULL) {
         size_t newlen = fread(fops_buffer, sizeof(char), fops_buffer_size, fileptr);
