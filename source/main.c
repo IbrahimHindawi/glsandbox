@@ -87,6 +87,7 @@ gameArchetype archetypePlane;
 
 u32 shader_program;
 u32 shader_program_starfield;
+u32 shader_program_projectile;
 u32 texture;
 u32 texture2;
 mat4 view;
@@ -128,6 +129,18 @@ void setup() {
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);
     }
+    {
+        fops_read("resource/projectile.vert");
+        u32 vertex_shader = shader_compile(fops_buffer, GL_VERTEX_SHADER);
+        // printf("%s", fops_buffer);
+        fops_read("resource/projectile.frag");
+        u32 fragment_shader = shader_compile(fops_buffer, GL_FRAGMENT_SHADER);
+        // printf("%s", fops_buffer);
+        // shader_program = shader_link(vertex_shader, fragment_shader);
+        shader_program_projectile = shader_link(vertex_shader, fragment_shader);
+        glDeleteShader(vertex_shader);
+        glDeleteShader(fragment_shader);
+    }
     // TEXTURE
     //-------------------------------------------
     {
@@ -140,7 +153,7 @@ void setup() {
         i32 width, height, n_channels;
         // u8 *data = stbi_load("resource/cgfx.png", &width, &height, &n_channels, 0);
         // u8 *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
-        u8 *data = stbi_load("resource/Ship_BaseColor_low.png", &width, &height, &n_channels, 0);
+        u8 *data = stbi_load("resource/Ship_BaseColor_purple_mid.jpg", &width, &height, &n_channels, 0);
         // u8 *data = stbi_load("resource/awesomeface.png", &width, &height, &n_channels, 0);
         if (data) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -160,7 +173,7 @@ void setup() {
         i32 width, height, n_channels;
         // u8 *data = stbi_load("resource/cgfx.png", &width, &height, &n_channels, 0);
         // u8 *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
-        u8 *data = stbi_load("resource/green.jpg", &width, &height, &n_channels, 0);
+        u8 *data = stbi_load("resource/Ship_BaseColor_orange_mid.jpg", &width, &height, &n_channels, 0);
         // u8 *data = stbi_load("resource/awesomeface.png", &width, &height, &n_channels, 0);
         if (data) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -368,13 +381,13 @@ void render() {
     // bind
     gameArchetypeRenderBG(&archetypePlane, shader_program_starfield, view, proj);
 
-    gameArchetypeRender(&archetypeEnemy, shader_program, view, proj, texture);
+    gameArchetypeRender(&archetypeEnemy, shader_program, view, proj, texture2);
     // gameArchetypeRenderBoxes(&archetypeEnemy, shader_program, view, proj, texture2);
 
     gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
     // gameArchetypeRenderBoxes(&archetypeHero, shader_program, view, proj, texture2);
 
-    gameArchetypeRender(&archetypeProjectile, shader_program, view, proj, texture2);
+    gameArchetypeRender(&archetypeProjectile, shader_program_projectile, view, proj, texture2);
     // gameArchetypeRenderBoxes(&archetypeProjectile, shader_program, view, proj, texture2);
 
     // end
