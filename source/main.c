@@ -26,7 +26,7 @@
 // system
 bool should_quit = false;
 SDL_Window *window = NULL;
-char fops_buffer[1024];
+char fops_buffer[fops_buffer_size];
 
 // time
 #define FPS 60
@@ -81,6 +81,7 @@ gameArchetype archetypeEnemy;
 gameArchetype archetypeHero;
 gameArchetype archetypeProjectile;
 gameArchetype archetypeColliders;
+gameArchetype archetypePlane;
 
 u32 shader_program;
 u32 shader_program_starfield;
@@ -212,6 +213,11 @@ void setup() {
             box_vertices, sizeofarray(box_vertices, f32), 
             box_indices, sizeofarray(box_vertices, f32));
 
+    gameArchetypeInitializeMemory(&archetypePlane, 1);
+    gameArchetypeInitializeMemoryRenderer(&archetypePlane, 
+            box_vertices, sizeofarray(box_vertices, f32), 
+            box_indices, sizeofarray(box_indices, i32));
+
     // gameArchetypeSetupPositionsAsGrid(&archetypeEnemy);
     gameArchetypeSetupPositionsAsLine(&archetypeEnemy, 15.f);
     ((vec3 *)archetypeHero.pos.data)[0][1] = -20.f;
@@ -313,7 +319,7 @@ void update() {
     glm_vec3_add(camera_position, camera_forward, camera_new_location);
     glm_lookat(camera_position, camera_new_location, camera_up, view);
 
-    // update enemy
+    // update attributes
     gameArchetypeUpdateVelocities(&archetypeEnemy, SDL_GetTicks() / 1000.f);
     gameArchetypeUpdateColliders(&archetypeHero);
     gameArchetypeUpdateColliders(&archetypeEnemy);
@@ -323,6 +329,8 @@ void update() {
     gameArchetypeUpdatePlayer(&archetypeHero, deltaTime, 16.f);
     gameArchetypeUpdate(&archetypeEnemy, deltaTime, 4.f);
     gameArchetypeUpdate(&archetypeProjectile, deltaTime, 5.f);
+    // gameArchetypeUpdate(&archetypePlane, deltaTime, 0.f);
+    gameArchetypeUpdateBG(&archetypePlane, 20.f);
 
     {
         // check collisions
@@ -352,19 +360,21 @@ void update() {
 void render() {
     // begin
     glClearColor(.05f, .05f, .05f, 1.f);
-    ropsCheckError_();
+    // ropsCheckError_();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     // bind
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    gameArchetypeRenderBG(&archetypePlane, shader_program_starfield, view, proj);
+
     gameArchetypeRender(&archetypeEnemy, shader_program, view, proj, texture);
-    gameArchetypeRenderBoxes(&archetypeEnemy, shader_program_starfield, view, proj, texture2);
+    // gameArchetypeRenderBoxes(&archetypeEnemy, shader_program, view, proj, texture2);
 
     gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
-    gameArchetypeRenderBoxes(&archetypeHero, shader_program_starfield, view, proj, texture2);
+    // gameArchetypeRenderBoxes(&archetypeHero, shader_program, view, proj, texture2);
 
     gameArchetypeRender(&archetypeProjectile, shader_program, view, proj, texture2);
-    gameArchetypeRenderBoxes(&archetypeProjectile, shader_program_starfield, view, proj, texture2);
+    // gameArchetypeRenderBoxes(&archetypeProjectile, shader_program, view, proj, texture2);
+
     // end
     SDL_GL_SwapWindow(window);
 }
@@ -403,23 +413,21 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Failed to load GL: %s\n", SDL_GetError());
         return 1;
     }
-    // printf("%d\n", GL_CONTEXT_FLAG_DEBUG_BIT);
-    // int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-    // printf("%d\n", flags & GL_CONTEXT_FLAG_DEBUG_BIT);
+
+    puts("OpenGL Loaded Successfully.");
+    printf("Vendor: %s\n", glGetString(GL_VENDOR));
+    printf("Renderer: %s\n", glGetString(GL_RENDERER));
+    printf("Version: %s\n", glGetString(GL_VERSION));
 
     int flags; glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
     if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+        printf("GL Debug Mode Enabled!\n");
         glEnable(GL_DEBUG_OUTPUT);
         glDebugMessageCallback(glDebugOutput, NULL);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
     }
 
-
-    puts("OpenGL loaded");
-    printf("Vendor: %s\n", glGetString(GL_VENDOR));
-    printf("Renderer: %s\n", glGetString(GL_RENDERER));
-    printf("Version: %s\n", glGetString(GL_VERSION));
 
 
     setup();

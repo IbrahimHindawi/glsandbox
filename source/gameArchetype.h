@@ -7,6 +7,7 @@
 #include <cglm/cam.h>
 #include <cglm/mat4.h>
 #include <cglm/vec3.h>
+#include <SDL2/SDL.h>
 
 #include "core.h"
 #include "hkArray.h"
@@ -338,16 +339,28 @@ void gameArchetypeUpdatePlayer(gameArchetype *archetype, f32 deltaTime, f32 spee
     }
 }
 
+void gameArchetypeUpdateBG(gameArchetype *archetype, f32 scale) {
+    mat4 *model = ((mat4 *)archetype->model.data);
+    const i64 n = archetype->index_count.length; 
+    for(i32 i = 0; i < n; ++i) {
+        // S T R
+        glm_mat4_identity(&model[i][0]);
+        glm_scale_uni(&model[i][0], scale);
+        glm_translate(&model[i][0], (vec3){0.0f, 0.0f, -1.0f});
+        glm_rotate(&model[i][0], pi * 0.5f, (vec3){1.f, 0.f, 0.f});
+    }
+}
+
 void gameArchetypeRender(gameArchetype *archetype, u32 shader_program, mat4 view, mat4 proj, u32 texture) {
     const i64 n = archetype->index_count.length; 
     for(i32 i = 0; i < n; ++i) {
         glUseProgram(shader_program);
         // uniforms
-        uint32_t view_location = glGetUniformLocation(shader_program, "view");
+        u32 view_location = glGetUniformLocation(shader_program, "view");
         glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
-        uint32_t proj_location = glGetUniformLocation(shader_program, "proj");
+        u32 proj_location = glGetUniformLocation(shader_program, "proj");
         glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
-        uint32_t model_location = glGetUniformLocation(shader_program, "model");
+        u32 model_location = glGetUniformLocation(shader_program, "model");
         glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
         // draw
         // meshRender(&mesh, texture, shader_program);
@@ -362,12 +375,12 @@ void gameArchetypeRenderBoxes(gameArchetype *archetype, u32 shader_program, mat4
     for(i32 i = 0; i < n; ++i) {
         glUseProgram(shader_program);
         // uniforms
-        uint32_t view_location = glGetUniformLocation(shader_program, "view");
+        u32 view_location = glGetUniformLocation(shader_program, "view");
         glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
-        uint32_t proj_location = glGetUniformLocation(shader_program, "proj");
+        u32 proj_location = glGetUniformLocation(shader_program, "proj");
         mat4 *model = ((mat4 *)archetype->model.data);
         glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
-        uint32_t model_location = glGetUniformLocation(shader_program, "model");
+        u32 model_location = glGetUniformLocation(shader_program, "model");
         glm_scale_uni(&model[i][0], 1.5f);
         glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
         // mat4 model;
@@ -380,6 +393,27 @@ void gameArchetypeRenderBoxes(gameArchetype *archetype, u32 shader_program, mat4
         glBindTexture(GL_TEXTURE_2D, texture);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+}
+
+void gameArchetypeRenderBG(gameArchetype *archetype, u32 shader_program, mat4 view, mat4 proj) {
+    const i64 n = archetype->index_count.length; 
+    for(i32 i = 0; i < n; ++i) {
+        glUseProgram(shader_program);
+        // uniforms
+        u32 time_location = glGetUniformLocation(shader_program, "time");
+        glUniform1f(time_location, SDL_GetTicks() / 1000.f);
+        u32 view_location = glGetUniformLocation(shader_program, "view");
+        glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
+        u32 proj_location = glGetUniformLocation(shader_program, "proj");
+        glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
+        u32 model_location = glGetUniformLocation(shader_program, "model");
+        glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
+        // draw
+        // meshRender(&mesh, texture, shader_program);
+        glBindVertexArray(((u32 *)archetype->vao.data)[i]);
+        // glBindTexture(GL_TEXTURE_2D, texture);
+        glDrawElements(GL_TRIANGLES, ((u32 *)archetype->index_count.data)[i], GL_UNSIGNED_INT, 0);
     }
 }
 
