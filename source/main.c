@@ -71,10 +71,12 @@ i32 box_indices[] = {
     1, 2, 3
 };
 f32 box_vertices[] = {
-     1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
-     1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-    -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-    -1.0f, 0.0f,  1.0f, 0.0f, 1.0f,
+    //  x     y      z     s     t     u    nx    ny    nz
+     1.0f, 0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
+     1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
+    -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
+    -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
+
 };
 
 gameArchetype archetypeEnemy;
@@ -367,13 +369,13 @@ void render() {
     gameArchetypeRenderBG(&archetypePlane, shader_program_starfield, view, proj);
 
     gameArchetypeRender(&archetypeEnemy, shader_program, view, proj, texture);
-    // gameArchetypeRenderBoxes(&archetypeEnemy, shader_program, view, proj, texture2);
+    gameArchetypeRenderBoxes(&archetypeEnemy, shader_program, view, proj, texture2);
 
     gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
-    // gameArchetypeRenderBoxes(&archetypeHero, shader_program, view, proj, texture2);
+    gameArchetypeRenderBoxes(&archetypeHero, shader_program, view, proj, texture2);
 
     gameArchetypeRender(&archetypeProjectile, shader_program, view, proj, texture2);
-    // gameArchetypeRenderBoxes(&archetypeProjectile, shader_program, view, proj, texture2);
+    gameArchetypeRenderBoxes(&archetypeProjectile, shader_program, view, proj, texture2);
 
     // end
     SDL_GL_SwapWindow(window);

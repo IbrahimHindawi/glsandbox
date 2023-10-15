@@ -111,14 +111,12 @@ void gameArchetypeInitializeMemoryRenderer(gameArchetype *archetype, f32 *vertic
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, ((u32 *)archetype->index_count.data)[i] * sizeof(i32), indices, GL_STATIC_DRAW);
 
         // pos
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(f32), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)0);
         glEnableVertexAttribArray(0);  
 
         // tex
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(f32), (void*)(sizeof(f32) * 3));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)(sizeof(f32) * 3));
         glEnableVertexAttribArray(1);  
-
-        glBindVertexArray(0);
     }
     return;
 }
@@ -148,14 +146,12 @@ void gameArchetypeInitializeMemoryRendererDebug(gameArchetype *archetype, f32 *v
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * sizeof(i32), indices, GL_STATIC_DRAW);
 
         // pos
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(f32), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)0);
         glEnableVertexAttribArray(0);  
 
         // tex
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(f32), (void*)(sizeof(f32) * 3));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)(sizeof(f32) * 3));
         glEnableVertexAttribArray(1);  
-
-        glBindVertexArray(0);
     }
 // #endif DEBUG
     return;
