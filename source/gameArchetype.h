@@ -12,15 +12,18 @@
 #include "core.h"
 #include "hkArray.h"
 
+typedef struct {
+    u32 mesh_id;
+    u32 vertex_count;
+    u32 index_count;
+} mesh;
+
 // Archetype V2
 ////////////////////////////////////////////////////////////////
 typedef struct {
     // graphics
     hkArray vao; // u32
-    hkArray vbo; // u32
-    hkArray ebo; // u32
-    hkArray vertex_count; // u32
-    hkArray index_count;  // u32
+    hkArray index_count; // u32
     // game
     hkArray pos; // vec3
     hkArray vel; // vec3
@@ -38,9 +41,6 @@ typedef struct {
 
 void gameArchetypeInitializeMemory(gameArchetype *archetype, i32 n) {
     archetype->vao = hkArrayCreate(sizeof(u32), n);
-    archetype->vbo = hkArrayCreate(sizeof(u32), n);
-    archetype->ebo = hkArrayCreate(sizeof(u32), n);
-    archetype->vertex_count = hkArrayCreate(sizeof(u32), n);
     archetype->index_count = hkArrayCreate(sizeof(u32), n);
     archetype->pos = hkArrayCreate(sizeof(vec3), n);
     archetype->vel = hkArrayCreate(sizeof(vec3), n);
@@ -56,9 +56,6 @@ void gameArchetypeInitializeMemory(gameArchetype *archetype, i32 n) {
 void gameArchetypeInitializeMemoryGrid(gameArchetype *archetype, i32 n) {
     const u32 edge = n * n;
     archetype->vao = hkArrayCreate(sizeof(u32), edge);
-    archetype->vbo = hkArrayCreate(sizeof(u32), edge);
-    archetype->ebo = hkArrayCreate(sizeof(u32), edge);
-    archetype->vertex_count = hkArrayCreate(sizeof(u32), edge);
     archetype->index_count = hkArrayCreate(sizeof(u32), edge);
     archetype->pos = hkArrayCreate(sizeof(vec3), edge);
     archetype->vel = hkArrayCreate(sizeof(vec3), edge);
@@ -72,9 +69,6 @@ void gameArchetypeInitializeMemoryGrid(gameArchetype *archetype, i32 n) {
 
 void gameArchetypeDeinitializeMemory(gameArchetype *archetype) {
     hkArrayDestroy(&archetype->vao);
-    hkArrayDestroy(&archetype->vbo);
-    hkArrayDestroy(&archetype->ebo);
-    hkArrayDestroy(&archetype->vertex_count);
     hkArrayDestroy(&archetype->index_count);
     hkArrayDestroy(&archetype->pos);
     hkArrayDestroy(&archetype->vel);
@@ -87,71 +81,21 @@ void gameArchetypeDeinitializeMemory(gameArchetype *archetype) {
 // #endif DEBUG
 }
 
-void gameArchetypeInitializeMemoryRenderer(gameArchetype *archetype, f32 *vertices, u32 vertex_count, i32 *indices, u32 index_count) {
+void gameArchetypeInitializeMemoryRenderer(gameArchetype *archetype, u32 vao, u32 index_count) {
     const i64 n = archetype->index_count.length; 
-    u32 *vao = ((u32 *)archetype->vao.data);
-    u32 *vbo = ((u32 *)archetype->vbo.data);
-    u32 *ebo = ((u32 *)archetype->ebo.data);
+    // u32 *vao = ((u32 *)archetype->vao.data);
     for(i32 i = 0; i < n; ++i) {
-        ((u32 *)archetype->vertex_count.data)[i] = vertex_count;
+        ((u32 *)archetype->vao.data)[i] = vao;
         ((u32 *)archetype->index_count.data)[i] = index_count;
-        // printf("vertex count = %d.\n", vertex_count);
-        // printf("index count = %d.\n", index_count);
-
-        glGenVertexArrays(1, &vao[i]);
-        glGenBuffers(1, &vbo[i]);
-        glGenBuffers(1, &ebo[i]);
-
-        glBindVertexArray(vao[i]);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[i]);
-        glBufferData(GL_ARRAY_BUFFER, ((u32 *)archetype->vertex_count.data)[i] * sizeof(f32), vertices, GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[i]);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, ((u32 *)archetype->index_count.data)[i] * sizeof(i32), indices, GL_STATIC_DRAW);
-
-        // pos
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)0);
-        glEnableVertexAttribArray(0);  
-
-        // tex
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)(sizeof(f32) * 3));
-        glEnableVertexAttribArray(1);  
     }
     return;
 }
 
-void gameArchetypeInitializeMemoryRendererDebug(gameArchetype *archetype, f32 *vertices, u32 vertex_count, i32 *indices, u32 index_count) {
+void gameArchetypeInitializeMemoryRendererDebug(gameArchetype *archetype, u32 vao) {
 // #ifdef DEBUG
-    const i64 n = archetype->index_count.length; 
-    u32 *vao = ((u32 *)archetype->vao_box_collider.data);
-    u32 *vbo = ((u32 *)archetype->vbo_box_collider.data);
-    u32 *ebo = ((u32 *)archetype->ebo_box_collider.data);
+    const i64 n = archetype->vao.length; 
     for(i32 i = 0; i < n; ++i) {
-        // const u32 vertex_count = 4;
-        // const u32 index_count = 6;
-        // printf("vertex count = %d.\n", vertex_count * sizeof(u32));
-        // printf("index count = %d.\n", index_count * sizeof(u32));
-
-        glGenVertexArrays(1, &vao[i]);
-        glGenBuffers(1, &vbo[i]);
-        glGenBuffers(1, &ebo[i]);
-
-        glBindVertexArray(vao[i]);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[i]);
-        glBufferData(GL_ARRAY_BUFFER, vertex_count * sizeof(f32), vertices, GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[i]);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_count * sizeof(i32), indices, GL_STATIC_DRAW);
-
-        // pos
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)0);
-        glEnableVertexAttribArray(0);  
-
-        // tex
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)(sizeof(f32) * 3));
-        glEnableVertexAttribArray(1);  
+        ((u32 *)archetype->vao.data)[i] = vao;
     }
 // #endif DEBUG
     return;

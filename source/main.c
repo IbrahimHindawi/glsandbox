@@ -40,21 +40,11 @@ i32 ship_indices[] = {
     // #include "models/cubeIndices.txt"
     #include "models/shipIndices.txt"
     // #include "models/rubberIndices.txt"
-    /*
-    0, 1, 3,
-    1, 2, 3
-    */
 };
 f32 ship_vertices[] = {
     // #include "models/cubeVertices.txt"
     #include "models/shipVertices.txt"
     // #include "models/rubberVertices.txt"
-    /*
-     1.0f, 0.0f,  1.0f, 1.0f, 1.0f,
-     1.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-    -1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-    -1.0f, 0.0f,  1.0f, 0.0f, 1.0f,
-    */
 };
 
 // streak
@@ -79,6 +69,69 @@ f32 box_vertices[] = {
 
 };
 
+// MESH
+///////////////////////////////////
+enum MeshName { 
+    // #include "config.ini"
+    Ship, 
+    Streak,
+    Plane, 
+    MeshCount 
+};
+
+typedef struct {
+    f32 *vertices;
+    u32 vertices_count;
+    i32 *indices;
+    u32 indices_count;
+} MeshRawData;
+
+MeshRawData MeshRawDataArray[MeshCount];
+u32 MeshVAOArray[MeshCount];
+
+MeshRawData MeshDataInitialize(f32 *vertices, u32 vertices_count, i32 *indices, u32 indices_count) {
+    MeshRawData result = {0};
+    result.vertices = vertices;
+    result.vertices_count = vertices_count;
+    result.indices = indices;
+    result.indices_count = indices_count;
+    return result;
+}
+
+void MeshVAOGen(u32 *vao, MeshRawData *mesh_data) {
+
+    u32 vbo = 0;
+    u32 ebo = 0;
+
+    glGenVertexArrays(1, vao);
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ebo);
+
+    glBindVertexArray(*vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, mesh_data->vertices_count * sizeof(f32), mesh_data->vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_data->indices_count * sizeof(i32), mesh_data->indices, GL_STATIC_DRAW);
+
+    // pos
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)0);
+    glEnableVertexAttribArray(0);  
+
+    // tex
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)(sizeof(f32) * 3));
+    glEnableVertexAttribArray(1);  
+
+    // nor
+    // glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)(sizeof(f32) * 6));
+    // glEnableVertexAttribArray(2);  
+
+    return;
+}
+
+// ECS
+///////////////////////////////////
 gameArchetype archetypeEnemy;
 gameArchetype archetypeHero;
 gameArchetype archetypeProjectile;
@@ -205,33 +258,19 @@ void setup() {
     //  ARCHETYPES
     //-------------------------------------------
     gameArchetypeInitializeMemory(&archetypeEnemy, 6);
-    gameArchetypeInitializeMemoryRenderer(&archetypeEnemy, 
-            ship_vertices, sizeofarray(ship_vertices, f32), 
-            ship_indices, sizeofarray(ship_indices, i32));
-    gameArchetypeInitializeMemoryRendererDebug(&archetypeEnemy, 
-            box_vertices, sizeofarray(box_vertices, f32), 
-            box_indices, sizeofarray(box_vertices, f32));
+    gameArchetypeInitializeMemoryRenderer(&archetypeEnemy, MeshVAOArray[Ship], MeshRawDataArray[Ship].indices_count);
+    // gameArchetypeInitializeMemoryRendererDebug(&archetypeEnemy, MeshVAOArray[Plane]);
 
     gameArchetypeInitializeMemory(&archetypeHero, 1);
-    gameArchetypeInitializeMemoryRenderer(&archetypeHero, 
-            ship_vertices, sizeofarray(ship_vertices, f32), 
-            ship_indices, sizeofarray(ship_indices, i32));
-    gameArchetypeInitializeMemoryRendererDebug(&archetypeHero, 
-            box_vertices, sizeofarray(box_vertices, f32), 
-            box_indices, sizeofarray(box_vertices, f32));
+    gameArchetypeInitializeMemoryRenderer(&archetypeHero, MeshVAOArray[Ship], MeshRawDataArray[Ship].indices_count);
+    // gameArchetypeInitializeMemoryRendererDebug(&archetypeHero, MeshVAOArray[Plane]);
 
     gameArchetypeInitializeMemory(&archetypeProjectile, 100);
-    gameArchetypeInitializeMemoryRenderer(&archetypeProjectile, 
-            streak_vertices, sizeofarray(streak_vertices, f32), 
-            streak_indices, sizeofarray(streak_indices, i32));
-    gameArchetypeInitializeMemoryRendererDebug(&archetypeProjectile,
-            box_vertices, sizeofarray(box_vertices, f32), 
-            box_indices, sizeofarray(box_vertices, f32));
+    gameArchetypeInitializeMemoryRenderer(&archetypeProjectile, MeshVAOArray[Streak], MeshRawDataArray[Streak].indices_count);
+    // gameArchetypeInitializeMemoryRendererDebug(&archetypeProjectile, MeshVAOArray[Plane]);
 
     gameArchetypeInitializeMemory(&archetypePlane, 1);
-    gameArchetypeInitializeMemoryRenderer(&archetypePlane, 
-            box_vertices, sizeofarray(box_vertices, f32), 
-            box_indices, sizeofarray(box_indices, i32));
+    gameArchetypeInitializeMemoryRenderer(&archetypePlane, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
 
     // gameArchetypeSetupPositionsAsGrid(&archetypeEnemy);
     gameArchetypeSetupPositionsAsLine(&archetypeEnemy, 15.f);
@@ -382,18 +421,17 @@ void render() {
     gameArchetypeRenderBG(&archetypePlane, shader_program_starfield, view, proj);
 
     gameArchetypeRender(&archetypeEnemy, shader_program, view, proj, texture2);
-    // gameArchetypeRenderBoxes(&archetypeEnemy, shader_program, view, proj, texture2);
+    // gameArchetypeRenderBoxes(&archetypeEnemy, shader_program_projectile, view, proj, texture2);
 
     gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
-    // gameArchetypeRenderBoxes(&archetypeHero, shader_program, view, proj, texture2);
+    // gameArchetypeRenderBoxes(&archetypeHero, shader_program_projectile, view, proj, texture2);
 
     gameArchetypeRender(&archetypeProjectile, shader_program_projectile, view, proj, texture2);
-    // gameArchetypeRenderBoxes(&archetypeProjectile, shader_program, view, proj, texture2);
+    // gameArchetypeRenderBoxes(&archetypeProjectile, shader_program_projectile, view, proj, texture2);
 
     // end
     SDL_GL_SwapWindow(window);
 }
-
 int main(int argc, char *argv[]) {
     /*
      * Initialises the SDL video subsystem (as well as the events subsystem).
@@ -443,7 +481,15 @@ int main(int argc, char *argv[]) {
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
     }
 
+    // MESHSETUP
+    /////////////////////
+    MeshRawDataArray[Ship] = MeshDataInitialize(ship_vertices, sizeofarray(ship_vertices, f32), ship_indices, sizeofarray(ship_indices, u32));
+    MeshRawDataArray[Streak] = MeshDataInitialize(streak_vertices, sizeofarray(streak_vertices, f32), streak_indices, sizeofarray(streak_indices, u32));
+    MeshRawDataArray[Plane] = MeshDataInitialize(box_vertices, sizeofarray(box_vertices, f32), box_indices, sizeofarray(box_indices, u32));
 
+    MeshVAOGen(&MeshVAOArray[Ship], &MeshRawDataArray[Ship]);
+    MeshVAOGen(&MeshVAOArray[Streak], &MeshRawDataArray[Streak]);
+    MeshVAOGen(&MeshVAOArray[Plane], &MeshRawDataArray[Plane]);
 
     setup();
     while (!should_quit) {
