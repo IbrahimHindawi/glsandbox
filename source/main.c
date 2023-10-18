@@ -259,15 +259,15 @@ void setup() {
     //-------------------------------------------
     gameArchetypeInitializeMemory(&archetypeEnemy, 6);
     gameArchetypeInitializeMemoryRenderer(&archetypeEnemy, MeshVAOArray[Ship], MeshRawDataArray[Ship].indices_count);
-    // gameArchetypeInitializeMemoryRendererDebug(&archetypeEnemy, MeshVAOArray[Plane]);
+    gameArchetypeInitializeMemoryRendererDebug(&archetypeEnemy, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
 
     gameArchetypeInitializeMemory(&archetypeHero, 1);
     gameArchetypeInitializeMemoryRenderer(&archetypeHero, MeshVAOArray[Ship], MeshRawDataArray[Ship].indices_count);
-    // gameArchetypeInitializeMemoryRendererDebug(&archetypeHero, MeshVAOArray[Plane]);
+    gameArchetypeInitializeMemoryRendererDebug(&archetypeHero, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
 
     gameArchetypeInitializeMemory(&archetypeProjectile, 100);
     gameArchetypeInitializeMemoryRenderer(&archetypeProjectile, MeshVAOArray[Streak], MeshRawDataArray[Streak].indices_count);
-    // gameArchetypeInitializeMemoryRendererDebug(&archetypeProjectile, MeshVAOArray[Plane]);
+    gameArchetypeInitializeMemoryRendererDebug(&archetypeProjectile, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
 
     gameArchetypeInitializeMemory(&archetypePlane, 1);
     gameArchetypeInitializeMemoryRenderer(&archetypePlane, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
@@ -421,13 +421,13 @@ void render() {
     gameArchetypeRenderBG(&archetypePlane, shader_program_starfield, view, proj);
 
     gameArchetypeRender(&archetypeEnemy, shader_program, view, proj, texture2);
-    // gameArchetypeRenderBoxes(&archetypeEnemy, shader_program_projectile, view, proj, texture2);
+    gameArchetypeRenderBoxes(&archetypeEnemy, shader_program_projectile, view, proj, texture2);
 
     gameArchetypeRender(&archetypeHero, shader_program, view, proj, texture);
-    // gameArchetypeRenderBoxes(&archetypeHero, shader_program_projectile, view, proj, texture2);
+    gameArchetypeRenderBoxes(&archetypeHero, shader_program_projectile, view, proj, texture2);
 
     gameArchetypeRender(&archetypeProjectile, shader_program_projectile, view, proj, texture2);
-    // gameArchetypeRenderBoxes(&archetypeProjectile, shader_program_projectile, view, proj, texture2);
+    gameArchetypeRenderBoxes(&archetypeProjectile, shader_program_projectile, view, proj, texture2);
 
     // end
     SDL_GL_SwapWindow(window);

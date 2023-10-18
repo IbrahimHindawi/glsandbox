@@ -32,8 +32,7 @@ typedef struct {
 // #ifdef DEBUG
     // debug: box drawing data should be taken from above array
     hkArray vao_box_collider; // u32
-    hkArray vbo_box_collider; // u32
-    hkArray ebo_box_collider; // u32
+    hkArray box_index_count; // u32
     // vertex_count == 4
     // index_count == 6
 // #endif
@@ -48,8 +47,9 @@ void gameArchetypeInitializeMemory(gameArchetype *archetype, i32 n) {
     archetype->model = hkArrayCreate(sizeof(mat4), n);
 // #ifdef DEBUG
     archetype->vao_box_collider = hkArrayCreate(sizeof(u32), n);
-    archetype->vbo_box_collider = hkArrayCreate(sizeof(u32), n);
-    archetype->ebo_box_collider = hkArrayCreate(sizeof(u32), n);
+    archetype->box_index_count = hkArrayCreate(sizeof(u32), n);
+    // archetype->vbo_box_collider = hkArrayCreate(sizeof(u32), n);
+    // archetype->ebo_box_collider = hkArrayCreate(sizeof(u32), n);
 // #endif DEBUG
 }
 
@@ -62,8 +62,7 @@ void gameArchetypeInitializeMemoryGrid(gameArchetype *archetype, i32 n) {
     archetype->model = hkArrayCreate(sizeof(mat4), edge);
 // #ifdef DEBUG
     archetype->vao_box_collider = hkArrayCreate(sizeof(u32), edge);
-    archetype->vbo_box_collider = hkArrayCreate(sizeof(u32), edge);
-    archetype->ebo_box_collider = hkArrayCreate(sizeof(u32), edge);
+    archetype->box_index_count = hkArrayCreate(sizeof(u32), edge);
 // #endif DEBUG
 }
 
@@ -76,8 +75,7 @@ void gameArchetypeDeinitializeMemory(gameArchetype *archetype) {
     hkArrayDestroy(&archetype->model);
 // #ifdef DEBUG
     hkArrayDestroy(&archetype->vao_box_collider);
-    hkArrayDestroy(&archetype->vbo_box_collider);
-    hkArrayDestroy(&archetype->ebo_box_collider);
+    hkArrayDestroy(&archetype->box_index_count);
 // #endif DEBUG
 }
 
@@ -91,11 +89,12 @@ void gameArchetypeInitializeMemoryRenderer(gameArchetype *archetype, u32 vao, u3
     return;
 }
 
-void gameArchetypeInitializeMemoryRendererDebug(gameArchetype *archetype, u32 vao) {
+void gameArchetypeInitializeMemoryRendererDebug(gameArchetype *archetype, u32 vao, u32 index_count) {
 // #ifdef DEBUG
-    const i64 n = archetype->vao.length; 
+    const i64 n = archetype->index_count.length; 
     for(i32 i = 0; i < n; ++i) {
-        ((u32 *)archetype->vao.data)[i] = vao;
+        ((u32 *)archetype->vao_box_collider.data)[i] = vao;
+        ((u32 *)archetype->box_index_count.data)[i] = index_count;
     }
 // #endif DEBUG
     return;
