@@ -24,12 +24,14 @@
 // #include "mesh.h"
 #include "gameArchetype.h"
 
-// system
+// SYSTEM
+///////////////////////////////////
 bool should_quit = false;
 SDL_Window *window = NULL;
 char fops_buffer[fops_buffer_size];
 
-// time
+// TIME
+///////////////////////////////////
 #define FPS 60
 const int frameTime = 1000 / FPS;
 const float frameTimef32 = 1000.f / FPS;
