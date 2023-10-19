@@ -20,6 +20,7 @@
 #include "shader.h"
 #include "fileops.h"
 #include "renderops.h"
+#include "meshops.h"
 // #include "mesh.h"
 #include "gameArchetype.h"
 
@@ -34,101 +35,6 @@ const int frameTime = 1000 / FPS;
 const float frameTimef32 = 1000.f / FPS;
 int framePrevTime;
 int frameDelay;
-
-// ship
-i32 ship_indices[] = { 
-    // #include "models/cubeIndices.txt"
-    #include "models/shipIndices.txt"
-    // #include "models/rubberIndices.txt"
-};
-f32 ship_vertices[] = {
-    // #include "models/cubeVertices.txt"
-    #include "models/shipVertices.txt"
-    // #include "models/rubberVertices.txt"
-};
-
-// streak
-i32 streak_indices[] = { 
-    #include "models/streakIndices.txt"
-};
-f32 streak_vertices[] = {
-    #include "models/streakVertices.txt"
-};
-
-// box
-i32 box_indices[] = { 
-    0, 1, 3,
-    1, 2, 3
-};
-f32 box_vertices[] = {
-    //  x     y      z     s     t     u    nx    ny    nz
-     1.0f, 0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
-     1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
-    -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
-    -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
-
-};
-
-// MESH
-///////////////////////////////////
-enum MeshName { 
-    // #include "config.ini"
-    Ship, 
-    Streak,
-    Plane, 
-    MeshCount 
-};
-
-typedef struct {
-    f32 *vertices;
-    u32 vertices_count;
-    i32 *indices;
-    u32 indices_count;
-} MeshRawData;
-
-MeshRawData MeshRawDataArray[MeshCount];
-u32 MeshVAOArray[MeshCount];
-
-MeshRawData MeshDataInitialize(f32 *vertices, u32 vertices_count, i32 *indices, u32 indices_count) {
-    MeshRawData result = {0};
-    result.vertices = vertices;
-    result.vertices_count = vertices_count;
-    result.indices = indices;
-    result.indices_count = indices_count;
-    return result;
-}
-
-void MeshVAOGen(u32 *vao, MeshRawData *mesh_data) {
-
-    u32 vbo = 0;
-    u32 ebo = 0;
-
-    glGenVertexArrays(1, vao);
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
-
-    glBindVertexArray(*vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, mesh_data->vertices_count * sizeof(f32), mesh_data->vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_data->indices_count * sizeof(i32), mesh_data->indices, GL_STATIC_DRAW);
-
-    // pos
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)0);
-    glEnableVertexAttribArray(0);  
-
-    // tex
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)(sizeof(f32) * 3));
-    glEnableVertexAttribArray(1);  
-
-    // nor
-    // glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)(sizeof(f32) * 6));
-    // glEnableVertexAttribArray(2);  
-
-    return;
-}
 
 // ECS
 ///////////////////////////////////
@@ -156,8 +62,18 @@ vec3 camera_target = {0};
 vec3 camera_direction = {0};
 
 void setup() {
+    // MESH
+    /////////////////////
+    MeshRawDataArray[Ship] = MeshDataInitialize(ship_vertices, sizeofarray(ship_vertices, f32), ship_indices, sizeofarray(ship_indices, u32));
+    MeshRawDataArray[Streak] = MeshDataInitialize(streak_vertices, sizeofarray(streak_vertices, f32), streak_indices, sizeofarray(streak_indices, u32));
+    MeshRawDataArray[Plane] = MeshDataInitialize(box_vertices, sizeofarray(box_vertices, f32), box_indices, sizeofarray(box_indices, u32));
+
+    MeshVAOGen(&MeshVAOArray[Ship], &MeshRawDataArray[Ship]);
+    MeshVAOGen(&MeshVAOArray[Streak], &MeshRawDataArray[Streak]);
+    MeshVAOGen(&MeshVAOArray[Plane], &MeshRawDataArray[Plane]);
+
     //  SHADER
-    //-------------------------------------------
+    /////////////////////////////////////////////
     {
         fops_read("resource/simple.vert");
         u32 vertex_shader = shader_compile(fops_buffer, GL_VERTEX_SHADER);
@@ -194,8 +110,9 @@ void setup() {
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);
     }
+
     // TEXTURE
-    //-------------------------------------------
+    /////////////////////////////////////////////
     {
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -238,7 +155,7 @@ void setup() {
     }
 
     // XFORMS
-    //--------------------------------------------
+    //////////////////////////////////////////////
     camera_position[2] = 10.0f;
     // camera look at dir
     glm_vec3_sub(camera_direction, camera_position, camera_direction);
@@ -432,6 +349,7 @@ void render() {
     // end
     SDL_GL_SwapWindow(window);
 }
+
 int main(int argc, char *argv[]) {
     /*
      * Initialises the SDL video subsystem (as well as the events subsystem).
@@ -480,16 +398,6 @@ int main(int argc, char *argv[]) {
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
     }
-
-    // MESHSETUP
-    /////////////////////
-    MeshRawDataArray[Ship] = MeshDataInitialize(ship_vertices, sizeofarray(ship_vertices, f32), ship_indices, sizeofarray(ship_indices, u32));
-    MeshRawDataArray[Streak] = MeshDataInitialize(streak_vertices, sizeofarray(streak_vertices, f32), streak_indices, sizeofarray(streak_indices, u32));
-    MeshRawDataArray[Plane] = MeshDataInitialize(box_vertices, sizeofarray(box_vertices, f32), box_indices, sizeofarray(box_indices, u32));
-
-    MeshVAOGen(&MeshVAOArray[Ship], &MeshRawDataArray[Ship]);
-    MeshVAOGen(&MeshVAOArray[Streak], &MeshRawDataArray[Streak]);
-    MeshVAOGen(&MeshVAOArray[Plane], &MeshRawDataArray[Plane]);
 
     setup();
     while (!should_quit) {
