@@ -191,11 +191,28 @@ void setup() {
     gameArchetypeInitializeMemory(&archetypePlane, 1);
     gameArchetypeInitializeMemoryRenderer(&archetypePlane, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
 
-    // gameArchetypeSetupPositionsAsGrid(&archetypeEnemy);
+    gameArchetypeSetupTransforms(&archetypeEnemy, 
+                                (vec3){0.f, 0.f, 0.f}, 
+                                (vec3){pi * 0.5, 0.f, 0.f}, 
+                                (vec3){.15f, .15f, .15f});
     gameArchetypeSetupPositionsAsLine(&archetypeEnemy, 15.f);
-    ((vec3 *)archetypeHero.pos.data)[0][1] = -20.f;
+
+    gameArchetypeSetupTransforms(&archetypeHero, 
+                                (vec3){0.f, -20.f, 0.f}, 
+                                (vec3){pi * 0.5f, pi, 0.f}, 
+                                (vec3){.15f, .15f, .15f});
+
+    gameArchetypeSetupTransforms(&archetypeProjectile, 
+                                (vec3){0.f, 0.f, 0.f}, 
+                                (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
+                                (vec3){.15f, .15f, .15f});
     gameArchetypeSetupPositions(&archetypeProjectile, (vec3){-100.f, -100.f, 0.f});
-    gameArchetypeSetupVelocities(&archetypeProjectile, (vec3){0.f, 10.f, 0.f});
+    gameArchetypeSetupVelocities(&archetypeProjectile, (vec3){0.f, 15.f, 0.f});
+
+    gameArchetypeSetupTransforms(&archetypePlane, 
+                                (vec3){0.f, 0.f, -1.f}, 
+                                (vec3){pi * 0.5f, 0.f, 0.f}, 
+                                (vec3){20.f, 20.f, 20.f});
 
     gameArchetypeSetupCollisionBoxes(&archetypeEnemy, 3.f, 3.f);
     gameArchetypeSetupCollisionBoxes(&archetypeHero, 3.f, 3.f);
@@ -203,7 +220,7 @@ void setup() {
 }
 
 void input() {
-    vec3 *vel = ((vec3 *)archetypeHero.vel.data);
+    vec3 *velocity = ((vec3 *)archetypeHero.velocity.data);
     const i64 n = archetypeHero.index_count.length; 
     const f32 base = 1.f;
     SDL_Event event;
@@ -218,19 +235,19 @@ void input() {
                     should_quit = true;
                 } else if(event.key.keysym.sym == SDLK_a) {
                     for(i32 i = 0; i < n; ++i) {
-                        vel[0][0] = -base;
+                        velocity[0][0] = -base;
                     }
                 } else if(event.key.keysym.sym == SDLK_d) {
                     for(i32 i = 0; i < n; ++i) {
-                        vel[0][0] = base;
+                        velocity[0][0] = base;
                     }
                 } else if(event.key.keysym.sym == SDLK_w) {
                     for(i32 i = 0; i < n; ++i) {
-                        vel[0][1] = base;
+                        velocity[0][1] = base;
                     }
                 } else if(event.key.keysym.sym == SDLK_s) {
                     for(i32 i = 0; i < n; ++i) {
-                        vel[0][1] = -base;
+                        velocity[0][1] = -base;
                     }
                 } else if(event.key.keysym.sym == SDLK_SPACE) {
                     for(i32 i = 0; i < n; ++i) {
@@ -244,23 +261,23 @@ void input() {
                     should_quit = true;
                 } else if(event.key.keysym.sym == SDLK_a) {
                     for(i32 i = 0; i < n; ++i) {
-                        if(vel[0][0] < 0.f)
-                            vel[0][0] = 0.f;
+                        if(velocity[0][0] < 0.f)
+                            velocity[0][0] = 0.f;
                     }
                 } else if(event.key.keysym.sym == SDLK_d) {
                     for(i32 i = 0; i < n; ++i) {
-                        if(vel[0][0] > 0.f)
-                            vel[0][0] = 0.f;
+                        if(velocity[0][0] > 0.f)
+                            velocity[0][0] = 0.f;
                     }
                 } else if(event.key.keysym.sym == SDLK_w) {
                     for(i32 i = 0; i < n; ++i) {
-                        if(vel[0][1] > 0.f)
-                            vel[0][1] = 0.f;
+                        if(velocity[0][1] > 0.f)
+                            velocity[0][1] = 0.f;
                     }
                 } else if(event.key.keysym.sym == SDLK_s) {
                     for(i32 i = 0; i < n; ++i) {
-                        if(vel[0][1] < 0.f)
-                            vel[0][1] = 0.f;
+                        if(velocity[0][1] < 0.f)
+                            velocity[0][1] = 0.f;
                     }
                 }
                 break;
@@ -299,19 +316,22 @@ void update() {
     gameArchetypeUpdateColliders(&archetypeProjectile);
 
     // integrate movement
-    gameArchetypeUpdatePlayer(&archetypeHero, deltaTime, 16.f);
+    gameArchetypeUpdate(&archetypeHero, deltaTime, 16.f);
     gameArchetypeUpdate(&archetypeEnemy, deltaTime, 4.f);
     gameArchetypeUpdate(&archetypeProjectile, deltaTime, 5.f);
-    // gameArchetypeUpdate(&archetypePlane, deltaTime, 0.f);
-    gameArchetypeUpdateBG(&archetypePlane, 20.f);
+
+    gameArchetypeUpdateTransforms(&archetypeHero);
+    gameArchetypeUpdateTransforms(&archetypeEnemy);
+    gameArchetypeUpdateTransforms(&archetypeProjectile);
+    gameArchetypeUpdateTransforms(&archetypePlane);
 
     {
         // check collisions
         i32 coll_id = gameArchetypeCheckCollisions(&archetypeHero, &archetypeEnemy);
         // printf("collision id = %d\n", coll_id);
         if (coll_id != -1) {
-            ((vec3 *)archetypeEnemy.pos.data)[coll_id][0] = -1000.f;
-            ((vec3 *)archetypeEnemy.pos.data)[coll_id][1] = -1000.f;
+            ((vec3 *)archetypeEnemy.position.data)[coll_id][0] = -1000.f;
+            ((vec3 *)archetypeEnemy.position.data)[coll_id][1] = -1000.f;
             // printf("collision id = %d\n", coll_id);
             coll_id = -1;
         }
@@ -322,8 +342,8 @@ void update() {
         // printf("collision id = %d\n", coll_id);
         if (coll_id != -1) {
             // printf("hit collision id = %d\n", coll_id);
-            ((vec3 *)archetypeEnemy.pos.data)[coll_id][0] = -1000.f;
-            ((vec3 *)archetypeEnemy.pos.data)[coll_id][1] = -1000.f;
+            ((vec3 *)archetypeEnemy.position.data)[coll_id][0] = -1000.f;
+            ((vec3 *)archetypeEnemy.position.data)[coll_id][1] = -1000.f;
             // printf("collision id = %d\n", coll_id);
             coll_id = -1;
         }
