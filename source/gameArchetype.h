@@ -337,9 +337,6 @@ void gameArchetypeRenderBoxes(gameArchetype *archetype, u32 shader_program, mat4
         u32 model_location = glGetUniformLocation(shader_program, "model");
         glm_scale_uni(&model[i][0], 1.5f);
         glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
-        // mat4 model;
-        // glm_mat4_identity(model);
-        // glUniformMatrix4fv(model_location, 1, GL_FALSE, model[0]);
         // draw
         // meshRender(&mesh, texture, shader_program);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
