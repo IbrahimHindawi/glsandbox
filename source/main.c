@@ -26,6 +26,9 @@
 
 // SYSTEM
 ///////////////////////////////////
+#define window_width 800
+#define window_height 640
+#define FOV 45
 bool should_quit = false;
 SDL_Window *window = NULL;
 char fops_buffer[fops_buffer_size];
@@ -168,11 +171,11 @@ void setup() {
     // camera up
     glm_vec3_cross(camera_direction, camera_right, camera_up);
     camera_forward[2] = -1.0f;
-    // setup MVP
+
     // glm_mat4_identity(model);
     glm_mat4_identity(view);
     glm_mat4_identity(proj);
-    glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, proj);
+    glm_perspective(glm_rad((f32)FOV), (f32)window_width / (f32)window_height, 0.1f, 100.0f, proj);
 
     //  SETUPARCHETYPES
     //-------------------------------------------
@@ -183,7 +186,8 @@ void setup() {
                                      (vec3){0.f, 0.f, 0.f}, 
                                      (vec3){pi * 0.5, 0.f, 0.f}, 
                                      (vec3){.15f, .15f, .15f});
-    gameArchetypeInitializePositionsAsLine(&archetypeEnemy, 2.f);
+    gameArchetypeInitializePositionsAsLine(&archetypeEnemy, 2.f, 10.f);
+    gameArchetypeInitializeVelocities(&archetypeEnemy, (vec3){0.f, -1.f, 0.f});
 
     gameArchetypeAllocate(&archetypeHero, 1);
     gameArchetypeInitalizeMeshes(&archetypeHero, MeshVAOArray[Ship], MeshRawDataArray[Ship].indices_count);
@@ -306,7 +310,7 @@ void update() {
     glm_lookat(camera_position, camera_new_location, camera_up, view);
 
     // update attributes
-    gameArchetypeUpdateVelocities(&archetypeEnemy, SDL_GetTicks() / 1000.f);
+    // gameArchetypeUpdateVelocities(&archetypeEnemy, SDL_GetTicks() / 1000.f);
     gameArchetypeUpdateColliders(&archetypeHero);
     gameArchetypeUpdateColliders(&archetypeEnemy);
     gameArchetypeUpdateColliders(&archetypeProjectile);
@@ -379,7 +383,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // Setup OpenGL
+    // INITIALIZEOPENGL
     //-------------------------------------------
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
@@ -389,7 +393,7 @@ int main(int argc, char *argv[]) {
 
     // Creates a SDL window
     //-------------------------------------------
-    window = SDL_CreateWindow("glsandbox", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 640, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("glsandbox", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, SDL_WINDOW_OPENGL);
 
     // Checks if window has been created; if not, exits program
     //-------------------------------------------

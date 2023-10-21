@@ -198,7 +198,7 @@ void gameArchetypeInitializeVelocities(GameArchetype *archetype, vec3 v) {
     }
 }
 
-void gameArchetypeInitializePositionsAsLine(GameArchetype *archetype, const f32 s) {
+void gameArchetypeInitializePositionsAsLine(GameArchetype *archetype, const f32 s, const f32 y) {
     // initalize positionitions
     f32 a = -1.f;
     vec3 *position = archetype->position.data;
@@ -207,6 +207,7 @@ void gameArchetypeInitializePositionsAsLine(GameArchetype *archetype, const f32 
     // printf("factor %f\n", f);
     for(i32 i = 0; i < n; ++i) {
         position[i][0] = a * s;
+        position[i][1] = y;
         // printf("step %f\n", a);
         a += f;
     }
@@ -216,7 +217,7 @@ void gameArchetypeUpdateVelocities(GameArchetype *archetype, f32 time) {
     const i64 n = archetype->index_count.length;
     for(i32 i = 0; i < n; ++i) {
         // printf("%f\n", new_velocity);
-        ((vec3 *)archetype->velocity.data)[i][0] = ((f32)sin(time)* .5f);
+        ((vec3 *)archetype->velocity.data)[i][0] = (f32)sin(time)-.5f;
     }
 }
 
