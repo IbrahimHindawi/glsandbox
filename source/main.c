@@ -176,47 +176,44 @@ void setup() {
 
     //  ARCHETYPES
     //-------------------------------------------
-    gameArchetypeInitializeMemory(&archetypeEnemy, 6);
-    gameArchetypeInitializeMemoryRenderer(&archetypeEnemy, MeshVAOArray[Ship], MeshRawDataArray[Ship].indices_count);
-    gameArchetypeInitializeMemoryRendererDebug(&archetypeEnemy, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
 
-    gameArchetypeInitializeMemory(&archetypeHero, 1);
-    gameArchetypeInitializeMemoryRenderer(&archetypeHero, MeshVAOArray[Ship], MeshRawDataArray[Ship].indices_count);
-    gameArchetypeInitializeMemoryRendererDebug(&archetypeHero, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
+    gameArchetypeAllocate(&archetypeEnemy, 6);
+    gameArchetypeInitalizeMeshes(&archetypeEnemy, MeshVAOArray[Ship], MeshRawDataArray[Ship].indices_count);
+    gameArchetypeInitializeMeshesDebug(&archetypeEnemy, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
+    gameArchetypeInitializeTransforms(&archetypeEnemy, 
+                                     (vec3){0.f, 0.f, 0.f}, 
+                                     (vec3){pi * 0.5, 0.f, 0.f}, 
+                                     (vec3){.15f, .15f, .15f});
+    gameArchetypeInitializePositionsAsLine(&archetypeEnemy, 15.f);
 
-    gameArchetypeInitializeMemory(&archetypeProjectile, 100);
-    gameArchetypeInitializeMemoryRenderer(&archetypeProjectile, MeshVAOArray[Streak], MeshRawDataArray[Streak].indices_count);
-    gameArchetypeInitializeMemoryRendererDebug(&archetypeProjectile, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
+    gameArchetypeAllocate(&archetypeHero, 1);
+    gameArchetypeInitalizeMeshes(&archetypeHero, MeshVAOArray[Ship], MeshRawDataArray[Ship].indices_count);
+    gameArchetypeInitializeMeshesDebug(&archetypeHero, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
+    gameArchetypeInitializeTransforms(&archetypeHero, 
+                                     (vec3){0.f, -20.f, 0.f}, 
+                                     (vec3){pi * 0.5f, pi, 0.f}, 
+                                     (vec3){.15f, .15f, .15f});
 
-    gameArchetypeInitializeMemory(&archetypePlane, 1);
-    gameArchetypeInitializeMemoryRenderer(&archetypePlane, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
+    gameArchetypeAllocate(&archetypeProjectile, 100);
+    gameArchetypeInitalizeMeshes(&archetypeProjectile, MeshVAOArray[Streak], MeshRawDataArray[Streak].indices_count);
+    gameArchetypeInitializeMeshesDebug(&archetypeProjectile, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
+    gameArchetypeInitializeTransforms(&archetypeProjectile, 
+                                     (vec3){0.f, 0.f, 0.f}, 
+                                     (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
+                                     (vec3){.15f, .15f, .15f});
+    gameArchetypeInitializePositions(&archetypeProjectile, (vec3){-100.f, -100.f, 0.f});
+    gameArchetypeInitializeVelocities(&archetypeProjectile, (vec3){0.f, 15.f, 0.f});
 
-    gameArchetypeSetupTransforms(&archetypeEnemy, 
-                                (vec3){0.f, 0.f, 0.f}, 
-                                (vec3){pi * 0.5, 0.f, 0.f}, 
-                                (vec3){.15f, .15f, .15f});
-    gameArchetypeSetupPositionsAsLine(&archetypeEnemy, 15.f);
+    gameArchetypeAllocate(&archetypePlane, 1);
+    gameArchetypeInitalizeMeshes(&archetypePlane, MeshVAOArray[Plane], MeshRawDataArray[Plane].indices_count);
+    gameArchetypeInitializeTransforms(&archetypePlane, 
+                                     (vec3){0.f, 0.f, -1.f}, 
+                                     (vec3){pi * 0.5f, 0.f, 0.f}, 
+                                     (vec3){20.f, 20.f, 20.f});
 
-    gameArchetypeSetupTransforms(&archetypeHero, 
-                                (vec3){0.f, -20.f, 0.f}, 
-                                (vec3){pi * 0.5f, pi, 0.f}, 
-                                (vec3){.15f, .15f, .15f});
-
-    gameArchetypeSetupTransforms(&archetypeProjectile, 
-                                (vec3){0.f, 0.f, 0.f}, 
-                                (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
-                                (vec3){.15f, .15f, .15f});
-    gameArchetypeSetupPositions(&archetypeProjectile, (vec3){-100.f, -100.f, 0.f});
-    gameArchetypeSetupVelocities(&archetypeProjectile, (vec3){0.f, 15.f, 0.f});
-
-    gameArchetypeSetupTransforms(&archetypePlane, 
-                                (vec3){0.f, 0.f, -1.f}, 
-                                (vec3){pi * 0.5f, 0.f, 0.f}, 
-                                (vec3){20.f, 20.f, 20.f});
-
-    gameArchetypeSetupCollisionBoxes(&archetypeEnemy, 3.f, 3.f);
-    gameArchetypeSetupCollisionBoxes(&archetypeHero, 3.f, 3.f);
-    gameArchetypeSetupCollisionBoxes(&archetypeProjectile, 3.f, 3.f);
+    gameArchetypeInitializeCollisionBoxes(&archetypeEnemy, 3.f, 3.f);
+    gameArchetypeInitializeCollisionBoxes(&archetypeHero, 3.f, 3.f);
+    gameArchetypeInitializeCollisionBoxes(&archetypeProjectile, 3.f, 3.f);
 }
 
 void input() {
@@ -316,9 +313,9 @@ void update() {
     gameArchetypeUpdateColliders(&archetypeProjectile);
 
     // integrate movement
-    gameArchetypeUpdate(&archetypeHero, deltaTime, 16.f);
-    gameArchetypeUpdate(&archetypeEnemy, deltaTime, 4.f);
-    gameArchetypeUpdate(&archetypeProjectile, deltaTime, 5.f);
+    gameArchetypeIntegrateVelocity(&archetypeHero, deltaTime, 16.f);
+    gameArchetypeIntegrateVelocity(&archetypeEnemy, deltaTime, 4.f);
+    gameArchetypeIntegrateVelocity(&archetypeProjectile, deltaTime, 5.f);
 
     gameArchetypeUpdateTransforms(&archetypeHero);
     gameArchetypeUpdateTransforms(&archetypeEnemy);
