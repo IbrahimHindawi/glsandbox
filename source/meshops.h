@@ -8,21 +8,8 @@
 
 #include "core.h"
 
-// ship
-i32 ship_indices[] = { 
-    #include "models/shipIndices.txt"
-};
-f32 ship_vertices[] = {
-    #include "models/shipVertices.txt"
-};
-
-// streak
-i32 streak_indices[] = { 
-    #include "models/streakIndices.txt"
-};
-f32 streak_vertices[] = {
-    #include "models/streakVertices.txt"
-};
+#include "models/ship.h"
+#include "models/streak.h"
 
 // box
 i32 box_indices[] = { 
@@ -37,8 +24,6 @@ f32 box_vertices[] = {
     -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
 };
 
-// MESH
-///////////////////////////////////
 enum MeshName { 
     // #include "config.ini"
     Ship, 
@@ -92,8 +77,8 @@ void MeshVAOGen(u32 *vao, MeshRawData *mesh_data) {
     glEnableVertexAttribArray(1);  
 
     // nor
-    // glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)(sizeof(f32) * 6));
-    // glEnableVertexAttribArray(2);  
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(f32), (void*)(sizeof(f32) * 6));
+    glEnableVertexAttribArray(2);  
 
     return;
 }
