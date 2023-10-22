@@ -2,6 +2,7 @@
 #include "SDL2/SDL_video.h"
 #ifdef _MSC_VER
     #define SDL_MAIN_HANDLED
+    // #define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #include <glad/glad.h>
@@ -214,9 +215,9 @@ void setup() {
                                      (vec3){pi * 0.5f, 0.f, 0.f}, 
                                      (vec3){20.f, 20.f, 20.f});
 
-    gameArchetypeInitializeCollisionBoxes(&archetypeEnemy, 3.f, 3.f);
-    gameArchetypeInitializeCollisionBoxes(&archetypeHero, 3.f, 3.f);
-    gameArchetypeInitializeCollisionBoxes(&archetypeProjectile, 3.f, 3.f);
+    gameArchetypeInitializeCollisionBoxes(&archetypeEnemy, 3.f, 3.f, 0.f, 0.f);
+    gameArchetypeInitializeCollisionBoxes(&archetypeHero, 3.f, 3.f, 0.f, 0.f);
+    gameArchetypeInitializeCollisionBoxes(&archetypeProjectile, 1.f, 1.f, 0.f, 0.f);
 }
 
 void input() {
@@ -308,6 +309,8 @@ void update() {
     vec3 camera_new_location;
     glm_vec3_add(camera_position, camera_forward, camera_new_location);
     glm_lookat(camera_position, camera_new_location, camera_up, view);
+
+    // gameArchetypeSpawnProjectile(&archetypeEnemy, &archetypeProjectile);
 
     // update attributes
     // gameArchetypeUpdateVelocities(&archetypeEnemy, SDL_GetTicks() / 1000.f);

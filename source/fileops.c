@@ -1,16 +1,11 @@
 #include <assert.h>
 #include "fileops.h"
 
-
 void fops_read(const char *file_path) {
     FILE *fileptr;
     // fileptr = fopen(file_path, "r");
 
-#ifdef _MSC_VER
-    fopen_s(&fileptr, file_path, "r");
-#else
     fileptr = fopen(file_path, "r");
-#endif
     fseek(fileptr, 0L, SEEK_END);
     u64 filesize = ftell(fileptr);
     fseek(fileptr, 0L, SEEK_SET);

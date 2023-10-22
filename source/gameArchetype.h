@@ -52,6 +52,8 @@ void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
 // #ifdef DEBUG
     archetype->vao_box_collider = hkArrayCreate(sizeof(u32), n);
     archetype->box_index_count = hkArrayCreate(sizeof(u32), n);
+    // archetype->vbo_box_collider = hkArrayCreate(sizeof(u32), n);
+    // archetype->ebo_box_collider = hkArrayCreate(sizeof(u32), n);
 // #endif DEBUG
 }
 
@@ -116,14 +118,14 @@ void gameArchetypeInitializePositionsAsGrid(GameArchetype *archetype) {
     }
 }
 
-void gameArchetypeInitializeCollisionBoxes(GameArchetype *archetype, const f32 box_width, const f32 box_height) {
+void gameArchetypeInitializeCollisionBoxes(GameArchetype *archetype, const f32 box_width, const f32 box_height, const f32 box_xoffset, const f32 box_yoffset) {
     const i64 n = archetype->index_count.length;
     vec4 *box = (vec4 *)archetype->box.data;
     vec3 *scale = (vec3 *)archetype->scale.data;
     const vec3 *position = (vec3 *)archetype->position.data;
     for(i32 i = 0; i < n; ++i) {
-        box[i][0] = position[i][0];
-        box[i][1] = position[i][1];
+        box[i][0] = position[i][0] + box_xoffset;
+        box[i][1] = position[i][1] + box_yoffset;
         box[i][2] = box_width * scale[i][0];
         box[i][3] = box_height * scale[i][0];
 // #ifdef DEBUG
@@ -316,7 +318,6 @@ void gameArchetypeRender(GameArchetype *archetype, u32 shader_program, mat4 view
         u32 model_location = glGetUniformLocation(shader_program, "model");
         glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
         // draw
-        // meshRender(&mesh, texture, shader_program);
         glBindVertexArray(((u32 *)archetype->vao.data)[i]);
         glBindTexture(GL_TEXTURE_2D, texture);
         glDrawElements(GL_TRIANGLES, ((u32 *)archetype->index_count.data)[i], GL_UNSIGNED_INT, 0);
@@ -334,10 +335,8 @@ void gameArchetypeRenderBoxes(GameArchetype *archetype, u32 shader_program, mat4
         mat4 *model = ((mat4 *)archetype->model.data);
         glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
         u32 model_location = glGetUniformLocation(shader_program, "model");
-        glm_scale_uni(&model[i][0], 1.5f);
         glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
         // draw
-        // meshRender(&mesh, texture, shader_program);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glBindVertexArray(((u32 *)archetype->vao_box_collider.data)[i]);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -367,15 +366,23 @@ void gameArchetypeRenderBG(GameArchetype *archetype, u32 shader_program, mat4 vi
     }
 }
 
-void gameSpawnProjectileAtEntity(GameArchetype *archetypeHero, GameArchetype *archetypeProjectile, i32 id) {
-    vec3 *position = ((vec3 *)archetypeHero->position.data);
+void gameSpawnProjectileAtEntity(const GameArchetype *archetype, GameArchetype *archetypeProjectile, i32 id) {
+    vec3 *archetypeposition = ((vec3 *)archetype->position.data);
     vec3 *projectile_position = ((vec3 *)archetypeProjectile->position.data);
     const i64 projectile_length = archetypeProjectile->index_count.length; 
     static i32 current_projectile_pool_index = 0;
-    projectile_position[current_projectile_pool_index][0] = position[id][0];
-    projectile_position[current_projectile_pool_index][1] = position[id][1];
-    projectile_position[current_projectile_pool_index][2] = position[id][2];
+    projectile_position[current_projectile_pool_index][0] = archetypeposition[id][0];
+    projectile_position[current_projectile_pool_index][1] = archetypeposition[id][1];
+    projectile_position[current_projectile_pool_index][2] = archetypeposition[id][2];
     current_projectile_pool_index = (current_projectile_pool_index + 1) % projectile_length;
     // printf("%d\n", current_projectile_pool_index);
+    return;
+}
+
+void gameArchetypeSpawnProjectile(const GameArchetype *archetype, GameArchetype *archetypeProjectile) {
+    const i64 n = archetype->index_count.length; 
+    for(i32 i = 0; i < n; ++i) {
+        gameSpawnProjectileAtEntity(archetype, archetypeProjectile, i);
+    }
     return;
 }
