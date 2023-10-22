@@ -52,8 +52,6 @@ void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
 // #ifdef DEBUG
     archetype->vao_box_collider = hkArrayCreate(sizeof(u32), n);
     archetype->box_index_count = hkArrayCreate(sizeof(u32), n);
-    // archetype->vbo_box_collider = hkArrayCreate(sizeof(u32), n);
-    // archetype->ebo_box_collider = hkArrayCreate(sizeof(u32), n);
 // #endif DEBUG
 }
 
