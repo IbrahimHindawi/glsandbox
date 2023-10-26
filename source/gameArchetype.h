@@ -25,20 +25,27 @@ typedef struct {
     hkArray vao; // u32
     hkArray index_count; // u32
     // game
+    hkArray velocity; // vec3
     hkArray position; // vec3
     hkArray rotation; // vec3
     hkArray scale; // vec3
-    hkArray velocity; // vec3
     hkArray model; // mat4
-    hkArray box; // vec4
-// #ifdef DEBUG
-    // debug: box drawing data should be taken from above array
-    hkArray vao_box_collider; // u32
-    hkArray box_index_count; // u32
-    // vertex_count == 4
-    // index_count == 6
+    hkArray box; // mat4
+    hkArray vao_box_collider; // mat4
+    hkArray box_index_count; // mat4
 // #endif
 } GameArchetype;
+
+typedef struct {
+    // graphics
+    hkArray vao; // u32
+    hkArray index_count; // u32
+    // game
+    hkArray position; // vec3
+    hkArray rotation; // vec3
+    hkArray scale; // vec3
+    hkArray model; // mat4
+} BoxArchetype;
 
 void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
     archetype->vao = hkArrayCreate(sizeof(u32), n);
@@ -47,49 +54,25 @@ void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
     archetype->rotation = hkArrayCreate(sizeof(vec3), n);
     archetype->scale = hkArrayCreate(sizeof(vec3), n);
     archetype->velocity = hkArrayCreate(sizeof(vec3), n);
-    archetype->box = hkArrayCreate(sizeof(vec4), n);
     archetype->model = hkArrayCreate(sizeof(mat4), n);
-// #ifdef DEBUG
-    archetype->vao_box_collider = hkArrayCreate(sizeof(u32), n);
-    archetype->box_index_count = hkArrayCreate(sizeof(u32), n);
-    // archetype->vbo_box_collider = hkArrayCreate(sizeof(u32), n);
-    // archetype->ebo_box_collider = hkArrayCreate(sizeof(u32), n);
-// #endif DEBUG
 }
 
-void gameArchetypeDeinitializeMemory(GameArchetype *archetype) {
+void gameArchetypeDeallocate(GameArchetype *archetype) {
     hkArrayDestroy(&archetype->vao);
     hkArrayDestroy(&archetype->index_count);
     hkArrayDestroy(&archetype->position);
     hkArrayDestroy(&archetype->rotation);
     hkArrayDestroy(&archetype->scale);
     hkArrayDestroy(&archetype->velocity);
-    hkArrayDestroy(&archetype->box);
     hkArrayDestroy(&archetype->model);
-// #ifdef DEBUG
-    hkArrayDestroy(&archetype->vao_box_collider);
-    hkArrayDestroy(&archetype->box_index_count);
-// #endif DEBUG
 }
 
-void gameArchetypeInitalizeMeshes(GameArchetype *archetype, u32 vao, u32 index_count) {
-    const i64 n = archetype->index_count.length; 
+void gameArchetypeInitalizeMeshes(u32 *vao_data, u32 vao, u32 *index_count_data, u32 index_count, const u64 n) {
     // u32 *vao = ((u32 *)archetype->vao.data);
     for(i32 i = 0; i < n; ++i) {
-        ((u32 *)archetype->vao.data)[i] = vao;
-        ((u32 *)archetype->index_count.data)[i] = index_count;
+        vao_data[i] = vao;
+        index_count_data[i] = index_count;
     }
-    return;
-}
-
-void gameArchetypeInitializeMeshesDebug(GameArchetype *archetype, u32 vao, u32 index_count) {
-// #ifdef DEBUG
-    const i64 n = archetype->index_count.length; 
-    for(i32 i = 0; i < n; ++i) {
-        ((u32 *)archetype->vao_box_collider.data)[i] = vao;
-        ((u32 *)archetype->box_index_count.data)[i] = index_count;
-    }
-// #endif DEBUG
     return;
 }
 
@@ -166,22 +149,19 @@ void gameArchetypeInitializeScales(GameArchetype *archetype, vec3 s) {
     }
 }
 
-void gameArchetypeInitializeTransforms(GameArchetype *archetype, vec3 p, vec3 r, vec3 s) {
+void gameArchetypeInitializeTransforms(vec3 *position_data, vec3 *rotation_data, vec3 *scale_data, 
+                                       vec3 p, vec3 r, vec3 s, const u64 n) {
     // initalize velocityocities
-    vec3 *position = (vec3 *)archetype->position.data;
-    vec3 *rotation = ((vec3 *)archetype->rotation.data);
-    vec3 *scale = ((vec3 *)archetype->scale.data);
-    const i32 n = (i32)archetype->index_count.length;
     for(i32 i = 0; i < n; ++i) {
-        position[i][0] = p[0];
-        position[i][1] = p[1];
-        position[i][2] = p[2];
-        rotation[i][0] = r[0];
-        rotation[i][1] = r[1];
-        rotation[i][2] = r[2];
-        scale[i][0] = s[0];
-        scale[i][1] = s[1];
-        scale[i][2] = s[2];
+        position_data[i][0] = p[0];
+        position_data[i][1] = p[1];
+        position_data[i][2] = p[2];
+        rotation_data[i][0] = r[0];
+        rotation_data[i][1] = r[1];
+        rotation_data[i][2] = r[2];
+        scale_data[i][0] = s[0];
+        scale_data[i][1] = s[1];
+        scale_data[i][2] = s[2];
         // printf("step %f\n", a);
     }
 }
