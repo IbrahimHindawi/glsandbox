@@ -217,7 +217,7 @@ void setup() {
                                       (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
                                       (vec3){.15f, .15f, .15f},
                                       archetypeProjectile.index_count.length);
-    gameArchetypeInitializePositions(&archetypeProjectile, (vec3){-100.f, -100.f, 0.f});
+    gameArchetypeSetPositions((vec3 *)archetypeProjectile.position.data, (vec3){-100.f, -100.f, 0.f}, archetypeProjectile.index_count.length);
     gameArchetypeInitializeVelocities(&archetypeProjectile, (vec3){0.f, 1.f, 0.f});
 
     gameArchetypeAllocate(&archetypePlane, 1);

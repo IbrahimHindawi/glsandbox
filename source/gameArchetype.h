@@ -117,13 +117,11 @@ void gameArchetypeInitializeCollisionBoxes(GameArchetype *archetype, const f32 b
     }
 }
 
-void gameArchetypeInitializePositions(GameArchetype *archetype, vec3 p) {
-    vec3 *position = (vec3 *)archetype->position.data;
-    const i32 n = (i32)archetype->index_count.length;
+void gameArchetypeSetPositions(vec3 *position_data, vec3 p, const u32 n) {
     for(i32 i = 0; i < n; ++i) {
-        position[i][0] = p[0];
-        position[i][1] = p[1];
-        position[i][2] = p[2];
+        position_data[i][0] = p[0];
+        position_data[i][1] = p[1];
+        position_data[i][2] = p[2];
     }
 }
 
