@@ -38,14 +38,14 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/scripts/cmake/")
     find_package(SDL2 CONFIG REQUIRED)
     include_directories(${SDL2_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${SDL2_LIBRARIES})
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/scripts/cmake/")
     find_package(SDL2 CONFIG REQUIRED)
     include_directories(${SDL2_INCLUDE_DIRS})
-    target_link_libraries(${PROJECT_NAME} -lm -ldl ${SDL2_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} PUBLIC -lm -ldl ${SDL2_LIBRARIES})
 endif()
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
