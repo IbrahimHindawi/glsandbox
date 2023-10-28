@@ -179,7 +179,13 @@ void setup() {
     //  SETUPARCHETYPES
     //-------------------------------------------
     gameArchetypeAllocate(&archetype, 1024);
-    Range enemy_range = {0, 6};
+    rangeArenaInitialize(&range_arena, 6);
+    // printf("start: %d, end: %d, length: %d\n", 
+    //         range_arena.ranges[RangeIdEnemy].start,
+    //         range_arena.ranges[RangeIdEnemy].end,
+    //         range_arena.ranges[RangeIdEnemy].length);
+    // Range enemy_range = {0, 6};
+    Range enemy_range = range_arena.ranges[RangeIdEnemy];
     gameArchetypeInitalizeMeshesShadersTextures((u32 *)archetype.vao.data, MeshVAOArray[Ship], 
                                                 (u32 *)archetype.index_count.data, MeshRawDataArray[Ship].indices_count, 
                                                 (u32 *)archetype.shader_program.data, shader_program,
@@ -197,7 +203,12 @@ void setup() {
     // gameArchetypeInitializeVelocities(&archetype, (vec3){0.f, -1.f, 0.f}, enemy_range);
 
     // gameArchetypeAllocate(&archetype, 1);
-    Range hero_range = {6, 7};
+    rangeArenaAppend(&range_arena, 1);
+    // printf("start: %d, end: %d, length: %d\n", 
+    //         range_arena.ranges[RangeIdEnemy].start,
+    //         range_arena.ranges[RangeIdEnemy].end,
+    //         range_arena.ranges[RangeIdEnemy].length);
+    Range hero_range = range_arena.ranges[RangeIdHero];
     gameArchetypeInitalizeMeshesShadersTextures((u32 *)archetype.vao.data, MeshVAOArray[Ship], 
                                                 (u32 *)archetype.index_count.data, MeshRawDataArray[Ship].indices_count, 
                                                 (u32 *)archetype.shader_program.data, shader_program,
@@ -213,7 +224,12 @@ void setup() {
     gameArchetypeInitializeSpeeds((f32 *)archetype.speed.data, 6.0f, hero_range);
 
     // gameArchetypeAllocate(&archetype, 100);
-    Range projectile_range = {7, 16};
+    rangeArenaAppend(&range_arena, 100);
+    Range projectile_range = range_arena.ranges[RangeIdProjectiles];
+    // printf("start: %d, end: %d, length: %d\n", 
+    //         range_arena.ranges[RangeIdProjectiles].start,
+    //         range_arena.ranges[RangeIdProjectiles].end,
+    //         range_arena.ranges[RangeIdProjectiles].length);
     gameArchetypeInitalizeMeshesShadersTextures((u32 *)archetype.vao.data, MeshVAOArray[Streak], 
                                                 (u32 *)archetype.index_count.data, MeshRawDataArray[Streak].indices_count, 
                                                 (u32 *)archetype.shader_program.data, shader_program_projectile,
@@ -283,7 +299,10 @@ void input() {
                     }
                 } else if(event.key.keysym.sym == SDLK_SPACE) {
                     for(i32 i = s; i < n; ++i) {
-                        gameSpawnProjectileAtEntity((vec3 *)archetype.position.data, s, (vec3 *)archetype.position.data, 7, 16 - 7);
+                        gameSpawnProjectileAtEntity((vec3 *)archetype.position.data, s, 
+                                                    (vec3 *)archetype.position.data, 
+                                                    range_arena.ranges[RangeIdProjectiles].start, 
+                                                    range_arena.ranges[RangeIdProjectiles].length);
                     }
                 }
                 break;
@@ -340,18 +359,18 @@ void update() {
     // gameArchetypeSpawnProjectile(&archetype, &archetype);
 
     // update attributes
-    // gameArchetypeUpdateVelocities(&archetype, SDL_GetTicks() / 1000.f);
+    // gameArchetypeUpdateVelocities(&archetype, SDL_GetTicks() / 1000.f, range_arena.ranges[RangeIdEnemy]);
     // gameArchetypeUpdateColliders(&archetype);
     // gameArchetypeUpdateColliders(&archetype);
     // gameArchetypeUpdateColliders(&archetype);
 
     // integrate movement
-    gameArchetypeIntegrateVelocity(&archetype, deltaTime, (Range){0, 16});
+    gameArchetypeIntegrateVelocity(&archetype, deltaTime, (Range){0, range_arena.border});
     // gameArchetypeIntegrateVelocity(&archetype, deltaTime, 3.f);
     // gameArchetypeIntegrateVelocity(&archetype, deltaTime, 5.f);
 
     // finalize transformation matrices
-    gameArchetypeUpdateTransforms(&archetype, (Range){0, 16});
+    gameArchetypeUpdateTransforms(&archetype, (Range){0, range_arena.border});
     // gameArchetypeUpdateTransforms(&archetype);
     // gameArchetypeUpdateTransforms(&archetype);
     // gameArchetypeUpdateTransforms(&archetype_plane);
@@ -390,7 +409,7 @@ void render() {
     // bind
     // gameArchetypeRenderBG(&archetype_plane, shader_program_starfield, view, proj);
 
-    gameArchetypeRender(&archetype, view, proj, (Range){0, 16});
+    gameArchetypeRender(&archetype, view, proj, (Range){0, range_arena.border});
     // gameArchetypeRenderBoxes(&archetype, shader_program_projectile, view, proj, texture2);
 
     // gameArchetypeRender(&archetype, shader_program, view, proj, texture);

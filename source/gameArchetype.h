@@ -12,10 +12,44 @@
 #include "core.h"
 #include "hkArray.h"
 
+enum {
+    RangeIdEnemy,
+    RangeIdHero,
+    RangeIdProjectiles,
+    RangeIdsLength,
+} RangeIds;
+
 typedef struct {
     i32 start;
     i32 end;
+    i32 length;
 } Range;
+
+Range rangeInitialize(Range *range, i32 start, i32 end) {
+    Range result = {start, end, end - start};
+    return result;
+}
+
+typedef struct {
+    i32 border;
+    i32 last_index;
+    Range ranges[RangeIdsLength];
+} RangeArena;
+
+RangeArena range_arena;
+
+void rangeArenaInitialize(RangeArena *range_arena, i32 new_size) {
+    range_arena->border += new_size;
+    range_arena->ranges[0] = (Range){ 0, new_size, new_size };
+    range_arena->last_index += 1;
+};
+
+void rangeArenaAppend(RangeArena *range_arena, u32 new_size) {
+    u32 old_size = range_arena->border;
+    range_arena->border += new_size;
+    range_arena->ranges[range_arena->last_index] = (Range){ old_size, old_size + new_size, (new_size + old_size) - old_size};
+    range_arena->last_index += 1;
+};
 
 // Archetype V2
 ////////////////////////////////////////////////////////////////
@@ -42,6 +76,8 @@ typedef struct {
     // graphics
     hkArray vao; // u32
     hkArray index_count; // u32
+    hkArray shader_program; // u32
+    hkArray texture; // u32
     // game
     hkArray position; // vec3
     hkArray rotation; // vec3
@@ -222,11 +258,10 @@ void gameArchetypeInitializePositionsAsLine(GameArchetype *archetype, const f32 
     }
 }
 
-void gameArchetypeUpdateVelocities(GameArchetype *archetype, f32 time) {
-    const i64 n = archetype->index_count.length;
-    for(i32 i = 0; i < n; ++i) {
+void gameArchetypeUpdateVelocities(GameArchetype *archetype, f32 time, const Range range) {
+    for(i32 i = range.start; i < range.end; ++i) {
         // printf("%f\n", new_velocity);
-        ((vec3 *)archetype->velocity.data)[i][0] = (f32)sin(time)-.5f;
+        ((vec3 *)archetype->velocity.data)[i][0] = (f32)sin(time);
     }
 }
 
