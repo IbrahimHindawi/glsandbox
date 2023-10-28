@@ -23,7 +23,10 @@ typedef struct {
     // graphics
     hkArray vao; // u32
     hkArray index_count; // u32
+    hkArray shader_program; // u32
+    hkArray texture; // u32
     // game
+    hkArray speed; // f32 
     hkArray velocity; // vec3
     hkArray position; // vec3
     hkArray rotation; // vec3
@@ -49,20 +52,28 @@ typedef struct {
 void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
     archetype->vao = hkArrayCreate(sizeof(u32), n);
     archetype->index_count = hkArrayCreate(sizeof(u32), n);
+    archetype->shader_program = hkArrayCreate(sizeof(u32), n);
+    archetype->texture = hkArrayCreate(sizeof(u32), n);
+
+    archetype->speed = hkArrayCreate(sizeof(f32), n);
+    archetype->velocity = hkArrayCreate(sizeof(vec3), n);
     archetype->position = hkArrayCreate(sizeof(vec3), n);
     archetype->rotation = hkArrayCreate(sizeof(vec3), n);
     archetype->scale = hkArrayCreate(sizeof(vec3), n);
-    archetype->velocity = hkArrayCreate(sizeof(vec3), n);
     archetype->model = hkArrayCreate(sizeof(mat4), n);
 }
 
 void gameArchetypeDeallocate(GameArchetype *archetype) {
     hkArrayDestroy(&archetype->vao);
     hkArrayDestroy(&archetype->index_count);
+    hkArrayDestroy(&archetype->shader_program);
+    hkArrayDestroy(&archetype->texture);
+
+    hkArrayDestroy(&archetype->speed);
+    hkArrayDestroy(&archetype->velocity);
     hkArrayDestroy(&archetype->position);
     hkArrayDestroy(&archetype->rotation);
     hkArrayDestroy(&archetype->scale);
-    hkArrayDestroy(&archetype->velocity);
     hkArrayDestroy(&archetype->model);
 }
 
@@ -71,6 +82,20 @@ void gameArchetypeInitalizeMeshes(u32 *vao_data, u32 vao, u32 *index_count_data,
     for(i32 i = range.start; i < range.end; ++i) {
         vao_data[i] = vao;
         index_count_data[i] = index_count;
+    }
+    return;
+}
+
+void gameArchetypeInitalizeMeshesShadersTextures(u32 *vao_data, u32 vao, 
+                                                 u32 *index_count_data, u32 index_count, 
+                                                 u32 *shader_program_data, u32 shader_program, 
+                                                 u32 *texture_data, u32 texture, 
+                                                 const Range range) {
+    for(i32 i = range.start; i < range.end; ++i) {
+        vao_data[i] = vao;
+        index_count_data[i] = index_count;
+        shader_program_data[i] = shader_program;
+        texture_data[i] = texture;
     }
     return;
 }
@@ -163,8 +188,15 @@ void gameArchetypeInitializeTransforms(vec3 *position_data, vec3 *rotation_data,
     }
 }
 
+void gameArchetypeInitializeSpeeds(f32 *speeds, f32 input_speed, const Range range) {
+    for(i32 i = range.start; i < range.end; ++i) {
+        speeds[i] = input_speed;
+        // printf("step %f\n", a);
+    }
+}
+
 void gameArchetypeInitializeVelocities(GameArchetype *archetype, vec3 v, const Range range) {
-    // initalize velocityocities
+    // initalize velocity
     vec3 *velocity = (vec3 *)archetype->velocity.data;
     const i32 n = (i32)archetype->index_count.length;
     for(i32 i = range.start; i < range.end; ++i) {
@@ -271,32 +303,32 @@ void gameArchetypeUpdateTransforms(GameArchetype *archetype, const Range range) 
     return;
 }
 
-void gameArchetypeIntegrateVelocity(GameArchetype *archetype, f32 deltaTime, f32 speed, const Range range) {
-    vec3 *position = ((vec3 *)archetype->position.data);
-    vec3 *velocity = ((vec3 *)archetype->velocity.data);
-    mat4 *model = ((mat4 *)archetype->model.data);
+void gameArchetypeIntegrateVelocity(GameArchetype *archetype, f32 deltaTime, const Range range) {
+    vec3 *position = (vec3 *)archetype->position.data;
+    vec3 *velocity = (vec3 *)archetype->velocity.data;
+    mat4 *model = (mat4 *)archetype->model.data;
+    f32 *speed = (f32 *)archetype->speed.data;
     const i64 n = archetype->index_count.length; 
     for(i32 i = range.start; i < range.end; ++i) {
         // transformations
-        position[i][0] += velocity[i][0] * speed * deltaTime;
-        position[i][1] += velocity[i][1] * speed * deltaTime;
+        position[i][0] += velocity[i][0] * speed[i] * deltaTime;
+        position[i][1] += velocity[i][1] * speed[i] * deltaTime;
     }
 }
 
-void gameArchetypeRender(GameArchetype *archetype, u32 shader_program, mat4 view, mat4 proj, u32 texture, const Range range) {
-    const i64 n = archetype->index_count.length; 
+void gameArchetypeRender(GameArchetype *archetype, mat4 view, mat4 proj, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
-        glUseProgram(shader_program);
+        glUseProgram(((u32 *)archetype->shader_program.data)[i]);
         // uniforms
-        u32 view_location = glGetUniformLocation(shader_program, "view");
+        u32 view_location = glGetUniformLocation(((u32 *)archetype->shader_program.data)[i], "view");
         glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
-        u32 proj_location = glGetUniformLocation(shader_program, "proj");
+        u32 proj_location = glGetUniformLocation(((u32 *)archetype->shader_program.data)[i], "proj");
         glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
-        u32 model_location = glGetUniformLocation(shader_program, "model");
+        u32 model_location = glGetUniformLocation(((u32 *)archetype->shader_program.data)[i], "model");
         glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
         // draw
         glBindVertexArray(((u32 *)archetype->vao.data)[i]);
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindTexture(GL_TEXTURE_2D, ((u32 *)archetype->texture.data)[i]);
         glDrawElements(GL_TRIANGLES, ((u32 *)archetype->index_count.data)[i], GL_UNSIGNED_INT, 0);
     }
 }
@@ -342,6 +374,16 @@ void gameArchetypeRenderBG(GameArchetype *archetype, u32 shader_program, mat4 vi
     }
 }
 
+void gameSpawnProjectileAtEntity(const vec3 *source_position, i32 id, vec3 *dest_position, i32 offset, const i32 projectile_length) {
+    static i32 current_projectile_pool_index = 0;
+    current_projectile_pool_index = (current_projectile_pool_index + 1) % projectile_length + offset;
+    dest_position[current_projectile_pool_index][0] = source_position[id][0];
+    dest_position[current_projectile_pool_index][1] = source_position[id][1];
+    dest_position[current_projectile_pool_index][2] = source_position[id][2];
+    return;
+}
+
+/*
 void gameSpawnProjectileAtEntity(const GameArchetype *archetype, GameArchetype *archetypeProjectile, i32 id) {
     vec3 *archetypeposition = ((vec3 *)archetype->position.data);
     vec3 *projectile_position = ((vec3 *)archetypeProjectile->position.data);
@@ -362,3 +404,4 @@ void gameArchetypeSpawnProjectile(const GameArchetype *archetype, GameArchetype 
     }
     return;
 }
+*/
