@@ -22,6 +22,7 @@
 #include "fileops.h"
 #include "renderops.h"
 #include "meshops.h"
+#include "rangeops.h"
 // #include "mesh.h"
 #include "gameArchetype.h"
 
@@ -180,10 +181,10 @@ void setup() {
     //-------------------------------------------
     gameArchetypeAllocate(&archetype, 1024);
     rangeArenaInitialize(&range_arena, 6);
-    // printf("start: %d, end: %d, length: %d\n", 
-    //         range_arena.ranges[RangeIdEnemy].start,
-    //         range_arena.ranges[RangeIdEnemy].end,
-    //         range_arena.ranges[RangeIdEnemy].length);
+    printf("start: %d, end: %d, length: %d\n", 
+            range_arena.ranges[RangeIdEnemy].start,
+            range_arena.ranges[RangeIdEnemy].end,
+            range_arena.ranges[RangeIdEnemy].length);
     // Range enemy_range = {0, 6};
     Range enemy_range = range_arena.ranges[RangeIdEnemy];
     gameArchetypeInitalizeMeshesShadersTextures((u32 *)archetype.vao.data, MeshVAOArray[Ship], 
@@ -204,10 +205,10 @@ void setup() {
 
     // gameArchetypeAllocate(&archetype, 1);
     rangeArenaAppend(&range_arena, 1);
-    // printf("start: %d, end: %d, length: %d\n", 
-    //         range_arena.ranges[RangeIdEnemy].start,
-    //         range_arena.ranges[RangeIdEnemy].end,
-    //         range_arena.ranges[RangeIdEnemy].length);
+    printf("start: %d, end: %d, length: %d\n", 
+            range_arena.ranges[RangeIdHero].start,
+            range_arena.ranges[RangeIdHero].end,
+            range_arena.ranges[RangeIdHero].length);
     Range hero_range = range_arena.ranges[RangeIdHero];
     gameArchetypeInitalizeMeshesShadersTextures((u32 *)archetype.vao.data, MeshVAOArray[Ship], 
                                                 (u32 *)archetype.index_count.data, MeshRawDataArray[Ship].indices_count, 
@@ -226,10 +227,10 @@ void setup() {
     // gameArchetypeAllocate(&archetype, 100);
     rangeArenaAppend(&range_arena, 100);
     Range projectile_range = range_arena.ranges[RangeIdProjectiles];
-    // printf("start: %d, end: %d, length: %d\n", 
-    //         range_arena.ranges[RangeIdProjectiles].start,
-    //         range_arena.ranges[RangeIdProjectiles].end,
-    //         range_arena.ranges[RangeIdProjectiles].length);
+    printf("start: %d, end: %d, length: %d\n", 
+            range_arena.ranges[RangeIdProjectiles].start,
+            range_arena.ranges[RangeIdProjectiles].end,
+            range_arena.ranges[RangeIdProjectiles].length);
     gameArchetypeInitalizeMeshesShadersTextures((u32 *)archetype.vao.data, MeshVAOArray[Streak], 
                                                 (u32 *)archetype.index_count.data, MeshRawDataArray[Streak].indices_count, 
                                                 (u32 *)archetype.shader_program.data, shader_program_projectile,
