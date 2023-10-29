@@ -14,15 +14,14 @@
 #include <cglm/mat4.h>
 #include <cglm/vec3.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
+#include "texops.h"
 #include "core.h"
-#include "shader.h"
+#include "shops.h"
 #include "fileops.h"
 #include "renderops.h"
 #include "meshops.h"
-// #include "mesh.h"
+
 #include "gameArchetype.h"
 
 // SYSTEM
@@ -78,85 +77,14 @@ void setup() {
 
     //  SHADER
     /////////////////////////////////////////////
-    {
-        fops_read("resource/simple.vert");
-        u32 vertex_shader = shader_compile(fops_buffer, GL_VERTEX_SHADER);
-        // printf("%s", fops_buffer);
-        fops_read("resource/simple.frag");
-        u32 fragment_shader = shader_compile(fops_buffer, GL_FRAGMENT_SHADER);
-        // printf("%s", fops_buffer);
-        // shader_program = shader_link(vertex_shader, fragment_shader);
-        shader_program = shader_link(vertex_shader, fragment_shader);
-        glDeleteShader(vertex_shader);
-        glDeleteShader(fragment_shader);
-    }
-    {
-        fops_read("resource/starfield.vert");
-        u32 vertex_shader = shader_compile(fops_buffer, GL_VERTEX_SHADER);
-        // printf("%s", fops_buffer);
-        fops_read("resource/starfield.frag");
-        u32 fragment_shader = shader_compile(fops_buffer, GL_FRAGMENT_SHADER);
-        // printf("%s", fops_buffer);
-        // shader_program = shader_link(vertex_shader, fragment_shader);
-        shader_program_starfield = shader_link(vertex_shader, fragment_shader);
-        glDeleteShader(vertex_shader);
-        glDeleteShader(fragment_shader);
-    }
-    {
-        fops_read("resource/projectile.vert");
-        u32 vertex_shader = shader_compile(fops_buffer, GL_VERTEX_SHADER);
-        // printf("%s", fops_buffer);
-        fops_read("resource/projectile.frag");
-        u32 fragment_shader = shader_compile(fops_buffer, GL_FRAGMENT_SHADER);
-        // printf("%s", fops_buffer);
-        // shader_program = shader_link(vertex_shader, fragment_shader);
-        shader_program_projectile = shader_link(vertex_shader, fragment_shader);
-        glDeleteShader(vertex_shader);
-        glDeleteShader(fragment_shader);
-    }
+    shader_create(&shader_program, "resource/simple.vert", "resource/simple.frag");
+    shader_create(&shader_program_starfield, "resource/starfield.vert", "resource/starfield.frag");
+    shader_create(&shader_program_projectile, "resource/projectile.vert", "resource/projectile.frag");
 
     // TEXTURE
     /////////////////////////////////////////////
-    {
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        i32 width, height, n_channels;
-        // u8 *data = stbi_load("resource/cgfx.png", &width, &height, &n_channels, 0);
-        // u8 *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
-        u8 *data = stbi_load("resource/Ship_BaseColor_purple_mid.jpg", &width, &height, &n_channels, 0);
-        // u8 *data = stbi_load("resource/awesomeface.png", &width, &height, &n_channels, 0);
-        if (data) {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-        } else {
-            printf("failed to load texture.");
-        }
-        STBI_FREE(data);
-    }
-    {
-        glGenTextures(1, &texture2);
-        glBindTexture(GL_TEXTURE_2D, texture2);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        i32 width, height, n_channels;
-        // u8 *data = stbi_load("resource/cgfx.png", &width, &height, &n_channels, 0);
-        // u8 *data = stbi_load("resource/toylowres.jpg", &width, &height, &n_channels, 0);
-        u8 *data = stbi_load("resource/Ship_BaseColor_orange_mid.jpg", &width, &height, &n_channels, 0);
-        // u8 *data = stbi_load("resource/awesomeface.png", &width, &height, &n_channels, 0);
-        if (data) {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
-        } else {
-            printf("failed to load texture2.");
-        }
-        STBI_FREE(data);
-    }
+    texture_create(&texture, "resource/Ship_BaseColor_purple_mid.jpg");
+    texture_create(&texture2, "resource/Ship_BaseColor_orange_mid.jpg");
 
     // XFORMS
     //////////////////////////////////////////////

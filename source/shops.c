@@ -1,4 +1,4 @@
-#include "shader.h"
+#include "shops.h"
 
 void shader_compile_check(u32 shader) {
     int success;
@@ -35,4 +35,18 @@ u32 shader_link(u32 vertex_shader, u32 fragment_shader) {
     glLinkProgram(shader_program);
     shader_link_check(shader_program);
     return shader_program;
+}
+
+void shader_create(u32 *shader_id, const char *vertex_shader_path, const char *fragment_shader_path) {
+    fops_read(vertex_shader_path);
+    u32 vertex_shader = shader_compile(fops_buffer, GL_VERTEX_SHADER);
+    // printf("%s", fops_buffer);
+    fops_read(fragment_shader_path);
+    u32 fragment_shader = shader_compile(fops_buffer, GL_FRAGMENT_SHADER);
+    // printf("%s", fops_buffer);
+    // shader_program = shader_link(vertex_shader, fragment_shader);
+    *shader_id = shader_link(vertex_shader, fragment_shader);
+    glDeleteShader(vertex_shader);
+    glDeleteShader(fragment_shader);
+    return;
 }
