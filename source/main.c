@@ -123,17 +123,17 @@ void setup() {
     id.enemy = rangeArenaInitialize(&range_arena, 6);
     rangeArenaIndexPrint(range_arena, id.enemy);
     archetypeInitalizeMeshesShadersTextures((u32 *)archetype.vao.data, MeshVAOArray[Ship], 
-                                                (u32 *)archetype.index_count.data, MeshRawDataArray[Ship].indices_count, 
-                                                (u32 *)archetype.shader_program.data, shader_program,
-                                                (u32 *)archetype.texture.data, texture2,
-                                                range_arena.ranges[id.enemy]);
+                                            (u32 *)archetype.index_count.data, MeshRawDataArray[Ship].indices_count, 
+                                            (u32 *)archetype.shader_program.data, shader_program,
+                                            (u32 *)archetype.texture.data, texture2,
+                                            range_arena.ranges[id.enemy]);
     archetypeInitializeTransforms((vec3 *)archetype.position.data,
-                                      (vec3 *)archetype.rotation.data,
-                                      (vec3 *)archetype.scale.data,
-                                      (vec3){0.f, 0.f, 0.f}, 
-                                      (vec3){pi * 0.5, 0.f, 0.f}, 
-                                      (vec3){.15f, .15f, .15f},
-                                      range_arena.ranges[id.enemy]);
+                                  (vec3 *)archetype.rotation.data,
+                                  (vec3 *)archetype.scale.data,
+                                  (vec3){0.f, 0.f, 0.f}, 
+                                  (vec3){pi * 0.5, 0.f, 0.f}, 
+                                  (vec3){.15f, .15f, .15f},
+                                  range_arena.ranges[id.enemy]);
     archetypeInitializePositionsAsLine((vec3 *)archetype.position.data, 2.f, 1.f, range_arena.ranges[id.enemy]);
     archetypeInitializeSpeeds((f32 *)archetype.speed.data, 3.0f, range_arena.ranges[id.enemy]);
     // archetypeInitializeVelocities(&archetype, (vec3){0.f, -1.f, 0.f}, range_arena.ranges[id.enemy]);
@@ -141,33 +141,33 @@ void setup() {
     id.hero = rangeArenaAppend(&range_arena, 1);
     rangeArenaIndexPrint(range_arena, id.hero);
     archetypeInitalizeMeshesShadersTextures((u32 *)archetype.vao.data, MeshVAOArray[Ship], 
-                                                (u32 *)archetype.index_count.data, MeshRawDataArray[Ship].indices_count, 
-                                                (u32 *)archetype.shader_program.data, shader_program,
-                                                (u32 *)archetype.texture.data, texture,
-                                                range_arena.ranges[id.hero]);
+                                            (u32 *)archetype.index_count.data, MeshRawDataArray[Ship].indices_count, 
+                                            (u32 *)archetype.shader_program.data, shader_program,
+                                            (u32 *)archetype.texture.data, texture,
+                                            range_arena.ranges[id.hero]);
     archetypeInitializeTransforms((vec3 *)archetype.position.data,
-                                      (vec3 *)archetype.rotation.data,
-                                      (vec3 *)archetype.scale.data,
-                                      (vec3){0.f, -3.f, 0.f}, 
-                                      (vec3){pi * 0.5f, pi, 0.f}, 
-                                      (vec3){.15f, .15f, .15f},
-                                      range_arena.ranges[id.hero]);
+                                  (vec3 *)archetype.rotation.data,
+                                  (vec3 *)archetype.scale.data,
+                                  (vec3){0.f, -3.f, 0.f}, 
+                                  (vec3){pi * 0.5f, pi, 0.f}, 
+                                  (vec3){.15f, .15f, .15f},
+                                  range_arena.ranges[id.hero]);
     archetypeInitializeSpeeds((f32 *)archetype.speed.data, 6.0f, range_arena.ranges[id.hero]);
 
     id.projectile = rangeArenaAppend(&range_arena, 100);
     rangeArenaIndexPrint(range_arena, id.projectile);
     archetypeInitalizeMeshesShadersTextures((u32 *)archetype.vao.data, MeshVAOArray[Streak], 
-                                                (u32 *)archetype.index_count.data, MeshRawDataArray[Streak].indices_count, 
-                                                (u32 *)archetype.shader_program.data, shader_program_projectile,
-                                                (u32 *)archetype.texture.data, texture,
-                                                range_arena.ranges[id.projectile]);
+                                            (u32 *)archetype.index_count.data, MeshRawDataArray[Streak].indices_count, 
+                                            (u32 *)archetype.shader_program.data, shader_program_projectile,
+                                            (u32 *)archetype.texture.data, texture,
+                                            range_arena.ranges[id.projectile]);
     archetypeInitializeTransforms((vec3 *)archetype.position.data,
-                                      (vec3 *)archetype.rotation.data,
-                                      (vec3 *)archetype.scale.data,
-                                      (vec3){0.f, 0.f, 0.f}, 
-                                      (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
-                                      (vec3){.15f, .15f, .15f},
-                                      range_arena.ranges[id.projectile]);
+                                  (vec3 *)archetype.rotation.data,
+                                  (vec3 *)archetype.scale.data,
+                                  (vec3){0.f, 0.f, 0.f}, 
+                                  (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
+                                  (vec3){.15f, .15f, .15f},
+                                  range_arena.ranges[id.projectile]);
     archetypeSetPositions((vec3 *)archetype.position.data, (vec3){-100.f, -100.f, 0.f}, range_arena.ranges[id.projectile]);
     archetypeInitializeVelocities(&archetype, (vec3){0.f, 1.f, 0.f}, range_arena.ranges[id.projectile]);
     archetypeInitializeSpeeds((f32 *)archetype.speed.data, 10.0f, range_arena.ranges[id.projectile]);
@@ -226,9 +226,9 @@ void input() {
                 } else if(event.key.keysym.sym == SDLK_SPACE) {
                     for(i32 i = s; i < n; ++i) {
                         archetypeSpawnProjectileAtEntity((vec3 *)archetype.position.data, s, 
-                                                    (vec3 *)archetype.position.data, 
-                                                    range_arena.ranges[id.projectile].start, 
-                                                    range_arena.ranges[id.projectile].length);
+                                                         (vec3 *)archetype.position.data, 
+                                                         range_arena.ranges[id.projectile].start, 
+                                                         range_arena.ranges[id.projectile].length);
                     }
                 }
                 break;
