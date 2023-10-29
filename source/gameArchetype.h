@@ -205,16 +205,14 @@ void archetypeInitializeVelocities(GameArchetype *archetype, vec3 v, const Range
     }
 }
 
-void gameArchetypeInitializePositionsAsLine(GameArchetype *archetype, const f32 s, const f32 y, const Range range) {
-    // initalize positionitions
+void archetypeInitializePositionsAsLine(vec3 *position_data, const f32 s, const f32 y, const Range range) {
     f32 a = -1.f;
-    vec3 *position = archetype->position.data;
-    const i32 n = (i32)archetype->index_count.length;
+    const i32 n = range.length;
     const f32 f = (2.f / (range.end - 1));
     // printf("factor %f\n", f);
     for(i32 i = range.start; i < range.end; ++i) {
-        position[i][0] = a * s;
-        position[i][1] = y;
+        position_data[i][0] = a * s;
+        position_data[i][1] = y;
         // printf("step %f\n", a);
         a += f;
     }
@@ -281,41 +279,41 @@ collision_exit:
     return coll_id;
 }
 
-void archetypeUpdateTransforms(vec3 *position, vec3 *rotation, vec3 *scale, mat4 *model, const Range range) {
+void archetypeUpdateTransforms(vec3 *position_data, vec3 *rotation_data, vec3 *scale_data, mat4 *model_data, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         // S T R
-        glm_mat4_identity(&model[i][0]);
-        glm_translate(&model[i][0], position[i]);
-        glm_rotate(&model[i][0], rotation[i][0], (vec3){1.f, 0.f, 0.f});
-        glm_rotate(&model[i][0], rotation[i][1], (vec3){0.f, 1.f, 0.f});
-        glm_rotate(&model[i][0], rotation[i][2], (vec3){0.f, 0.f, 1.f});
-        glm_scale(&model[i][0], scale[i]);
+        glm_mat4_identity(&model_data[i][0]);
+        glm_translate(&model_data[i][0], position_data[i]);
+        glm_rotate(&model_data[i][0], rotation_data[i][0], (vec3){1.f, 0.f, 0.f});
+        glm_rotate(&model_data[i][0], rotation_data[i][1], (vec3){0.f, 1.f, 0.f});
+        glm_rotate(&model_data[i][0], rotation_data[i][2], (vec3){0.f, 0.f, 1.f});
+        glm_scale(&model_data[i][0], scale_data[i]);
     }
     return;
 }
 
-void archetypeIntegrateVelocity(vec3 *position, vec3 *velocity, f32 *speed, f32 deltaTime, const Range range) {
+void archetypeIntegrateVelocity(vec3 *position_data, vec3 *velocity_data, f32 *speed_data, f32 deltaTime, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         // transformations
-        position[i][0] += velocity[i][0] * speed[i] * deltaTime;
-        position[i][1] += velocity[i][1] * speed[i] * deltaTime;
+        position_data[i][0] += velocity_data[i][0] * speed_data[i] * deltaTime;
+        position_data[i][1] += velocity_data[i][1] * speed_data[i] * deltaTime;
     }
 }
 
-void gameArchetypeRender(GameArchetype *archetype, mat4 view, mat4 proj, const Range range) {
+void archetypeRender(u32 *vao_data, u32 *shader_program_data, u32 *texture_data, u32* index_count_data, mat4 *model_data, mat4 view, mat4 proj, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
-        glUseProgram(((u32 *)archetype->shader_program.data)[i]);
+        glUseProgram(shader_program_data[i]);
         // uniforms
-        u32 view_location = glGetUniformLocation(((u32 *)archetype->shader_program.data)[i], "view");
+        u32 view_location = glGetUniformLocation(shader_program_data[i], "view");
         glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
-        u32 proj_location = glGetUniformLocation(((u32 *)archetype->shader_program.data)[i], "proj");
+        u32 proj_location = glGetUniformLocation(shader_program_data[i], "proj");
         glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
-        u32 model_location = glGetUniformLocation(((u32 *)archetype->shader_program.data)[i], "model");
-        glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
+        u32 model_location = glGetUniformLocation(shader_program_data[i], "model");
+        glUniformMatrix4fv(model_location, 1, GL_FALSE, model_data[i][0]);
         // draw
-        glBindVertexArray(((u32 *)archetype->vao.data)[i]);
-        glBindTexture(GL_TEXTURE_2D, ((u32 *)archetype->texture.data)[i]);
-        glDrawElements(GL_TRIANGLES, ((u32 *)archetype->index_count.data)[i], GL_UNSIGNED_INT, 0);
+        glBindVertexArray(vao_data[i]);
+        glBindTexture(GL_TEXTURE_2D, texture_data[i]);
+        glDrawElements(GL_TRIANGLES, index_count_data[i], GL_UNSIGNED_INT, 0);
     }
 }
 
@@ -360,7 +358,7 @@ void gameArchetypeRenderBG(GameArchetype *archetype, u32 shader_program, mat4 vi
     }
 }
 
-void gameSpawnProjectileAtEntity(const vec3 *source_position, i32 id, vec3 *dest_position, i32 offset, const i32 projectile_length) {
+void archetypeSpawnProjectileAtEntity(const vec3 *source_position, i32 id, vec3 *dest_position, i32 offset, const i32 projectile_length) {
     static i32 current_projectile_pool_index = 0;
     current_projectile_pool_index = (current_projectile_pool_index + 1) % projectile_length + offset;
     dest_position[current_projectile_pool_index][0] = source_position[id][0];

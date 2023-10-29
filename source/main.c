@@ -134,9 +134,9 @@ void setup() {
                                       (vec3){pi * 0.5, 0.f, 0.f}, 
                                       (vec3){.15f, .15f, .15f},
                                       range_arena.ranges[id.enemy]);
-    gameArchetypeInitializePositionsAsLine(&archetype, 2.f, 1.f, range_arena.ranges[id.enemy]);
+    archetypeInitializePositionsAsLine((vec3 *)archetype.position.data, 2.f, 1.f, range_arena.ranges[id.enemy]);
     archetypeInitializeSpeeds((f32 *)archetype.speed.data, 3.0f, range_arena.ranges[id.enemy]);
-    // gameArchetypeInitializeVelocities(&archetype, (vec3){0.f, -1.f, 0.f}, range_arena.ranges[id.enemy]);
+    // archetypeInitializeVelocities(&archetype, (vec3){0.f, -1.f, 0.f}, range_arena.ranges[id.enemy]);
 
     id.hero = rangeArenaAppend(&range_arena, 1);
     rangeArenaIndexPrint(range_arena, id.hero);
@@ -225,7 +225,7 @@ void input() {
                     }
                 } else if(event.key.keysym.sym == SDLK_SPACE) {
                     for(i32 i = s; i < n; ++i) {
-                        gameSpawnProjectileAtEntity((vec3 *)archetype.position.data, s, 
+                        archetypeSpawnProjectileAtEntity((vec3 *)archetype.position.data, s, 
                                                     (vec3 *)archetype.position.data, 
                                                     range_arena.ranges[id.projectile].start, 
                                                     range_arena.ranges[id.projectile].length);
@@ -290,10 +290,10 @@ void update() {
 
     // integrate movement
     archetypeIntegrateVelocity((vec3 *)archetype.position.data,
-                                   (vec3 *)archetype.velocity.data,
-                                   (f32 *)archetype.speed.data,
-                                   deltaTime,
-                                   (Range){0, range_arena.border});
+                               (vec3 *)archetype.velocity.data,
+                               (f32 *)archetype.speed.data,
+                               deltaTime,
+                               (Range){0, range_arena.border});
 
     // finalize transformation matrices
     archetypeUpdateTransforms((vec3 *)archetype.position.data,
@@ -336,7 +336,12 @@ void render() {
     // bind
     // gameArchetypeRenderBG(&archetype_plane, shader_program_starfield, view, proj);
 
-    gameArchetypeRender(&archetype, view, proj, (Range){0, range_arena.border});
+    archetypeRender((u32 *)archetype.vao.data,
+                    (u32 *)archetype.shader_program.data,
+                    (u32 *)archetype.texture.data,
+                    (u32 *)archetype.index_count.data,
+                    (mat4 *)archetype.model.data,
+                    view, proj, (Range){0, range_arena.border});
     // gameArchetypeRenderBoxes(&archetype, shader_program_projectile, view, proj, texture2);
 
     // end
