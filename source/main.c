@@ -289,7 +289,7 @@ void update() {
     // gameArchetypeUpdateColliders(&archetype);
 
     // integrate movement
-    gameArchetypeIntegrateVelocity((vec3 *)archetype.position.data,
+    archetypeIntegrateVelocity((vec3 *)archetype.position.data,
                                    (vec3 *)archetype.velocity.data,
                                    (f32 *)archetype.speed.data,
                                    deltaTime,

@@ -294,7 +294,7 @@ void archetypeUpdateTransforms(vec3 *position, vec3 *rotation, vec3 *scale, mat4
     return;
 }
 
-void gameArchetypeIntegrateVelocity(vec3 *position, vec3 *velocity, f32 *speed, f32 deltaTime, const Range range) {
+void archetypeIntegrateVelocity(vec3 *position, vec3 *velocity, f32 *speed, f32 deltaTime, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         // transformations
         position[i][0] += velocity[i][0] * speed[i] * deltaTime;
