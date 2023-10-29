@@ -11,6 +11,7 @@
 
 #include "core.h"
 #include "hkArray.h"
+#include "rangeops.h"
 
 // Archetype V2
 ////////////////////////////////////////////////////////////////
@@ -74,7 +75,7 @@ void gameArchetypeDeallocate(GameArchetype *archetype) {
     hkArrayDestroy(&archetype->model);
 }
 
-void gameArchetypeInitalizeMeshes(u32 *vao_data, u32 vao, u32 *index_count_data, u32 index_count, const Range range) {
+void archetypeInitalizeMeshes(u32 *vao_data, u32 vao, u32 *index_count_data, u32 index_count, const Range range) {
     // u32 *vao = ((u32 *)archetype->vao.data);
     for(i32 i = range.start; i < range.end; ++i) {
         vao_data[i] = vao;
@@ -83,7 +84,7 @@ void gameArchetypeInitalizeMeshes(u32 *vao_data, u32 vao, u32 *index_count_data,
     return;
 }
 
-void gameArchetypeInitalizeMeshesShadersTextures(u32 *vao_data, u32 vao, 
+void archetypeInitalizeMeshesShadersTextures(u32 *vao_data, u32 vao, 
                                                  u32 *index_count_data, u32 index_count, 
                                                  u32 *shader_program_data, u32 shader_program, 
                                                  u32 *texture_data, u32 texture, 
@@ -97,7 +98,7 @@ void gameArchetypeInitalizeMeshesShadersTextures(u32 *vao_data, u32 vao,
     return;
 }
 
-void gameArchetypeInitializePositionsAsGrid(GameArchetype *archetype) {
+void archetypeInitializePositionsAsGrid(GameArchetype *archetype) {
     // initalize positionitions
     f32 a = 0.f;
     f32 b = -1.f;
@@ -138,7 +139,7 @@ void gameArchetypeInitializeCollisionBoxes(GameArchetype *archetype, const f32 b
     }
 }
 
-void gameArchetypeSetPositions(vec3 *position_data, vec3 p, const Range range) {
+void archetypeSetPositions(vec3 *position_data, vec3 p, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         position_data[i][0] = p[0];
         position_data[i][1] = p[1];
@@ -168,7 +169,7 @@ void gameArchetypeInitializeScales(GameArchetype *archetype, vec3 s) {
     }
 }
 
-void gameArchetypeInitializeTransforms(vec3 *position_data, vec3 *rotation_data, vec3 *scale_data, 
+void archetypeInitializeTransforms(vec3 *position_data, vec3 *rotation_data, vec3 *scale_data, 
                                        vec3 p, vec3 r, vec3 s, const Range range) {
     // initalize velocityocities
     for(i32 i = range.start; i < range.end; ++i) {
@@ -185,14 +186,14 @@ void gameArchetypeInitializeTransforms(vec3 *position_data, vec3 *rotation_data,
     }
 }
 
-void gameArchetypeInitializeSpeeds(f32 *speeds, f32 input_speed, const Range range) {
+void archetypeInitializeSpeeds(f32 *speeds, f32 input_speed, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         speeds[i] = input_speed;
         // printf("step %f\n", a);
     }
 }
 
-void gameArchetypeInitializeVelocities(GameArchetype *archetype, vec3 v, const Range range) {
+void archetypeInitializeVelocities(GameArchetype *archetype, vec3 v, const Range range) {
     // initalize velocity
     vec3 *velocity = (vec3 *)archetype->velocity.data;
     const i32 n = (i32)archetype->index_count.length;
@@ -219,7 +220,7 @@ void gameArchetypeInitializePositionsAsLine(GameArchetype *archetype, const f32 
     }
 }
 
-void gameArchetypeUpdateVelocities(GameArchetype *archetype, f32 time, const Range range) {
+void archetypeUpdateVelocities(GameArchetype *archetype, f32 time, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         // printf("%f\n", new_velocity);
         ((vec3 *)archetype->velocity.data)[i][0] = (f32)sin(time);
@@ -280,14 +281,8 @@ collision_exit:
     return coll_id;
 }
 
-void gameArchetypeUpdateTransforms(GameArchetype *archetype, const Range range) {
-    vec3 *position = ((vec3 *)archetype->position.data);
-    vec3 *rotation = ((vec3 *)archetype->rotation.data);
-    vec3 *scale = ((vec3 *)archetype->scale.data);
-    mat4 *model = ((mat4 *)archetype->model.data);
-    const i64 n = archetype->index_count.length; 
+void archetypeUpdateTransforms(vec3 *position, vec3 *rotation, vec3 *scale, mat4 *model, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
-
         // S T R
         glm_mat4_identity(&model[i][0]);
         glm_translate(&model[i][0], position[i]);
@@ -299,12 +294,7 @@ void gameArchetypeUpdateTransforms(GameArchetype *archetype, const Range range) 
     return;
 }
 
-void gameArchetypeIntegrateVelocity(GameArchetype *archetype, f32 deltaTime, const Range range) {
-    vec3 *position = (vec3 *)archetype->position.data;
-    vec3 *velocity = (vec3 *)archetype->velocity.data;
-    mat4 *model = (mat4 *)archetype->model.data;
-    f32 *speed = (f32 *)archetype->speed.data;
-    const i64 n = archetype->index_count.length; 
+void gameArchetypeIntegrateVelocity(vec3 *position, vec3 *velocity, f32 *speed, f32 deltaTime, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         // transformations
         position[i][0] += velocity[i][0] * speed[i] * deltaTime;
