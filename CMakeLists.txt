@@ -6,6 +6,7 @@ project(${ProjectNameParam} VERSION 1.0 LANGUAGES C)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED True)
+set(CMAKE_BUILD_TYPE Debug)
 
 add_executable(${PROJECT_NAME}
     source/main.c
