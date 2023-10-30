@@ -13,8 +13,6 @@
 #include "hkArray.h"
 #include "rangeops.h"
 
-// Archetype V2
-////////////////////////////////////////////////////////////////
 typedef struct {
     // graphics
     hkArray vao; // u32
@@ -31,8 +29,37 @@ typedef struct {
     hkArray box; // mat4
     hkArray vao_box_collider; // mat4
     hkArray box_index_count; // mat4
-// #endif
 } GameArchetype;
+
+void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
+    // game
+    archetype->vao = hkArrayCreate(sizeof(u32), n);
+    archetype->index_count = hkArrayCreate(sizeof(u32), n);
+    archetype->shader_program = hkArrayCreate(sizeof(u32), n);
+    archetype->texture = hkArrayCreate(sizeof(u32), n);
+    // graphics
+    archetype->speed = hkArrayCreate(sizeof(f32), n);
+    archetype->velocity = hkArrayCreate(sizeof(vec3), n);
+    archetype->position = hkArrayCreate(sizeof(vec3), n);
+    archetype->rotation = hkArrayCreate(sizeof(vec3), n);
+    archetype->scale = hkArrayCreate(sizeof(vec3), n);
+    archetype->model = hkArrayCreate(sizeof(mat4), n);
+}
+
+void gameArchetypeDeallocate(GameArchetype *archetype) {
+    // game
+    hkArrayDestroy(&archetype->vao);
+    hkArrayDestroy(&archetype->index_count);
+    hkArrayDestroy(&archetype->shader_program);
+    hkArrayDestroy(&archetype->texture);
+    // graphics
+    hkArrayDestroy(&archetype->speed);
+    hkArrayDestroy(&archetype->velocity);
+    hkArrayDestroy(&archetype->position);
+    hkArrayDestroy(&archetype->rotation);
+    hkArrayDestroy(&archetype->scale);
+    hkArrayDestroy(&archetype->model);
+}
 
 typedef struct {
     // graphics
@@ -47,28 +74,26 @@ typedef struct {
     hkArray model; // mat4
 } BoxArchetype;
 
-void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
+void boxArchetypeAllocate(BoxArchetype *archetype, i32 n) {
+    // game
     archetype->vao = hkArrayCreate(sizeof(u32), n);
     archetype->index_count = hkArrayCreate(sizeof(u32), n);
     archetype->shader_program = hkArrayCreate(sizeof(u32), n);
     archetype->texture = hkArrayCreate(sizeof(u32), n);
-
-    archetype->speed = hkArrayCreate(sizeof(f32), n);
-    archetype->velocity = hkArrayCreate(sizeof(vec3), n);
+    // graphics
     archetype->position = hkArrayCreate(sizeof(vec3), n);
     archetype->rotation = hkArrayCreate(sizeof(vec3), n);
     archetype->scale = hkArrayCreate(sizeof(vec3), n);
     archetype->model = hkArrayCreate(sizeof(mat4), n);
 }
 
-void gameArchetypeDeallocate(GameArchetype *archetype) {
+void boxArchetypeDeallocate(BoxArchetype *archetype) {
+    // game
     hkArrayDestroy(&archetype->vao);
     hkArrayDestroy(&archetype->index_count);
     hkArrayDestroy(&archetype->shader_program);
     hkArrayDestroy(&archetype->texture);
-
-    hkArrayDestroy(&archetype->speed);
-    hkArrayDestroy(&archetype->velocity);
+    // graphics
     hkArrayDestroy(&archetype->position);
     hkArrayDestroy(&archetype->rotation);
     hkArrayDestroy(&archetype->scale);
@@ -85,10 +110,10 @@ void archetypeInitalizeMeshes(u32 *vao_data, u32 vao, u32 *index_count_data, u32
 }
 
 void archetypeInitalizeMeshesShadersTextures(u32 *vao_data, u32 vao, 
-                                                 u32 *index_count_data, u32 index_count, 
-                                                 u32 *shader_program_data, u32 shader_program, 
-                                                 u32 *texture_data, u32 texture, 
-                                                 const Range range) {
+                                             u32 *index_count_data, u32 index_count, 
+                                             u32 *shader_program_data, u32 shader_program, 
+                                             u32 *texture_data, u32 texture, 
+                                             const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         vao_data[i] = vao;
         index_count_data[i] = index_count;
@@ -225,13 +250,13 @@ void archetypeUpdateVelocities(GameArchetype *archetype, f32 time, const Range r
     }
 }
 
-void gameArchetypeUpdateColliders(GameArchetype *archetype) {
-    const i64 n = archetype->index_count.length;
-    vec4 *box = (vec4 *)archetype->box.data;
-    const vec3 *position = (vec3 *)archetype->position.data;
-    for(i32 i = 0; i < n; ++i) {
-        box[i][0] = position[i][0];
-        box[i][1] = position[i][1];
+void archetypeCopyVector(vec3 *source_position_data, vec3 *dest_position_data, const Range range) {
+    // vec4 *box = (vec4 *)archetype->box.data;
+    // const vec3 *position = (vec3 *)archetype->position.data;
+    for(i32 i = range.start; i < range.end; ++i) {
+        dest_position_data[i][0] = source_position_data[i][0];
+        dest_position_data[i][1] = source_position_data[i][1];
+        dest_position_data[i][2] = source_position_data[i][2];
         // printf("{%f, %f, %f, %f}\n", box[i][0], box[i][1], box[i][2], box[i][3]);
     }
     // printf("\n");
@@ -314,6 +339,25 @@ void archetypeRender(u32 *vao_data, u32 *shader_program_data, u32 *texture_data,
         glBindVertexArray(vao_data[i]);
         glBindTexture(GL_TEXTURE_2D, texture_data[i]);
         glDrawElements(GL_TRIANGLES, index_count_data[i], GL_UNSIGNED_INT, 0);
+    }
+}
+
+void archetypeRenderWires(u32 *vao_data, u32 *shader_program_data, u32 *texture_data, u32* index_count_data, mat4 *model_data, mat4 view, mat4 proj, const Range range) {
+    for(i32 i = range.start; i < range.end; ++i) {
+        glUseProgram(shader_program_data[i]);
+        // uniforms
+        u32 view_location = glGetUniformLocation(shader_program_data[i], "view");
+        glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
+        u32 proj_location = glGetUniformLocation(shader_program_data[i], "proj");
+        glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
+        u32 model_location = glGetUniformLocation(shader_program_data[i], "model");
+        glUniformMatrix4fv(model_location, 1, GL_FALSE, model_data[i][0]);
+        // draw
+        glBindVertexArray(vao_data[i]);
+        glBindTexture(GL_TEXTURE_2D, texture_data[i]);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glDrawElements(GL_TRIANGLES, index_count_data[i], GL_UNSIGNED_INT, 0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 }
 

@@ -2,7 +2,7 @@
 
 #include "core.h"
 
-#define RangeIdsLength 3
+#define RangeIdsLength 256
 
 typedef struct {
     i32 start;
@@ -23,6 +23,7 @@ typedef struct {
 } RangeArena;
 
 RangeArena range_arena;
+RangeArena range_arena_box;
 
 u32 rangeArenaInitialize(RangeArena *range_arena, i32 new_size) {
     // zero here is returned since this is the initial range
@@ -38,7 +39,6 @@ u32 rangeArenaAppend(RangeArena *range_arena, u32 new_size) {
     range_arena->ranges[range_arena->last_index] = (Range){ old_size, old_size + new_size, (new_size + old_size) - old_size, range_arena->last_index };
     return range_arena->last_index;
 };
-
 
 #define rangeArenaIndexPrint(range_arena, range_index) { \
     printf("start: %d, end: %d, length: %d, index: %d.\n", \
