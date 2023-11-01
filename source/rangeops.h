@@ -56,8 +56,8 @@ u32 rangeArenaAppend(RangeArena *range_arena, u32 new_size) {
 
 #define rangeArenaIndexPrint(range_arena, range_index) { \
     printf("start: %d, end: %d, length: %d, index: %d.\n", \
-            range_arena.ranges[range_index].start, \
-            range_arena.ranges[range_index].end, \
-            range_arena.ranges[range_index].length, \
-            range_arena.ranges[range_index].index); \
+            ((Range *)range_arena->ranges.data)[range_index].start, \
+            ((Range *)range_arena->ranges.data)[range_index].end, \
+            ((Range *)range_arena->ranges.data)[range_index].length, \
+            ((Range *)range_arena->ranges.data)[range_index].index); \
 }

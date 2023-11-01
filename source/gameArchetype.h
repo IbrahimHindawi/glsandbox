@@ -278,10 +278,10 @@ int boxAABBCollision(vec4 boxa, vec4 boxb) {
 
 // vec4 box {x, y, w, h}
 int boxAABBCollision2(vec3 posa, vec3 scla, vec3 posb, vec3 sclb) {
-    if (posa[0] < posb[0] + sclb[0] &&
-        posa[0] + scla[0] > posb[0] &&
-        posa[1] < posb[1] + sclb[2] &&
-        posa[1] + scla[2] > posb[1]) {
+    if (posa[0] < posb[0] +       sclb[0] * 2.f &&
+        posa[0] + scla[0] * 2.f > posb[0]       &&
+        posa[1] < posb[1] +       sclb[2] * 2.f &&
+        posa[1] + scla[2] * 2.f > posb[1]) {
         return 1;
     } else {
         return 0;
