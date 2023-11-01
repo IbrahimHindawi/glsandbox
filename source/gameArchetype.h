@@ -13,6 +13,9 @@
 #include "hkArray.h"
 #include "rangeops.h"
 
+#define getComponent(reference, type, attribute) (type *)reference.attribute.data
+#define getComponentPtr(reference, type, attribute) (type *)reference->attribute.data
+
 typedef struct {
     // graphics
     hkArray vao; // u32
@@ -273,14 +276,28 @@ int boxAABBCollision(vec4 boxa, vec4 boxb) {
     }
 }
 
-i32 gameArchetypeCheckCollisions(GameArchetype *archetypeA, GameArchetype *archetypeB) {
+// vec4 box {x, y, w, h}
+int boxAABBCollision2(vec3 posa, vec3 scla, vec3 posb, vec3 sclb) {
+    if (posa[0] < posb[0] + sclb[0] &&
+        posa[0] + scla[0] > posb[0] &&
+        posa[1] < posb[1] + sclb[2] &&
+        posa[1] + scla[2] > posb[1]) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+// i32 gameArchetypeCheckCollisions(GameArchetype *archetypeA, GameArchetype *archetypeB) {
+i32 gameArchetypeCheckCollisions(u32 na, vec4 *boxa, u32 nb, vec4 *boxb) {
+    /*
     const i64 na = archetypeA->index_count.length;
     vec4 *boxa = (vec4 *)archetypeA->box.data;
 
     const i64 nb = archetypeB->index_count.length;
     vec4 *boxb = (vec4 *)archetypeB->box.data;
+    */
     // printf("%lld, %lld\n", na, nb);
-
     i32 coll_id = -1;
     for(i32 i = 0; i < na; ++i) {
         for(i32 j = 0; j < nb; ++j) {
@@ -303,6 +320,39 @@ collision_exit:
     // printf("returned collision id = %d\n", coll_id);
     return coll_id;
 }
+
+i32 gameArchetypeCheckCollisions2(vec3 *posa, vec3 *scla, Range na, vec3 *posb, vec3 *sclb, Range nb) {// u32 na, vec4 *boxa, u32 nb, vec4 *boxb) {
+    /*
+    const i64 na = archetypeA->index_count.length;
+    vec4 *boxa = (vec4 *)archetypeA->box.data;
+
+    const i64 nb = archetypeB->index_count.length;
+    vec4 *boxb = (vec4 *)archetypeB->box.data;
+    */
+    // printf("%lld, %lld\n", na, nb);
+    i32 coll_id = -1;
+    for(i32 i = na.start; i < na.end; ++i) {
+        for(i32 j = nb.start; j < nb.end; ++j) {
+            if(boxAABBCollision2(posa[i], scla[i], posb[j], sclb[j])) {
+                // printf("boxa {%f, %f, %f, %f}\n", boxa[i][0], boxa[i][1], boxa[i][2], boxa[i][3]);
+                // printf("boxb {%f, %f, %f, %f}\n", boxb[j][0], boxb[j][1], boxb[j][2], boxb[j][3]);
+                // printf("HIT!\n");
+                coll_id = j;
+                // printf("collision id = %d\n", coll_id);
+                // break;
+                goto collision_exit;
+            } else {
+                coll_id = -1;
+            }
+        }
+        // printf("{%f, %f, %f, %f}\n", box[i][0], box[i][1], box[i][2], box[i][3]);
+    }
+collision_exit:
+    // printf("\n");
+    // printf("returned collision id = %d\n", coll_id);
+    return coll_id;
+}
+
 
 void archetypeUpdateTransforms(vec3 *position_data, vec3 *rotation_data, vec3 *scale_data, mat4 *model_data, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {

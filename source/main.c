@@ -322,28 +322,36 @@ void update() {
                         (vec3 *)box_archetype.position.data,
                         ((Range *)range_arena_box->ranges.data)[id.colliders]);
     // finalize transformation matrices
-    archetypeUpdateTransforms((vec3 *)game_archetype.position.data,
-                              (vec3 *)game_archetype.rotation.data,
-                              (vec3 *)game_archetype.scale.data,
-                              (mat4 *)game_archetype.model.data,
-                              (Range){0, range_arena_game->border});
-    archetypeUpdateTransforms((vec3 *)box_archetype.position.data,
-                              (vec3 *)box_archetype.rotation.data,
-                              (vec3 *)box_archetype.scale.data,
-                              (mat4 *)box_archetype.model.data,
-                              ((Range *)range_arena_box->ranges.data)[id.colliders]);
+    archetypeUpdateTransforms(
+        (vec3 *)game_archetype.position.data,
+        (vec3 *)game_archetype.rotation.data,
+        (vec3 *)game_archetype.scale.data,
+        (mat4 *)game_archetype.model.data,
+        (Range){0, range_arena_game->border});
+    archetypeUpdateTransforms(
+        (vec3 *)box_archetype.position.data,
+        (vec3 *)box_archetype.rotation.data,
+        (vec3 *)box_archetype.scale.data,
+        (mat4 *)box_archetype.model.data,
+        ((Range *)range_arena_box->ranges.data)[id.colliders]);
 
-//     {
-//         // check collisions
-//         i32 coll_id = gameArchetypeCheckCollisions(&game_archetype, &game_archetype);
-//         // printf("collision id = %d\n", coll_id);
-//         if (coll_id != -1) {
-//             ((vec3 *)game_archetype.position.data)[coll_id][0] = -1000.f;
-//             ((vec3 *)game_archetype.position.data)[coll_id][1] = -1000.f;
-//             // printf("collision id = %d\n", coll_id);
-//             coll_id = -1;
-//         }
-//     }
+    {
+        // check collisions
+        i32 coll_id = gameArchetypeCheckCollisions2(
+                (vec3 *)box_archetype.position.data,
+                (vec3 *)box_archetype.scale.data,
+                ((Range *)range_arena_game->ranges.data)[id.hero],
+                (vec3 *)box_archetype.position.data,
+                (vec3 *)box_archetype.scale.data,
+                ((Range *)range_arena_game->ranges.data)[id.enemy]);
+        // printf("collision id = %d\n", coll_id);
+        if (coll_id != -1) {
+            ((vec3 *)game_archetype.position.data)[coll_id][0] = -1000.f;
+            ((vec3 *)game_archetype.position.data)[coll_id][1] = -1000.f;
+            // printf("collision id = %d\n", coll_id);
+            coll_id = -1;
+        }
+    }
 //     {
 //         // check collisions
 //         i32 coll_id = gameArchetypeCheckCollisions(&game_archetype, &game_archetype);
@@ -367,18 +375,20 @@ void render() {
     // bind
     // gameArchetypeRenderBG(&archetype_plane, shader_program_starfield, view, proj);
 
-    archetypeRender((u32 *)game_archetype.vao.data,
-                    (u32 *)game_archetype.shader_program.data,
-                    (u32 *)game_archetype.texture.data,
-                    (u32 *)game_archetype.index_count.data,
-                    (mat4 *)game_archetype.model.data,
-                    view, proj, (Range){0, range_arena_game->border});
-    archetypeRenderWires((u32 *)box_archetype.vao.data,
-                    (u32 *)box_archetype.shader_program.data,
-                    (u32 *)box_archetype.texture.data,
-                    (u32 *)box_archetype.index_count.data,
-                    (mat4 *)box_archetype.model.data,
-                    view, proj, (Range){0, range_arena_box->border});
+    archetypeRender(
+            getComponent(game_archetype, u32, vao),
+            getComponent(game_archetype, u32, shader_program),
+            getComponent(game_archetype, u32, texture),
+            getComponent(game_archetype, u32, index_count),
+            getComponent(game_archetype, mat4, model),
+            view, proj, (Range){0, range_arena_game->border});
+    archetypeRenderWires(
+            getComponent(box_archetype, u32, vao),
+            getComponent(box_archetype, u32, shader_program),
+            getComponent(box_archetype, u32, texture),
+            getComponent(box_archetype, u32, index_count),
+            getComponent(box_archetype, mat4, model),
+            view, proj, (Range){0, range_arena_box->border});
                     // view, proj, range_arena_box->ranges[id.colliders]);
     // gameArchetypeRenderBoxes(&game_archetype, shader_program_projectile, view, proj, texture2);
 
