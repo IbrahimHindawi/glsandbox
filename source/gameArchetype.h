@@ -276,18 +276,6 @@ int boxAABBCollision(vec4 boxa, vec4 boxb) {
     }
 }
 
-// vec4 box {x, y, w, h}
-int boxAABBCollision2(vec3 posa, vec3 scla, vec3 posb, vec3 sclb) {
-    if (posa[0] < posb[0] +       sclb[0] * 2.f &&
-        posa[0] + scla[0] * 2.f > posb[0]       &&
-        posa[1] < posb[1] +       sclb[2] * 2.f &&
-        posa[1] + scla[2] * 2.f > posb[1]) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
 // i32 gameArchetypeCheckCollisions(GameArchetype *archetypeA, GameArchetype *archetypeB) {
 i32 gameArchetypeCheckCollisions(u32 na, vec4 *boxa, u32 nb, vec4 *boxb) {
     /*
@@ -319,6 +307,18 @@ collision_exit:
     // printf("\n");
     // printf("returned collision id = %d\n", coll_id);
     return coll_id;
+}
+
+// vec4 box {x, y, w, h}
+int boxAABBCollision2(vec3 posa, vec3 scla, vec3 posb, vec3 sclb) {
+    if (posa[0] < posb[0] +       sclb[0] * 2.f &&
+        posa[0] + scla[0] * 2.f > posb[0]       &&
+        posa[1] < posb[1] +       sclb[2] * 2.f &&
+        posa[1] + scla[2] * 2.f > posb[1]) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 i32 gameArchetypeCheckCollisions2(vec3 *posa, vec3 *scla, const Range na, vec3 *posb, vec3 *sclb, const Range nb) {// u32 na, vec4 *boxa, u32 nb, vec4 *boxb) {
@@ -446,9 +446,9 @@ void gameArchetypeRenderBG(GameArchetype *archetype, u32 shader_program, mat4 vi
 
 void archetypeSpawnProjectileAtEntity(i32 *current_projectile_pool_index, const vec3 *source_position, i32 id, vec3 *dest_position, const i32 offset, const i32 projectile_length) {
     // static i32 current_projectile_pool_index = 0;
-    printf("%d\n", *current_projectile_pool_index);
-    printf("%d\n", *current_projectile_pool_index+offset);
-    printf("%p\n", current_projectile_pool_index);
+    // printf("%d\n", *current_projectile_pool_index);
+    // printf("%d\n", *current_projectile_pool_index+offset);
+    // printf("%p\n", current_projectile_pool_index);
     *current_projectile_pool_index = (*current_projectile_pool_index + 1) % projectile_length; // + offset;
     dest_position[*current_projectile_pool_index + offset][0] = source_position[id][0];
     dest_position[*current_projectile_pool_index + offset][1] = source_position[id][1];

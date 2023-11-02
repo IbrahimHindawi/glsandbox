@@ -45,6 +45,7 @@ int frameDelay;
 
 // ECS
 ///////////////////////////////////
+#define MAX 1024
 GameArchetype game_archetype;
 RangeArena *range_arena_game;
 
@@ -55,7 +56,6 @@ GameArchetype archetype_plane;
 
 // GAME
 ///////////////////////////////////
-#define MaxEntityCount 1024
 typedef struct {
     u32 enemy;
     u32 hero;
@@ -86,7 +86,7 @@ void setup() {
     // MESH
     /////////////////////
     current_projectile_pool_index = malloc(sizeof(i32));
-    printf("current_projectile_pool_index address: %p\n", current_projectile_pool_index);
+    // printf("current_projectile_pool_index address: %p\n", current_projectile_pool_index);
     *current_projectile_pool_index = 0;
     MeshRawDataArray[Ship] = MeshDataInitialize(ship_vertices, sizeofarray(ship_vertices, f32), ship_indices, sizeofarray(ship_indices, u32));
     MeshRawDataArray[Streak] = MeshDataInitialize(streak_vertices, sizeofarray(streak_vertices, f32), streak_indices, sizeofarray(streak_indices, u32));
@@ -127,8 +127,8 @@ void setup() {
 
     //  SETUP_GAME_ARCHETYPES
     //-------------------------------------------
-    gameArchetypeAllocate(&game_archetype, MaxEntityCount);
-    range_arena_game = rangeArenaAllocate(MaxEntityCount);
+    gameArchetypeAllocate(&game_archetype, MAX);
+    range_arena_game = rangeArenaAllocate(MAX);
 
     id.enemy = rangeArenaInitalize(range_arena_game, 7);
     rangeArenaIndexPrint(range_arena_game, id.enemy);
@@ -202,8 +202,8 @@ void setup() {
 
     //  SETUP_BOX_ARCHETYPES
     //-------------------------------------------
-    boxArchetypeAllocate(&box_archetype, MaxEntityCount);
-    range_arena_box = rangeArenaAllocate(MaxEntityCount);
+    boxArchetypeAllocate(&box_archetype, MAX);
+    range_arena_box = rangeArenaAllocate(MAX);
 
     id.colliders = rangeArenaInitalize(range_arena_box, range_arena_game->border);
     rangeArenaIndexPrint(range_arena_box, id.colliders);
@@ -367,9 +367,11 @@ void update() {
     {
         // check collisions
         i32 coll_id = gameArchetypeCheckCollisions2(
+                // A
                 (vec3 *)box_archetype.position.data,
                 (vec3 *)box_archetype.scale.data,
                 ((Range *)range_arena_game->ranges.data)[id.hero],
+                // B
                 (vec3 *)box_archetype.position.data,
                 (vec3 *)box_archetype.scale.data,
                 ((Range *)range_arena_game->ranges.data)[id.enemy]);
@@ -381,26 +383,26 @@ void update() {
             coll_id = -1;
         }
     }
-//     {
-//         // check collisions
-//         i32 coll_id = gameArchetypeCheckCollisions2(
-//                 // A
-//                 (vec3 *)box_archetype.position.data,
-//                 (vec3 *)box_archetype.scale.data,
-//                 ((Range *)range_arena_box->ranges.data)[id.projectile],
-//                 // B
-//                 (vec3 *)box_archetype.position.data,
-//                 (vec3 *)box_archetype.scale.data,
-//                 ((Range *)range_arena_game->ranges.data)[id.enemy]);
-//         // printf("collision id = %d\n", coll_id);
-//         if (coll_id != -1) {
-//             // printf("hit collision id = %d\n", coll_id);
-//             ((vec3 *)game_archetype.position.data)[coll_id][0] = -1000.f;
-//             ((vec3 *)game_archetype.position.data)[coll_id][1] = -1000.f;
-//             // printf("collision id = %d\n", coll_id);
-//             coll_id = -1;
-//         }
-//     }
+    {
+        // check collisions
+        i32 coll_id = gameArchetypeCheckCollisions2(
+                // A
+                (vec3 *)box_archetype.position.data,
+                (vec3 *)box_archetype.scale.data,
+                ((Range *)range_arena_game->ranges.data)[id.projectile],
+                // B
+                (vec3 *)box_archetype.position.data,
+                (vec3 *)box_archetype.scale.data,
+                ((Range *)range_arena_game->ranges.data)[id.enemy]);
+        // printf("collision id = %d\n", coll_id);
+        if (coll_id != -1) {
+            // printf("hit collision id = %d\n", coll_id);
+            ((vec3 *)game_archetype.position.data)[coll_id][0] = -1000.f;
+            ((vec3 *)game_archetype.position.data)[coll_id][1] = -1000.f;
+            // printf("collision id = %d\n", coll_id);
+            coll_id = -1;
+        }
+    }
 }
 
 void render() {
