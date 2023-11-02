@@ -321,15 +321,7 @@ collision_exit:
     return coll_id;
 }
 
-i32 gameArchetypeCheckCollisions2(vec3 *posa, vec3 *scla, Range na, vec3 *posb, vec3 *sclb, Range nb) {// u32 na, vec4 *boxa, u32 nb, vec4 *boxb) {
-    /*
-    const i64 na = archetypeA->index_count.length;
-    vec4 *boxa = (vec4 *)archetypeA->box.data;
-
-    const i64 nb = archetypeB->index_count.length;
-    vec4 *boxb = (vec4 *)archetypeB->box.data;
-    */
-    // printf("%lld, %lld\n", na, nb);
+i32 gameArchetypeCheckCollisions2(vec3 *posa, vec3 *scla, const Range na, vec3 *posb, vec3 *sclb, const Range nb) {// u32 na, vec4 *boxa, u32 nb, vec4 *boxb) {
     i32 coll_id = -1;
     for(i32 i = na.start; i < na.end; ++i) {
         for(i32 j = nb.start; j < nb.end; ++j) {
@@ -452,14 +444,15 @@ void gameArchetypeRenderBG(GameArchetype *archetype, u32 shader_program, mat4 vi
     }
 }
 
-void archetypeSpawnProjectileAtEntity(const vec3 *source_position, i32 id, vec3 *dest_position, i32 offset, const i32 projectile_length) {
-    static i32 current_projectile_pool_index = 0;
-    printf("%d\n", current_projectile_pool_index);
-    printf("%d\n", current_projectile_pool_index+offset);
-    current_projectile_pool_index = (current_projectile_pool_index + 1) % projectile_length; // + offset;
-    dest_position[current_projectile_pool_index + offset][0] = source_position[id][0];
-    dest_position[current_projectile_pool_index + offset][1] = source_position[id][1];
-    dest_position[current_projectile_pool_index + offset][2] = source_position[id][2];
+void archetypeSpawnProjectileAtEntity(i32 *current_projectile_pool_index, const vec3 *source_position, i32 id, vec3 *dest_position, const i32 offset, const i32 projectile_length) {
+    // static i32 current_projectile_pool_index = 0;
+    printf("%d\n", *current_projectile_pool_index);
+    printf("%d\n", *current_projectile_pool_index+offset);
+    printf("%p\n", current_projectile_pool_index);
+    *current_projectile_pool_index = (*current_projectile_pool_index + 1) % projectile_length; // + offset;
+    dest_position[*current_projectile_pool_index + offset][0] = source_position[id][0];
+    dest_position[*current_projectile_pool_index + offset][1] = source_position[id][1];
+    dest_position[*current_projectile_pool_index + offset][2] = source_position[id][2];
     return;
 }
 

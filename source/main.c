@@ -63,6 +63,7 @@ typedef struct {
     u32 colliders;
 } Id;
 Id id;
+i32 *current_projectile_pool_index;
 
 u32 shader_program;
 u32 shader_program_starfield;
@@ -84,6 +85,9 @@ vec3 camera_direction = {0};
 void setup() {
     // MESH
     /////////////////////
+    current_projectile_pool_index = malloc(sizeof(i32));
+    printf("current_projectile_pool_index address: %p\n", current_projectile_pool_index);
+    *current_projectile_pool_index = 0;
     MeshRawDataArray[Ship] = MeshDataInitialize(ship_vertices, sizeofarray(ship_vertices, f32), ship_indices, sizeofarray(ship_indices, u32));
     MeshRawDataArray[Streak] = MeshDataInitialize(streak_vertices, sizeofarray(streak_vertices, f32), streak_indices, sizeofarray(streak_indices, u32));
     MeshRawDataArray[Plane] = MeshDataInitialize(box_vertices, sizeofarray(box_vertices, f32), box_indices, sizeofarray(box_indices, u32));
@@ -266,7 +270,16 @@ void input() {
                     }
                 } else if(event.key.keysym.sym == SDLK_SPACE) {
                     for(i32 i = s; i < n; ++i) {
+                        // printf("%s", "enemy: ");
+                        // rangeArenaIndexPrint(range_arena_game, id.enemy);
+                        // printf("%s", "hero: ");
+                        // rangeArenaIndexPrint(range_arena_game, id.hero);
+                        // printf("%s", "proj: ");
+                        // rangeArenaIndexPrint(range_arena_game, id.projectile);
+                        // printf("%s", "coll: ");
+                        // rangeArenaIndexPrint(range_arena_box, id.colliders);
                         archetypeSpawnProjectileAtEntity(
+                                current_projectile_pool_index,
                                 (vec3 *)game_archetype.position.data, s, 
                                 (vec3 *)game_archetype.position.data, 
                                 ((Range *)range_arena_game->ranges.data)[id.projectile].start, 
@@ -368,26 +381,26 @@ void update() {
             coll_id = -1;
         }
     }
-    {
-        // check collisions
-        i32 coll_id = gameArchetypeCheckCollisions2(
-                // A
-                (vec3 *)box_archetype.position.data,
-                (vec3 *)box_archetype.scale.data,
-                ((Range *)range_arena_box->ranges.data)[id.projectile],
-                // B
-                (vec3 *)game_archetype.position.data,
-                (vec3 *)game_archetype.scale.data,
-                ((Range *)range_arena_game->ranges.data)[id.enemy]);
-        // printf("collision id = %d\n", coll_id);
-        if (coll_id != -1) {
-            // printf("hit collision id = %d\n", coll_id);
-            ((vec3 *)game_archetype.position.data)[coll_id][0] = -1000.f;
-            ((vec3 *)game_archetype.position.data)[coll_id][1] = -1000.f;
-            // printf("collision id = %d\n", coll_id);
-            coll_id = -1;
-        }
-    }
+//     {
+//         // check collisions
+//         i32 coll_id = gameArchetypeCheckCollisions2(
+//                 // A
+//                 (vec3 *)box_archetype.position.data,
+//                 (vec3 *)box_archetype.scale.data,
+//                 ((Range *)range_arena_box->ranges.data)[id.projectile],
+//                 // B
+//                 (vec3 *)box_archetype.position.data,
+//                 (vec3 *)box_archetype.scale.data,
+//                 ((Range *)range_arena_game->ranges.data)[id.enemy]);
+//         // printf("collision id = %d\n", coll_id);
+//         if (coll_id != -1) {
+//             // printf("hit collision id = %d\n", coll_id);
+//             ((vec3 *)game_archetype.position.data)[coll_id][0] = -1000.f;
+//             ((vec3 *)game_archetype.position.data)[coll_id][1] = -1000.f;
+//             // printf("collision id = %d\n", coll_id);
+//             coll_id = -1;
+//         }
+//     }
 }
 
 void render() {
@@ -398,7 +411,6 @@ void render() {
     glEnable(GL_DEPTH_TEST);
     // bind
     // gameArchetypeRenderBG(&archetype_plane, shader_program_starfield, view, proj);
-
     archetypeRender(
             getComponent(game_archetype, u32, vao),
             getComponent(game_archetype, u32, shader_program),
@@ -415,7 +427,6 @@ void render() {
             view, proj, (Range){0, range_arena_box->border});
                     // view, proj, range_arena_box->ranges[id.colliders]);
     // gameArchetypeRenderBoxes(&game_archetype, shader_program_projectile, view, proj, texture2);
-
     // end
     SDL_GL_SwapWindow(window);
 }

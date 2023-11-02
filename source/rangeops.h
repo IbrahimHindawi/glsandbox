@@ -3,7 +3,7 @@
 #include "core.h"
 #include "hkArray.h"
 
-#define RangeIdsLength 256
+#define MAX 256
 
 typedef struct {
     i32 start;
@@ -33,7 +33,7 @@ RangeArena *rangeArenaAllocate(u64 count) {
 
 u32 rangeArenaInitalize(RangeArena *range_arena, u32 new_size) {
     range_arena->border += new_size;
-    range_arena->ranges = hkArrayCreate(sizeof(Range), 1);
+    range_arena->ranges = hkArrayCreate(sizeof(Range), MAX);
     ((Range *)range_arena->ranges.data)[0] = (Range) { 
         .end = new_size, 
         .length = new_size 
@@ -44,6 +44,7 @@ u32 rangeArenaInitalize(RangeArena *range_arena, u32 new_size) {
 u32 rangeArenaAppend(RangeArena *range_arena, u32 new_size) {
     u32 old_size = range_arena->border;
     range_arena->border += new_size;
+    assert(range_arena->border < MAX);
     range_arena->last_index += 1;
     ((Range *)range_arena->ranges.data)[range_arena->last_index] = (Range){ 
         .start = old_size, 
