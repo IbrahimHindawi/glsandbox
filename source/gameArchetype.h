@@ -454,10 +454,12 @@ void gameArchetypeRenderBG(GameArchetype *archetype, u32 shader_program, mat4 vi
 
 void archetypeSpawnProjectileAtEntity(const vec3 *source_position, i32 id, vec3 *dest_position, i32 offset, const i32 projectile_length) {
     static i32 current_projectile_pool_index = 0;
-    current_projectile_pool_index = (current_projectile_pool_index + 1) % projectile_length + offset;
-    dest_position[current_projectile_pool_index][0] = source_position[id][0];
-    dest_position[current_projectile_pool_index][1] = source_position[id][1];
-    dest_position[current_projectile_pool_index][2] = source_position[id][2];
+    printf("%d\n", current_projectile_pool_index);
+    printf("%d\n", current_projectile_pool_index+offset);
+    current_projectile_pool_index = (current_projectile_pool_index + 1) % projectile_length; // + offset;
+    dest_position[current_projectile_pool_index + offset][0] = source_position[id][0];
+    dest_position[current_projectile_pool_index + offset][1] = source_position[id][1];
+    dest_position[current_projectile_pool_index + offset][2] = source_position[id][2];
     return;
 }
 

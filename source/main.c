@@ -126,7 +126,7 @@ void setup() {
     gameArchetypeAllocate(&game_archetype, MaxEntityCount);
     range_arena_game = rangeArenaAllocate(MaxEntityCount);
 
-    id.enemy = rangeArenaInitalize(range_arena_game, 6);
+    id.enemy = rangeArenaInitalize(range_arena_game, 7);
     rangeArenaIndexPrint(range_arena_game, id.enemy);
     archetypeInitalizeMeshesShadersTextures(
             (u32 *)game_archetype.vao.data, MeshVAOArray[Ship], 
@@ -231,16 +231,12 @@ void setup() {
                                       (vec3){20.f, 20.f, 20.f},
                                       archetype_plane.index_count.length);
     */
-
-    // gameArchetypeInitializeCollisionBoxes(&game_archetype, 3.f, 3.f, 0.f, 0.f);
-    // gameArchetypeInitializeCollisionBoxes(&game_archetype, 3.f, 3.f, 0.f, 0.f);
-    // gameArchetypeInitializeCollisionBoxes(&game_archetype, 1.f, 1.f, 0.f, 0.f);
 }
 
 void input() {
     vec3 *velocity = ((vec3 *)game_archetype.velocity.data);
-    const i32 s = 6;
-    const i32 n = 7; // game_archetype.index_count.length; 
+    const i32 s = ((Range *)range_arena_game->ranges.data)[id.hero].start;
+    const i32 n = ((Range *)range_arena_game->ranges.data)[id.hero].end;
     const f32 base = 1.f;
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -372,18 +368,26 @@ void update() {
             coll_id = -1;
         }
     }
-//     {
-//         // check collisions
-//         i32 coll_id = gameArchetypeCheckCollisions(&game_archetype, &game_archetype);
-//         // printf("collision id = %d\n", coll_id);
-//         if (coll_id != -1) {
-//             // printf("hit collision id = %d\n", coll_id);
-//             ((vec3 *)game_archetype.position.data)[coll_id][0] = -1000.f;
-//             ((vec3 *)game_archetype.position.data)[coll_id][1] = -1000.f;
-//             // printf("collision id = %d\n", coll_id);
-//             coll_id = -1;
-//         }
-//     }
+    {
+        // check collisions
+        i32 coll_id = gameArchetypeCheckCollisions2(
+                // A
+                (vec3 *)box_archetype.position.data,
+                (vec3 *)box_archetype.scale.data,
+                ((Range *)range_arena_box->ranges.data)[id.projectile],
+                // B
+                (vec3 *)game_archetype.position.data,
+                (vec3 *)game_archetype.scale.data,
+                ((Range *)range_arena_game->ranges.data)[id.enemy]);
+        // printf("collision id = %d\n", coll_id);
+        if (coll_id != -1) {
+            // printf("hit collision id = %d\n", coll_id);
+            ((vec3 *)game_archetype.position.data)[coll_id][0] = -1000.f;
+            ((vec3 *)game_archetype.position.data)[coll_id][1] = -1000.f;
+            // printf("collision id = %d\n", coll_id);
+            coll_id = -1;
+        }
+    }
 }
 
 void render() {
