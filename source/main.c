@@ -57,7 +57,7 @@ RangeArena *range_arena_game;
 typedef struct {
     u32 hero;
     u32 enemy;
-    u32 projectile;
+    u32 projectile_hero;
     u32 projectile_enemy;
 } Id;
 Id id;
@@ -98,8 +98,8 @@ void setup() {
     //  SHADER
     /////////////////////////////////////////////
     shader_create(&shader_program, "resource/simple.vert", "resource/simple.frag");
-    shader_create(&shader_program_starfield, "resource/starfield.vert", "resource/starfield.frag");
-    shader_create(&shader_program_projectile, "resource/projectile.vert", "resource/projectile.frag");
+    shader_create(&shader_program_starfield, "resource/simple.vert", "resource/starfield.frag");
+    shader_create(&shader_program_projectile, "resource/simple.vert", "resource/projectile.frag");
     shader_create(&shader_program_box, "resource/simple.vert", "resource/box.frag");
 
     // TEXTURE
@@ -133,7 +133,7 @@ void setup() {
     id.hero = rangeArenaInitalize(range_arena_game, 1);
     rangeArenaIndexPrint(range_arena_game, id.hero);
     Range *hero_range = &((Range *)range_arena_game->ranges.data)[id.hero];
-    // Mesh
+    // Game
     archetypeInitalizeMeshesShadersTextures(
             (u32 *)game_archetype.vaos.data, MeshVAOArray[Plane], 
             (u32 *)game_archetype.index_counts.data, MeshRawDataArray[Plane].indices_count, 
@@ -144,14 +144,14 @@ void setup() {
             (vec3 *)game_archetype.positions.data,
             (vec3 *)game_archetype.rotations.data,
             (vec3 *)game_archetype.scales.data,
-            (vec3){0.f, 0.f, 0.f}, 
+            (vec3){0.f, -3.f, 0.f}, 
             (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
             (vec3){.35f, 1.f, .35f},
             *hero_range);
     archetypeInitializeSpeeds(
             (f32 *)game_archetype.speeds.data, 6.0f, 
             *hero_range);
-    // Box
+    // Graphics
     archetypeInitalizeMeshesShadersTextures(
             (u32 *)graphics_archetype.vaos.data, MeshVAOArray[Ship],
             (u32 *)graphics_archetype.index_counts.data, MeshRawDataArray[Ship].indices_count,
@@ -162,16 +162,15 @@ void setup() {
             (vec3 *)graphics_archetype.positions.data,
             (vec3 *)graphics_archetype.rotations.data,
             (vec3 *)graphics_archetype.scales.data,
-            (vec3){0.f, -3.f, 0.f}, 
+            (vec3){0.f, 0.f, 0.f}, 
             (vec3){pi * 0.5f, pi, 0.f}, 
             (vec3){.15f, .15f, .15f},
             *hero_range);
 
-
-    id.projectile = rangeArenaAppend(range_arena_game, 8);
-    rangeArenaIndexPrint(range_arena_game, id.projectile);
-    Range *projectile_range = &((Range *)range_arena_game->ranges.data)[id.projectile];
-    // Mesh
+    id.projectile_hero = rangeArenaAppend(range_arena_game, 8);
+    rangeArenaIndexPrint(range_arena_game, id.projectile_hero);
+    Range *projectile_range = &((Range *)range_arena_game->ranges.data)[id.projectile_hero];
+    // Game
     archetypeInitalizeMeshesShadersTextures(
             (u32 *)game_archetype.vaos.data, MeshVAOArray[Plane],
             (u32 *)game_archetype.index_counts.data, MeshRawDataArray[Plane].indices_count,
@@ -186,7 +185,15 @@ void setup() {
             (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
             (vec3){.05f, 1.f, .15f},
             *projectile_range);
-    // Box
+    archetypeInitializeSpeeds(
+            (f32 *)game_archetype.speeds.data, 
+            8.0f, 
+            *projectile_range);
+    archetypeInitializeVelocities(
+            game_archetype.velocities.data, 
+            (vec3){0.f, 1.f, 0.f}, 
+            *projectile_range);
+    // Graphics
     archetypeInitalizeMeshesShadersTextures(
             (u32 *)graphics_archetype.vaos.data, MeshVAOArray[Streak],
             (u32 *)graphics_archetype.index_counts.data, MeshRawDataArray[Streak].indices_count,
@@ -205,7 +212,7 @@ void setup() {
     id.enemy = rangeArenaAppend(range_arena_game, 1);
     rangeArenaIndexPrint(range_arena_game, id.enemy);
     Range *enemy_range = &((Range *)range_arena_game->ranges.data)[id.enemy];
-    // Mesh
+    // Game
     archetypeInitalizeMeshesShadersTextures(
             (u32 *)game_archetype.vaos.data, MeshVAOArray[Plane], 
             (u32 *)game_archetype.index_counts.data, MeshRawDataArray[Plane].indices_count, 
@@ -216,18 +223,24 @@ void setup() {
             (vec3 *)game_archetype.positions.data,
             (vec3 *)game_archetype.rotations.data,
             (vec3 *)game_archetype.scales.data,
-            (vec3){0.f, 0.f, 0.f}, 
+            (vec3){0.f, 3.f, 0.f}, 
             (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
             (vec3){.35f, 1.f, .35f},
             *enemy_range);
     // archetypeInitializePositionsAsLine(
     //         (vec3 *)game_archetype.positions.data, 2.f, 1.f, 
     //         ((Range *)range_arena_game->ranges.data)[id.enemy]);
+    /*
     archetypeInitializeSpeeds(
-            (f32 *)game_archetype.speeds.data, 3.0f, 
+            (f32 *)game_archetype.speeds.data, 
+            3.0f, 
             *enemy_range);
-    // archetypeInitializeVelocities(&game_archetype, (vec3){0.f, -1.f, 0.f}, ((Range *)range_arena_game->ranges.data)[id.enemy]);
-    // Box
+    archetypeInitializeVelocities(
+            game_archetype.velocities.data, 
+            (vec3){0.f, -1.f, 0.f}, 
+            *enemy_range);
+    */
+    // Graphics
     archetypeInitalizeMeshesShadersTextures(
             (u32 *)graphics_archetype.vaos.data, MeshVAOArray[Ship],
             (u32 *)graphics_archetype.index_counts.data, MeshRawDataArray[Ship].indices_count,
@@ -246,7 +259,7 @@ void setup() {
     id.projectile_enemy = rangeArenaAppend(range_arena_game, 1);
     rangeArenaIndexPrint(range_arena_game, id.enemy);
     Range *projectile_enemy_range = &((Range *)range_arena_game->ranges.data)[id.projectile_enemy];
-    // Mesh
+    // Game
     archetypeInitalizeMeshesShadersTextures(
             (u32 *)game_archetype.vaos.data, MeshVAOArray[Plane],
             (u32 *)game_archetype.index_counts.data, MeshRawDataArray[Plane].indices_count, 
@@ -259,17 +272,21 @@ void setup() {
             (vec3 *)game_archetype.scales.data,
             (vec3){0.f, 0.f, 0.f}, 
             (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
-            (vec3){.35f, 1.f, .35f},
+            (vec3){.05f, 1.f, .15f},
             *projectile_enemy_range);
     archetypeInitializeSpeeds(
-            (f32 *)game_archetype.speeds.data, 3.0f, 
+            (f32 *)game_archetype.speeds.data, 6.0f, 
+            *projectile_enemy_range);
+    archetypeInitializeVelocities(
+            (vec3 *)game_archetype.velocities.data, 
+            (vec3){0.0f, -1.f, 0.f},
             *projectile_enemy_range);
     // archetypeInitializeVelocities(&game_archetype, (vec3){0.f, -1.f, 0.f}, ((Range *)range_arena_game->ranges.data)[id.enemy]);
-    // Box
+    // Graphics
     archetypeInitalizeMeshesShadersTextures(
             (u32 *)graphics_archetype.vaos.data, MeshVAOArray[Streak],
             (u32 *)graphics_archetype.index_counts.data, MeshRawDataArray[Streak].indices_count,
-            (u32 *)graphics_archetype.shaders.data, shader_program,
+            (u32 *)graphics_archetype.shaders.data, shader_program_projectile,
             (u32 *)graphics_archetype.textures.data, texture,
             *projectile_enemy_range);
     archetypeInitializeTransforms(
@@ -277,10 +294,9 @@ void setup() {
             (vec3 *)graphics_archetype.rotations.data,
             (vec3 *)graphics_archetype.scales.data,
             (vec3){0.f, 0.f, 0.f}, 
-            (vec3){pi * 0.5, 0.f, 0.f}, 
-            (vec3){.15f, .15f, .15f},
+            (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
+            (vec3){.25f, 1.f, .25f},
             *projectile_enemy_range);
-
     return;
 }
 
@@ -322,15 +338,15 @@ void input() {
                         // printf("%s", "hero: ");
                         // rangeArenaIndexPrint(range_arena_game, id.hero);
                         // printf("%s", "proj: ");
-                        // rangeArenaIndexPrint(range_arena_game, id.projectile);
+                        // rangeArenaIndexPrint(range_arena_game, id.projectile_hero);
                         // printf("%s", "coll: ");
                         // rangeArenaIndexPrint(range_arena_game, id.colliders);
-                        // archetypeSpawnProjectileAtEntity(
-                        //         current_projectile_pool_index,
-                        //         (vec3 *)game_archetype.positions.data, s, 
-                        //         (vec3 *)game_archetype.positions.data, 
-                        //         ((Range *)range_arena_game->ranges.data)[id.projectile].start, 
-                        //         ((Range *)range_arena_game->ranges.data)[id.projectile].length);
+                        archetypeSpawnProjectileAtEntity(
+                                (i32 *)game_archetype.fire_indices.data, 
+                                (vec3 *)game_archetype.positions.data, s, 
+                                (vec3 *)game_archetype.positions.data, 
+                                ((Range *)range_arena_game->ranges.data)[id.projectile_hero].start, 
+                                ((Range *)range_arena_game->ranges.data)[id.projectile_hero].length);
                     }
                 }
                 break;
@@ -438,7 +454,7 @@ void update() {
                 // A
                 (vec3 *)graphics_archetype.positions.data,
                 (vec3 *)graphics_archetype.scales.data,
-                ((Range *)range_arena_game->ranges.data)[id.projectile],
+                ((Range *)range_arena_game->ranges.data)[id.projectile_hero],
                 // B
                 (vec3 *)graphics_archetype.positions.data,
                 (vec3 *)graphics_archetype.scales.data,

@@ -29,6 +29,7 @@ typedef struct {
     hkArray rotations; // vec3
     hkArray scales; // vec3
     hkArray models; // mat4
+    hkArray fire_indices; // u32
 } GameArchetype;
 
 void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
@@ -44,6 +45,7 @@ void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
     archetype->rotations = hkArrayCreate(sizeof(vec3), n);
     archetype->scales = hkArrayCreate(sizeof(vec3), n);
     archetype->models = hkArrayCreate(sizeof(mat4), n);
+    archetype->fire_indices = hkArrayCreate(sizeof(i32), n);
 }
 
 void gameArchetypeDeallocate(GameArchetype *archetype) {
@@ -202,10 +204,8 @@ void archetypeInitializeSpeeds(f32 *speeds, f32 input_speed, const Range range) 
     }
 }
 
-void archetypeInitializeVelocities(GameArchetype *archetype, vec3 v, const Range range) {
+void archetypeInitializeVelocities(vec3 *velocities, vec3 v, const Range range) {
     // initalize velocity
-    vec3 *velocities = (vec3 *)archetype->velocities.data;
-    const i32 n = (i32)archetype->index_counts.length;
     for(i32 i = range.start; i < range.end; ++i) {
         velocities[i][0] = v[0];
         velocities[i][1] = v[1];
