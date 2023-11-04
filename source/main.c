@@ -302,8 +302,8 @@ void setup() {
 
 void input() {
     vec3 *velocities = ((vec3 *)game_archetype.velocities.data);
-    const i32 s = ((Range *)range_arena_game->ranges.data)[id.hero].start;
-    const i32 n = ((Range *)range_arena_game->ranges.data)[id.hero].end;
+    const i32 hero_start = ((Range *)range_arena_game->ranges.data)[id.hero].start;
+    const i32 hero_end = ((Range *)range_arena_game->ranges.data)[id.hero].end;
     const f32 base = 1.f;
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -316,23 +316,23 @@ void input() {
                 if(event.key.keysym.sym == SDLK_ESCAPE) {
                     should_quit = true;
                 } else if(event.key.keysym.sym == SDLK_a) {
-                    for(i32 i = s; i < n; ++i) {
-                        velocities[s][0] = -base;
+                    for(i32 i = hero_start; i < hero_end; ++i) {
+                        velocities[hero_start][0] = -base;
                     }
                 } else if(event.key.keysym.sym == SDLK_d) {
-                    for(i32 i = s; i < n; ++i) {
-                        velocities[s][0] = base;
+                    for(i32 i = hero_start; i < hero_end; ++i) {
+                        velocities[hero_start][0] = base;
                     }
                 } else if(event.key.keysym.sym == SDLK_w) {
-                    for(i32 i = s; i < n; ++i) {
-                        velocities[s][1] = base;
+                    for(i32 i = hero_start; i < hero_end; ++i) {
+                        velocities[hero_start][1] = base;
                     }
                 } else if(event.key.keysym.sym == SDLK_s) {
-                    for(i32 i = s; i < n; ++i) {
-                        velocities[s][1] = -base;
+                    for(i32 i = hero_start; i < hero_end; ++i) {
+                        velocities[hero_start][1] = -base;
                     }
                 } else if(event.key.keysym.sym == SDLK_SPACE) {
-                    for(i32 i = s; i < n; ++i) {
+                    for(i32 i = hero_start; i < hero_end; ++i) {
                         // printf("%s", "enemy: ");
                         // rangeArenaIndexPrint(range_arena_game, id.enemy);
                         // printf("%s", "hero: ");
@@ -342,10 +342,9 @@ void input() {
                         // printf("%s", "coll: ");
                         // rangeArenaIndexPrint(range_arena_game, id.colliders);
                         archetypeSpawnProjectileAtEntity(
-                                (i32 *)game_archetype.fire_indices.data, 
-                                (vec3 *)game_archetype.positions.data, s, 
-                                (vec3 *)game_archetype.positions.data, 
-                                ((Range *)range_arena_game->ranges.data)[id.projectile_hero].start, 
+                                (i32 *)game_archetype.fire_indices.data, hero_start,
+                                (vec3 *)game_archetype.positions.data,
+                                ((Range *)range_arena_game->ranges.data)[id.projectile_hero].start,
                                 ((Range *)range_arena_game->ranges.data)[id.projectile_hero].length);
                     }
                 }
@@ -355,20 +354,20 @@ void input() {
                 if(event.key.keysym.sym == SDLK_ESCAPE) {
                     should_quit = true;
                 } else if(event.key.keysym.sym == SDLK_a) {
-                    for(i32 i = s; i < n; ++i) {
-                        if(velocities[s][0] < 0.f) velocities[s][0] = 0.f;
+                    for(i32 i = hero_start; i < hero_end; ++i) {
+                        if(velocities[hero_start][0] < 0.f) velocities[hero_start][0] = 0.f;
                     }
                 } else if(event.key.keysym.sym == SDLK_d) {
-                    for(i32 i = s; i < n; ++i) {
-                        if(velocities[s][0] > 0.f) velocities[s][0] = 0.f;
+                    for(i32 i = hero_start; i < hero_end; ++i) {
+                        if(velocities[hero_start][0] > 0.f) velocities[hero_start][0] = 0.f;
                     }
                 } else if(event.key.keysym.sym == SDLK_w) {
-                    for(i32 i = s; i < n; ++i) {
-                        if(velocities[s][1] > 0.f) velocities[s][1] = 0.f;
+                    for(i32 i = hero_start; i < hero_end; ++i) {
+                        if(velocities[hero_start][1] > 0.f) velocities[hero_start][1] = 0.f;
                     }
                 } else if(event.key.keysym.sym == SDLK_s) {
-                    for(i32 i = s; i < n; ++i) {
-                        if(velocities[s][1] < 0.f) velocities[s][1] = 0.f;
+                    for(i32 i = hero_start; i < hero_end; ++i) {
+                        if(velocities[hero_start][1] < 0.f) velocities[hero_start][1] = 0.f;
                     }
                 }
                 break;

@@ -402,37 +402,16 @@ void gameArchetypeRenderBG(GameArchetype *archetype, u32 shader_program, mat4 vi
     }
 }
 
-void archetypeSpawnProjectileAtEntity(i32 *current_projectile_pool_index, const vec3 *source_position, i32 id, vec3 *dest_position, const i32 offset, const i32 projectile_length) {
-    // static i32 current_projectile_pool_index = 0;
-    // printf("%d\n", *current_projectile_pool_index);
-    // printf("%d\n", *current_projectile_pool_index+offset);
-    // printf("%p\n", current_projectile_pool_index);
-    *current_projectile_pool_index = (*current_projectile_pool_index + 1) % projectile_length; // + offset;
-    dest_position[*current_projectile_pool_index + offset][0] = source_position[id][0];
-    dest_position[*current_projectile_pool_index + offset][1] = source_position[id][1];
-    dest_position[*current_projectile_pool_index + offset][2] = source_position[id][2];
+void archetypeSpawnProjectileAtEntity(i32 *fire_index_data, i32 id, vec3 *positions, const i32 offset, const i32 buffer_length) {
+    // static i32 fire_index_data = 0;
+    // printf("%d\n", *fire_index_data);
+    // printf("%d\n", *fire_index_data+offset);
+    // printf("%p\n", fire_index_data);
+    vec3 *source_position = positions;
+    vec3 *dest_position = positions;
+    *fire_index_data = (*fire_index_data + 1) % buffer_length; // + offset;
+    dest_position[*fire_index_data + offset][0] = source_position[id][0];
+    dest_position[*fire_index_data + offset][1] = source_position[id][1];
+    dest_position[*fire_index_data + offset][2] = source_position[id][2];
     return;
 }
-
-/*
-void gameSpawnProjectileAtEntity(const GameArchetype *archetype, GameArchetype *archetypeProjectile, i32 id) {
-    vec3 *archetypeposition = ((vec3 *)archetype->positions.data);
-    vec3 *projectile_position = ((vec3 *)archetypeProjectile->positions.data);
-    const i64 projectile_length = archetypeProjectile->index_counts.length; 
-    static i32 current_projectile_pool_index = 0;
-    projectile_position[current_projectile_pool_index][0] = archetypeposition[id][0];
-    projectile_position[current_projectile_pool_index][1] = archetypeposition[id][1];
-    projectile_position[current_projectile_pool_index][2] = archetypeposition[id][2];
-    current_projectile_pool_index = (current_projectile_pool_index + 1) % projectile_length;
-    // printf("%d\n", current_projectile_pool_index);
-    return;
-}
-
-void gameArchetypeSpawnProjectile(const GameArchetype *archetype, GameArchetype *archetypeProjectile) {
-    const i64 n = archetype->index_counts.length; 
-    for(i32 i = 0; i < n; ++i) {
-        gameSpawnProjectileAtEntity(archetype, archetypeProjectile, i);
-    }
-    return;
-}
-*/
