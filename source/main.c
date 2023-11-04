@@ -4,9 +4,9 @@
     #define SDL_MAIN_HANDLED
     // #define _CRT_SECURE_NO_WARNINGS
 #endif
+#include <SDL2/SDL.h>
 
 #include <glad/glad.h>
-#include <SDL2/SDL.h>
 
 #include <cglm/vec3.h>
 #include <cglm/affine.h>
@@ -14,16 +14,15 @@
 #include <cglm/mat4.h>
 #include <cglm/vec3.h>
 
+#include "core.h"
 
 #include "texops.h"
-#include "core.h"
 #include "shops.h"
 #include "fileops.h"
 #include "renderops.h"
 #include "meshops.h"
-
 #include "rangeops.h"
-// #include "mesh.h"
+
 #include "gameArchetype.h"
 
 // SYSTEM
@@ -49,8 +48,6 @@ int frameDelay;
 GameArchetype game_archetype;
 GraphicsArchetype graphics_archetype;
 RangeArena *range_arena_game;
-
-// GameArchetype archetype_plane;
 
 // GAME
 ///////////////////////////////////
