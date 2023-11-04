@@ -72,9 +72,9 @@ typedef struct {
     hkArray rotation; // vec3
     hkArray scale; // vec3
     hkArray model; // mat4
-} BoxArchetype;
+} GraphicsArchetype;
 
-void boxArchetypeAllocate(BoxArchetype *archetype, i32 n) {
+void boxArchetypeAllocate(GraphicsArchetype *archetype, i32 n) {
     // game
     archetype->vao = hkArrayCreate(sizeof(u32), n);
     archetype->index_count = hkArrayCreate(sizeof(u32), n);
@@ -87,7 +87,7 @@ void boxArchetypeAllocate(BoxArchetype *archetype, i32 n) {
     archetype->model = hkArrayCreate(sizeof(mat4), n);
 }
 
-void boxArchetypeDeallocate(BoxArchetype *archetype) {
+void boxArchetypeDeallocate(GraphicsArchetype *archetype) {
     // game
     hkArrayDestroy(&archetype->vao);
     hkArrayDestroy(&archetype->index_count);
