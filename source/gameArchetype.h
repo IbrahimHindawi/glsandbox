@@ -18,86 +18,86 @@
 
 typedef struct {
     // graphics
-    hkArray vao; // u32
-    hkArray index_count; // u32
-    hkArray shader_program; // u32
-    hkArray texture; // u32
+    hkArray vaos; // u32
+    hkArray index_counts; // u32
+    hkArray shaders; // u32
+    hkArray textures; // u32
     // game
-    hkArray speed; // f32 
-    hkArray velocity; // vec3
-    hkArray position; // vec3
-    hkArray rotation; // vec3
-    hkArray scale; // vec3
-    hkArray model; // mat4
+    hkArray speeds; // f32 
+    hkArray velocities; // vec3
+    hkArray positions; // vec3
+    hkArray rotations; // vec3
+    hkArray scales; // vec3
+    hkArray models; // mat4
 } GameArchetype;
 
 void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
     // game
-    archetype->vao = hkArrayCreate(sizeof(u32), n);
-    archetype->index_count = hkArrayCreate(sizeof(u32), n);
-    archetype->shader_program = hkArrayCreate(sizeof(u32), n);
-    archetype->texture = hkArrayCreate(sizeof(u32), n);
+    archetype->vaos = hkArrayCreate(sizeof(u32), n);
+    archetype->index_counts = hkArrayCreate(sizeof(u32), n);
+    archetype->shaders = hkArrayCreate(sizeof(u32), n);
+    archetype->textures = hkArrayCreate(sizeof(u32), n);
     // graphics
-    archetype->speed = hkArrayCreate(sizeof(f32), n);
-    archetype->velocity = hkArrayCreate(sizeof(vec3), n);
-    archetype->position = hkArrayCreate(sizeof(vec3), n);
-    archetype->rotation = hkArrayCreate(sizeof(vec3), n);
-    archetype->scale = hkArrayCreate(sizeof(vec3), n);
-    archetype->model = hkArrayCreate(sizeof(mat4), n);
+    archetype->speeds = hkArrayCreate(sizeof(f32), n);
+    archetype->velocities = hkArrayCreate(sizeof(vec3), n);
+    archetype->positions = hkArrayCreate(sizeof(vec3), n);
+    archetype->rotations = hkArrayCreate(sizeof(vec3), n);
+    archetype->scales = hkArrayCreate(sizeof(vec3), n);
+    archetype->models = hkArrayCreate(sizeof(mat4), n);
 }
 
 void gameArchetypeDeallocate(GameArchetype *archetype) {
     // game
-    hkArrayDestroy(&archetype->vao);
-    hkArrayDestroy(&archetype->index_count);
-    hkArrayDestroy(&archetype->shader_program);
-    hkArrayDestroy(&archetype->texture);
+    hkArrayDestroy(&archetype->vaos);
+    hkArrayDestroy(&archetype->index_counts);
+    hkArrayDestroy(&archetype->shaders);
+    hkArrayDestroy(&archetype->textures);
     // graphics
-    hkArrayDestroy(&archetype->speed);
-    hkArrayDestroy(&archetype->velocity);
-    hkArrayDestroy(&archetype->position);
-    hkArrayDestroy(&archetype->rotation);
-    hkArrayDestroy(&archetype->scale);
-    hkArrayDestroy(&archetype->model);
+    hkArrayDestroy(&archetype->speeds);
+    hkArrayDestroy(&archetype->velocities);
+    hkArrayDestroy(&archetype->positions);
+    hkArrayDestroy(&archetype->rotations);
+    hkArrayDestroy(&archetype->scales);
+    hkArrayDestroy(&archetype->models);
 }
 
 typedef struct {
     // graphics
-    hkArray vao; // u32
-    hkArray index_count; // u32
-    hkArray shader_program; // u32
-    hkArray texture; // u32
+    hkArray vaos; // u32
+    hkArray index_counts; // u32
+    hkArray shaders; // u32
+    hkArray textures; // u32
     // game
-    hkArray position; // vec3
-    hkArray rotation; // vec3
-    hkArray scale; // vec3
-    hkArray model; // mat4
+    hkArray positions; // vec3
+    hkArray rotations; // vec3
+    hkArray scales; // vec3
+    hkArray models; // mat4
 } GraphicsArchetype;
 
 void boxArchetypeAllocate(GraphicsArchetype *archetype, i32 n) {
     // game
-    archetype->vao = hkArrayCreate(sizeof(u32), n);
-    archetype->index_count = hkArrayCreate(sizeof(u32), n);
-    archetype->shader_program = hkArrayCreate(sizeof(u32), n);
-    archetype->texture = hkArrayCreate(sizeof(u32), n);
+    archetype->vaos = hkArrayCreate(sizeof(u32), n);
+    archetype->index_counts = hkArrayCreate(sizeof(u32), n);
+    archetype->shaders = hkArrayCreate(sizeof(u32), n);
+    archetype->textures = hkArrayCreate(sizeof(u32), n);
     // graphics
-    archetype->position = hkArrayCreate(sizeof(vec3), n);
-    archetype->rotation = hkArrayCreate(sizeof(vec3), n);
-    archetype->scale = hkArrayCreate(sizeof(vec3), n);
-    archetype->model = hkArrayCreate(sizeof(mat4), n);
+    archetype->positions = hkArrayCreate(sizeof(vec3), n);
+    archetype->rotations = hkArrayCreate(sizeof(vec3), n);
+    archetype->scales = hkArrayCreate(sizeof(vec3), n);
+    archetype->models = hkArrayCreate(sizeof(mat4), n);
 }
 
 void boxArchetypeDeallocate(GraphicsArchetype *archetype) {
     // game
-    hkArrayDestroy(&archetype->vao);
-    hkArrayDestroy(&archetype->index_count);
-    hkArrayDestroy(&archetype->shader_program);
-    hkArrayDestroy(&archetype->texture);
+    hkArrayDestroy(&archetype->vaos);
+    hkArrayDestroy(&archetype->index_counts);
+    hkArrayDestroy(&archetype->shaders);
+    hkArrayDestroy(&archetype->textures);
     // graphics
-    hkArrayDestroy(&archetype->position);
-    hkArrayDestroy(&archetype->rotation);
-    hkArrayDestroy(&archetype->scale);
-    hkArrayDestroy(&archetype->model);
+    hkArrayDestroy(&archetype->positions);
+    hkArrayDestroy(&archetype->rotations);
+    hkArrayDestroy(&archetype->scales);
+    hkArrayDestroy(&archetype->models);
 }
 
 void archetypeInitalizeMeshes(u32 *vao_data, u32 vao, u32 *index_count_data, u32 index_count, const Range range) {
@@ -128,19 +128,19 @@ void archetypeInitializePositionsAsGrid(GameArchetype *archetype) {
     f32 a = 0.f;
     f32 b = -1.f;
     const f32 s = 1.f;
-    const i32 f = (i32)sqrt((f64)archetype->index_count.length);
+    const i32 f = (i32)sqrt((f64)archetype->index_counts.length);
     for(i32 i = 0; i < f; ++i) {
         for(i32 j = 0; j < f; ++j) {
             b += 1.f;
-            vec3 *positionvector = archetype->position.data;
+            vec3 *positionvector = archetype->positions.data;
             positionvector[i + j * f][0] = a * s - f/2;
             positionvector[i + j * f][1] = b * s - f/2;
             // positionvector[i + j * f][2] = -50.f;
-            // ((vec3 *)archetype->velocity.data)[i][0] = -1.f;
-            // ((vec3 *)archetype->velocity.data)[i][1] = 0.f;
-            // archetype->position.data[i + j * f][0] = a * s - f/2;
-            // meshes.position[i + j * f][1] = b * s - f/2;
-            // meshes.position[i + j * f][2] = 0.f;
+            // ((vec3 *)archetype->velocities.data)[i][0] = -1.f;
+            // ((vec3 *)archetype->velocities.data)[i][1] = 0.f;
+            // archetype->positions.data[i + j * f][0] = a * s - f/2;
+            // meshes.positions[i + j * f][1] = b * s - f/2;
+            // meshes.positions[i + j * f][2] = 0.f;
             printf("{%f, %f}\n", a*s, b*s);
         }
         a += 1.f;
@@ -157,23 +157,23 @@ void archetypeSetPositions(vec3 *position_data, vec3 p, const Range range) {
 }
 
 void gameArchetypeInitializeRotations(GameArchetype *archetype, vec3 r) {
-    vec3 *rotation = ((vec3 *)archetype->rotation.data);
-    const i32 n = (i32)archetype->index_count.length;
+    vec3 *rotations = ((vec3 *)archetype->rotations.data);
+    const i32 n = (i32)archetype->index_counts.length;
     for(i32 i = 0; i < n; ++i) {
-        rotation[i][0] = r[0];
-        rotation[i][1] = r[1];
-        rotation[i][2] = r[2];
+        rotations[i][0] = r[0];
+        rotations[i][1] = r[1];
+        rotations[i][2] = r[2];
         // printf("step %f\n", a);
     }
 }
 
 void gameArchetypeInitializeScales(GameArchetype *archetype, vec3 s) {
-    vec3 *scale = ((vec3 *)archetype->scale.data);
-    const i32 n = (i32)archetype->index_count.length;
+    vec3 *scales = ((vec3 *)archetype->scales.data);
+    const i32 n = (i32)archetype->index_counts.length;
     for(i32 i = 0; i < n; ++i) {
-        scale[i][0] = s[0];
-        scale[i][1] = s[1];
-        scale[i][2] = s[2];
+        scales[i][0] = s[0];
+        scales[i][1] = s[1];
+        scales[i][2] = s[2];
         // printf("step %f\n", a);
     }
 }
@@ -204,12 +204,12 @@ void archetypeInitializeSpeeds(f32 *speeds, f32 input_speed, const Range range) 
 
 void archetypeInitializeVelocities(GameArchetype *archetype, vec3 v, const Range range) {
     // initalize velocity
-    vec3 *velocity = (vec3 *)archetype->velocity.data;
-    const i32 n = (i32)archetype->index_count.length;
+    vec3 *velocities = (vec3 *)archetype->velocities.data;
+    const i32 n = (i32)archetype->index_counts.length;
     for(i32 i = range.start; i < range.end; ++i) {
-        velocity[i][0] = v[0];
-        velocity[i][1] = v[1];
-        velocity[i][2] = v[2];
+        velocities[i][0] = v[0];
+        velocities[i][1] = v[1];
+        velocities[i][2] = v[2];
         // printf("step %f\n", a);
     }
 }
@@ -230,13 +230,13 @@ void archetypeInitializePositionsAsLine(vec3 *position_data, const f32 s, const 
 void archetypeUpdateVelocities(GameArchetype *archetype, f32 time, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         // printf("%f\n", new_velocity);
-        ((vec3 *)archetype->velocity.data)[i][0] = (f32)sin(time);
+        ((vec3 *)archetype->velocities.data)[i][0] = (f32)sin(time);
     }
 }
 
 void archetypeCopyVector(vec3 *source_position_data, vec3 *dest_position_data, const Range range) {
     // vec4 *box = (vec4 *)archetype->box.data;
-    // const vec3 *position = (vec3 *)archetype->position.data;
+    // const vec3 *positions = (vec3 *)archetype->positions.data;
     for(i32 i = range.start; i < range.end; ++i) {
         dest_position_data[i][0] = source_position_data[i][0];
         dest_position_data[i][1] = source_position_data[i][1];
@@ -260,10 +260,10 @@ int boxAABBCollision(vec4 boxa, vec4 boxb) {
 // i32 gameArchetypeCheckCollisions(GameArchetype *archetypeA, GameArchetype *archetypeB) {
 i32 gameArchetypeCheckCollisions(u32 na, vec4 *boxa, u32 nb, vec4 *boxb) {
     /*
-    const i64 na = archetypeA->index_count.length;
+    const i64 na = archetypeA->index_counts.length;
     vec4 *boxa = (vec4 *)archetypeA->box.data;
 
-    const i64 nb = archetypeB->index_count.length;
+    const i64 nb = archetypeB->index_counts.length;
     vec4 *boxb = (vec4 *)archetypeB->box.data;
     */
     // printf("%lld, %lld\n", na, nb);
@@ -385,7 +385,7 @@ void archetypeRenderWires(u32 *vao_data, u32 *shader_program_data, u32 *texture_
 }
 
 void gameArchetypeRenderBG(GameArchetype *archetype, u32 shader_program, mat4 view, mat4 proj) {
-    const i64 n = archetype->index_count.length; 
+    const i64 n = archetype->index_counts.length; 
     for(i32 i = 0; i < n; ++i) {
         glUseProgram(shader_program);
         // uniforms
@@ -396,11 +396,11 @@ void gameArchetypeRenderBG(GameArchetype *archetype, u32 shader_program, mat4 vi
         u32 proj_location = glGetUniformLocation(shader_program, "proj");
         glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
         u32 model_location = glGetUniformLocation(shader_program, "model");
-        glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
+        glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->models.data)[i][0]);
         // draw
-        glBindVertexArray(((u32 *)archetype->vao.data)[i]);
+        glBindVertexArray(((u32 *)archetype->vaos.data)[i]);
         // glBindTexture(GL_TEXTURE_2D, texture);
-        glDrawElements(GL_TRIANGLES, ((u32 *)archetype->index_count.data)[i], GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, ((u32 *)archetype->index_counts.data)[i], GL_UNSIGNED_INT, 0);
     }
 }
 
@@ -418,9 +418,9 @@ void archetypeSpawnProjectileAtEntity(i32 *current_projectile_pool_index, const 
 
 /*
 void gameSpawnProjectileAtEntity(const GameArchetype *archetype, GameArchetype *archetypeProjectile, i32 id) {
-    vec3 *archetypeposition = ((vec3 *)archetype->position.data);
-    vec3 *projectile_position = ((vec3 *)archetypeProjectile->position.data);
-    const i64 projectile_length = archetypeProjectile->index_count.length; 
+    vec3 *archetypeposition = ((vec3 *)archetype->positions.data);
+    vec3 *projectile_position = ((vec3 *)archetypeProjectile->positions.data);
+    const i64 projectile_length = archetypeProjectile->index_counts.length; 
     static i32 current_projectile_pool_index = 0;
     projectile_position[current_projectile_pool_index][0] = archetypeposition[id][0];
     projectile_position[current_projectile_pool_index][1] = archetypeposition[id][1];
@@ -431,7 +431,7 @@ void gameSpawnProjectileAtEntity(const GameArchetype *archetype, GameArchetype *
 }
 
 void gameArchetypeSpawnProjectile(const GameArchetype *archetype, GameArchetype *archetypeProjectile) {
-    const i64 n = archetype->index_count.length; 
+    const i64 n = archetype->index_counts.length; 
     for(i32 i = 0; i < n; ++i) {
         gameSpawnProjectileAtEntity(archetype, archetypeProjectile, i);
     }
