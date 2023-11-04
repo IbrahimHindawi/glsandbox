@@ -403,10 +403,9 @@ void gameArchetypeRenderBG(GameArchetype *archetype, u32 shader_program, mat4 vi
 }
 
 void archetypeSpawnProjectileAtEntity(i32 *fire_index_data, i32 id, vec3 *positions, const i32 offset, const i32 buffer_length) {
-    // static i32 fire_index_data = 0;
-    // printf("%d\n", *fire_index_data);
-    // printf("%d\n", *fire_index_data+offset);
-    // printf("%p\n", fire_index_data);
+    printf("fire_index_data[i] = %d. ", *fire_index_data);
+    printf("fire_index_data[i + offset] = %d. ", *fire_index_data+offset);
+    printf("address: %p\n", fire_index_data);
     vec3 *source_position = positions;
     vec3 *dest_position = positions;
     *fire_index_data = (*fire_index_data + 1) % buffer_length; // + offset;

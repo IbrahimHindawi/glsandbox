@@ -342,7 +342,7 @@ void input() {
                         // printf("%s", "coll: ");
                         // rangeArenaIndexPrint(range_arena_game, id.colliders);
                         archetypeSpawnProjectileAtEntity(
-                                (i32 *)game_archetype.fire_indices.data, hero_start,
+                                &((i32 *)game_archetype.fire_indices.data)[id.hero], hero_start,
                                 (vec3 *)game_archetype.positions.data,
                                 ((Range *)range_arena_game->ranges.data)[id.projectile_hero].start,
                                 ((Range *)range_arena_game->ranges.data)[id.projectile_hero].length);
