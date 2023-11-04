@@ -17,12 +17,12 @@
 #define getComponentPtr(reference, type, attribute) (type *)reference->attribute.data
 
 typedef struct {
-    // graphics
+    // debug-graphics
     hkArray vaos; // u32
     hkArray index_counts; // u32
     hkArray shaders; // u32
     hkArray textures; // u32
-    // game
+    // game logic
     hkArray speeds; // f32 
     hkArray velocities; // vec3
     hkArray positions; // vec3
@@ -64,12 +64,10 @@ void gameArchetypeDeallocate(GameArchetype *archetype) {
 }
 
 typedef struct {
-    // graphics
     hkArray vaos; // u32
     hkArray index_counts; // u32
     hkArray shaders; // u32
     hkArray textures; // u32
-    // game
     hkArray positions; // vec3
     hkArray rotations; // vec3
     hkArray scales; // vec3
