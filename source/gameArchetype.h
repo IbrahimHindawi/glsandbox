@@ -225,10 +225,10 @@ void archetypeInitializePositionsAsLine(vec3 *position_data, const f32 s, const 
     }
 }
 
-void archetypeUpdateVelocities(GameArchetype *archetype, f32 time, const Range range) {
+void archetypeUpdateVelocities(vec3 *velocity_data, f32 time, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
-        // printf("%f\n", new_velocity);
-        ((vec3 *)archetype->velocities.data)[i][0] = (f32)sin(time);
+        // printf("%f\n", velocity_data[i][0]);
+        velocity_data[i][0] = (f32)sin(time);
     }
 }
 
