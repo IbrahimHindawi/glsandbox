@@ -29,9 +29,6 @@ typedef struct {
     hkArray rotation; // vec3
     hkArray scale; // vec3
     hkArray model; // mat4
-    hkArray box; // mat4
-    hkArray vao_box_collider; // mat4
-    hkArray box_index_count; // mat4
 } GameArchetype;
 
 void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
@@ -148,22 +145,6 @@ void archetypeInitializePositionsAsGrid(GameArchetype *archetype) {
         }
         a += 1.f;
         b = -1.f;
-    }
-}
-
-void gameArchetypeInitializeCollisionBoxes(GameArchetype *archetype, const f32 box_width, const f32 box_height, const f32 box_xoffset, const f32 box_yoffset) {
-    const i64 n = archetype->index_count.length;
-    vec4 *box = (vec4 *)archetype->box.data;
-    vec3 *scale = (vec3 *)archetype->scale.data;
-    const vec3 *position = (vec3 *)archetype->position.data;
-    for(i32 i = 0; i < n; ++i) {
-        box[i][0] = position[i][0] + box_xoffset;
-        box[i][1] = position[i][1] + box_yoffset;
-        box[i][2] = box_width * scale[i][0];
-        box[i][3] = box_height * scale[i][0];
-// #ifdef DEBUG
-// #endif DEBUG
-        // printf("{%f, %f, %f, %f}\n", box[i][0], box[i][1], box[i][2], box[i][3]);
     }
 }
 
@@ -399,27 +380,6 @@ void archetypeRenderWires(u32 *vao_data, u32 *shader_program_data, u32 *texture_
         glBindTexture(GL_TEXTURE_2D, texture_data[i]);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawElements(GL_TRIANGLES, index_count_data[i], GL_UNSIGNED_INT, 0);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-}
-
-void gameArchetypeRenderBoxes(GameArchetype *archetype, u32 shader_program, mat4 view, mat4 proj, u32 texture) {
-    const i64 n = archetype->index_count.length; 
-    for(i32 i = 0; i < n; ++i) {
-        glUseProgram(shader_program);
-        // uniforms
-        u32 view_location = glGetUniformLocation(shader_program, "view");
-        glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
-        u32 proj_location = glGetUniformLocation(shader_program, "proj");
-        mat4 *model = ((mat4 *)archetype->model.data);
-        glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
-        u32 model_location = glGetUniformLocation(shader_program, "model");
-        glUniformMatrix4fv(model_location, 1, GL_FALSE, ((mat4 *)archetype->model.data)[i][0]);
-        // draw
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glBindVertexArray(((u32 *)archetype->vao_box_collider.data)[i]);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 }
