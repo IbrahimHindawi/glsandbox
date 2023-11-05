@@ -6,7 +6,6 @@
 #endif
 
 #include <SDL2/SDL.h>
-
 #include <glad/glad.h>
 
 #include <cglm/vec3.h>
@@ -14,7 +13,6 @@
 #include <cglm/cam.h>
 #include <cglm/mat4.h>
 #include <cglm/vec3.h>
-
 
 #include "texops.h"
 #include "shops.h"
@@ -385,13 +383,13 @@ void update() {
     if(frameDelay > 0) {
         SDL_Delay(frameDelay);
     }
-    float deltaTime = (SDL_GetTicks() - framePrevTime) / 1000.f;
-    if (deltaTime > frameTime) {
-        deltaTime = frameTimef32;
+    float delta_time = (SDL_GetTicks() - framePrevTime) / 1000.f;
+    if (delta_time > frameTime) {
+        delta_time = frameTimef32;
     }
     // printf("ticks: %d, ", SDL_GetTicks());
     framePrevTime = SDL_GetTicks();
-    // printf("FPS: %f.\n", 999.f / (1000.f * deltaTime));
+    // printf("FPS: %f.\n", 999.f / (1000.f * delta_time));
 
     // camera
     vec3 camera_new_location;
@@ -405,6 +403,11 @@ void update() {
         SDL_GetTicks() / 1000.f, 
         ((Range *)range_arena_game->ranges.data)[id.enemy]);
     */
+    archetypeSpawnProjectileAtEntityAI(
+            &((i32 *)game_archetype.fire_indices.data)[id.enemy], ((Range *)range_arena_game->ranges.data)[id.enemy].start,
+            (vec3 *)game_archetype.positions.data,
+            ((Range *)range_arena_game->ranges.data)[id.projectile_enemy].start,
+            ((Range *)range_arena_game->ranges.data)[id.projectile_enemy].length, SDL_GetTicks());
 
     Range total_range = (Range){ .start = 0, .end = range_arena_game->border };
     // integrate movement
@@ -412,7 +415,7 @@ void update() {
         (vec3 *)game_archetype.positions.data,
         (vec3 *)game_archetype.velocities.data,
         (f32 *)game_archetype.speeds.data,
-        deltaTime,
+        delta_time,
         total_range);
     archetypeCopyVector(
         (vec3 *)game_archetype.positions.data,

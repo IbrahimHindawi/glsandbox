@@ -338,11 +338,11 @@ void archetypeUpdateTransforms(vec3 *position_data, vec3 *rotation_data, vec3 *s
     return;
 }
 
-void archetypeIntegrateVelocity(vec3 *position_data, vec3 *velocity_data, f32 *speed_data, f32 deltaTime, const Range range) {
+void archetypeIntegrateVelocity(vec3 *position_data, vec3 *velocity_data, f32 *speed_data, f32 delta_time, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         // transformations
-        position_data[i][0] += velocity_data[i][0] * speed_data[i] * deltaTime;
-        position_data[i][1] += velocity_data[i][1] * speed_data[i] * deltaTime;
+        position_data[i][0] += velocity_data[i][0] * speed_data[i] * delta_time;
+        position_data[i][1] += velocity_data[i][1] * speed_data[i] * delta_time;
     }
 }
 
@@ -412,5 +412,34 @@ void archetypeSpawnProjectileAtEntity(i32 *fire_index_data, i32 id, vec3 *positi
     dest_position[*fire_index_data + offset][0] = source_position[id][0];
     dest_position[*fire_index_data + offset][1] = source_position[id][1];
     dest_position[*fire_index_data + offset][2] = source_position[id][2];
+    return;
+}
+
+void archetypeSpawnProjectileAtEntityAI(i32 *fire_index_data, i32 id, vec3 *positions, const i32 offset, const i32 buffer_length, f32 time) {
+    printf("fire_index_data[i] = %d. ", *fire_index_data);
+    printf("fire_index_data[i + offset] = %d. ", *fire_index_data+offset);
+    printf("address: %p\n", fire_index_data);
+    // fire_core { 
+    // fire_active;
+    // fire_index;
+    // fire_counter;
+    // fire_rate;
+    // }
+    #define fire_rate 20
+    static i32 fire_counter = 0;
+
+    vec3 *source_position = positions;
+    vec3 *dest_position = positions;
+
+    if ((fire_counter % fire_rate) == 0 && fire_counter > 50) {
+        *fire_index_data = (*fire_index_data + 1) % buffer_length; // + offset;
+        fire_counter = 0;
+        dest_position[*fire_index_data + offset][0] = source_position[id][0];
+        dest_position[*fire_index_data + offset][1] = source_position[id][1];
+        dest_position[*fire_index_data + offset][2] = source_position[id][2];
+    }
+    fire_counter += 1;
+
+    #undef fire_rate
     return;
 }
