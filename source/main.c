@@ -4,6 +4,7 @@
     #define SDL_MAIN_HANDLED
     // #define _CRT_SECURE_NO_WARNINGS
 #endif
+
 #include <SDL2/SDL.h>
 
 #include <glad/glad.h>
@@ -14,7 +15,6 @@
 #include <cglm/mat4.h>
 #include <cglm/vec3.h>
 
-#include "core.h"
 
 #include "texops.h"
 #include "shops.h"
@@ -24,6 +24,8 @@
 #include "rangeops.h"
 
 #include "gameArchetype.h"
+
+#include "core.h"
 
 // SYSTEM
 ///////////////////////////////////

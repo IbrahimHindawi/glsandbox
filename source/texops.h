@@ -1,7 +1,10 @@
+#pragma once
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 #include "core.h"
+
 #include "glad/glad.h"
 
 void texture_create(u32 *texture, const char *texture_path) {
