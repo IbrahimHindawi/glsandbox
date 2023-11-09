@@ -416,9 +416,9 @@ void archetypeSpawnProjectileAtEntity(i32 *fire_index_data, i32 id, vec3 *positi
 }
 
 void archetypeSpawnProjectileAtEntityAI(i32 *fire_index_data, i32 id, vec3 *positions, const i32 offset, const i32 buffer_length, f32 time) {
-    printf("fire_index_data[i] = %d. ", *fire_index_data);
-    printf("fire_index_data[i + offset] = %d. ", *fire_index_data+offset);
-    printf("address: %p\n", fire_index_data);
+    // printf("fire_index_data[i] = %d. ", *fire_index_data);
+    // printf("fire_index_data[i + offset] = %d. ", *fire_index_data+offset);
+    // printf("address: %p\n", fire_index_data);
     // fire_core { 
     // fire_active;
     // fire_index;
@@ -427,18 +427,23 @@ void archetypeSpawnProjectileAtEntityAI(i32 *fire_index_data, i32 id, vec3 *posi
     // }
     #define fire_rate 20
     static i32 fire_counter = 0;
+    static i32 fire_active = false;
 
     vec3 *source_position = positions;
     vec3 *dest_position = positions;
 
-    if ((fire_counter % fire_rate) == 0 && fire_counter > 50) {
+    if ((fire_counter % fire_rate) == 0 && fire_active == true) {
+        static i32 fire_burst_count = 3;
         *fire_index_data = (*fire_index_data + 1) % buffer_length; // + offset;
         fire_counter = 0;
         dest_position[*fire_index_data + offset][0] = source_position[id][0];
         dest_position[*fire_index_data + offset][1] = source_position[id][1];
         dest_position[*fire_index_data + offset][2] = source_position[id][2];
+        fire_burst_count -= 1;
+        if (fire_burst_count == 0) { fire_active = false; fire_burst_count = 3; }
     }
     fire_counter += 1;
+    if (fire_counter >= 100) { fire_active = true; }
 
     #undef fire_rate
     return;
