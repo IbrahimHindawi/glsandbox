@@ -419,15 +419,15 @@ void archetypeSpawnProjectileAtEntityAI(i32 *fire_index_data, i32 id, vec3 *posi
     // printf("fire_index_data[i] = %d. ", *fire_index_data);
     // printf("fire_index_data[i + offset] = %d. ", *fire_index_data+offset);
     // printf("address: %p\n", fire_index_data);
-    // fire_core { 
-    // fire_active;
-    // fire_index;
-    // fire_counter;
-    // fire_rate;
-    // }
-    #define fire_rate 20
-    static i32 fire_counter = 0;
+    // typedef struct { 
+    //     u8 fire_active;
+    //     u8 fire_index;
+    //     u8 fire_counter;
+    //     u8 fire_rate;
+    // } fire_core;
     static i32 fire_active = false;
+    static i32 fire_counter = 0;
+    static i32 fire_rate = 20;
 
     vec3 *source_position = positions;
     vec3 *dest_position = positions;
@@ -436,15 +436,16 @@ void archetypeSpawnProjectileAtEntityAI(i32 *fire_index_data, i32 id, vec3 *posi
         static i32 fire_burst_count = 3;
         *fire_index_data = (*fire_index_data + 1) % buffer_length; // + offset;
         fire_counter = 0;
+        // fire start
         dest_position[*fire_index_data + offset][0] = source_position[id][0];
         dest_position[*fire_index_data + offset][1] = source_position[id][1];
         dest_position[*fire_index_data + offset][2] = source_position[id][2];
+        // fire end
         fire_burst_count -= 1;
         if (fire_burst_count == 0) { fire_active = false; fire_burst_count = 3; }
     }
     fire_counter += 1;
     if (fire_counter >= 100) { fire_active = true; }
 
-    #undef fire_rate
     return;
 }
