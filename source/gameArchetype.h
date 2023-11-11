@@ -17,6 +17,15 @@
 #define getComponentPtr(reference, type, attribute) (type *)reference->attribute.data
 
 typedef struct {
+    i32 fire_active;
+    i32 fire_index;
+    i32 fire_rate;
+    i32 fire_counter;
+    i32 fire_burst_count;
+    i32 fire_burst_rate;
+} FireCore;
+
+typedef struct {
     // debug-graphics
     hkArray vaos; // u32
     hkArray index_counts; // u32
@@ -29,7 +38,7 @@ typedef struct {
     hkArray rotations; // vec3
     hkArray scales; // vec3
     hkArray models; // mat4
-    hkArray fire_indices; // u32
+    hkArray fire_cores; // u32
 } GameArchetype;
 
 void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
@@ -45,7 +54,7 @@ void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
     archetype->rotations = hkArrayCreate(sizeof(vec3), n);
     archetype->scales = hkArrayCreate(sizeof(vec3), n);
     archetype->models = hkArrayCreate(sizeof(mat4), n);
-    archetype->fire_indices = hkArrayCreate(sizeof(i32), n);
+    archetype->fire_cores = hkArrayCreate(sizeof(FireCore), n);
 }
 
 void gameArchetypeDeallocate(GameArchetype *archetype) {
@@ -402,50 +411,41 @@ void gameArchetypeRenderBG(GameArchetype *archetype, u32 shader_program, mat4 vi
     }
 }
 
-void archetypeSpawnProjectileAtEntity(i32 *fire_index_data, i32 id, vec3 *positions, const i32 offset, const i32 buffer_length) {
-    printf("fire_index_data[i] = %d. ", *fire_index_data);
-    printf("fire_index_data[i + offset] = %d. ", *fire_index_data+offset);
-    printf("address: %p\n", fire_index_data);
+void archetypeSpawnProjectileAtEntity(i32 source_entity_id, i32 *fire_index_data, vec3 *positions, const Range projectile_range) {
+    // printf("fire_index_data[i] = %d. ", *fire_index_data);
+    // printf("fire_index_data[i + projectile_range.start] = %d. ", *fire_index_data+projectile_range.start);
+    // printf("address: %p\n", fire_index_data);
     vec3 *source_position = positions;
     vec3 *dest_position = positions;
-    *fire_index_data = (*fire_index_data + 1) % buffer_length; // + offset;
-    dest_position[*fire_index_data + offset][0] = source_position[id][0];
-    dest_position[*fire_index_data + offset][1] = source_position[id][1];
-    dest_position[*fire_index_data + offset][2] = source_position[id][2];
+    *fire_index_data = (*fire_index_data + 1) % projectile_range.length; // + projectile_range.start;
+    dest_position[*fire_index_data + projectile_range.start][0] = source_position[source_entity_id][0];
+    dest_position[*fire_index_data + projectile_range.start][1] = source_position[source_entity_id][1];
+    dest_position[*fire_index_data + projectile_range.start][2] = source_position[source_entity_id][2];
     return;
 }
 
-void archetypeSpawnProjectileAtEntityAI(i32 *fire_index_data, i32 id, vec3 *positions, const i32 offset, const i32 buffer_length, f32 time) {
-    // printf("fire_index_data[i] = %d. ", *fire_index_data);
-    // printf("fire_index_data[i + offset] = %d. ", *fire_index_data+offset);
-    // printf("address: %p\n", fire_index_data);
-    // typedef struct { 
-    //     u8 fire_active;
-    //     u8 fire_index;
-    //     u8 fire_counter;
-    //     u8 fire_rate;
-    // } fire_core;
-    static i32 fire_active = false;
-    static i32 fire_counter = 0;
-    static i32 fire_rate = 20;
-
+void archetypeSpawnProjectileAtEntityAI(i32 source_entity_id, FireCore *fire_cores, vec3 *positions, const Range projectile_range) {
     vec3 *source_position = positions;
     vec3 *dest_position = positions;
 
-    if ((fire_counter % fire_rate) == 0 && fire_active == true) {
-        static i32 fire_burst_count = 3;
-        *fire_index_data = (*fire_index_data + 1) % buffer_length; // + offset;
-        fire_counter = 0;
+    if((fire_cores[source_entity_id].fire_counter % fire_cores[source_entity_id].fire_rate) == 0 && fire_cores[source_entity_id].fire_active == true) {
+        fire_cores[source_entity_id].fire_counter = 0;
         // fire start
-        dest_position[*fire_index_data + offset][0] = source_position[id][0];
-        dest_position[*fire_index_data + offset][1] = source_position[id][1];
-        dest_position[*fire_index_data + offset][2] = source_position[id][2];
+        fire_cores[source_entity_id].fire_index = (fire_cores[source_entity_id].fire_index + 1) % projectile_range.length; // + projectile_range.start;
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start][0] = source_position[source_entity_id][0];
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start][1] = source_position[source_entity_id][1];
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start][2] = source_position[source_entity_id][2];
         // fire end
-        fire_burst_count -= 1;
-        if (fire_burst_count == 0) { fire_active = false; fire_burst_count = 3; }
+        fire_cores[source_entity_id].fire_burst_count -= 1;
+        if(fire_cores[source_entity_id].fire_burst_count == 0) { 
+            fire_cores[source_entity_id].fire_active = false; 
+            fire_cores[source_entity_id].fire_burst_count = fire_cores[source_entity_id].fire_burst_rate; 
+        }
     }
-    fire_counter += 1;
-    if (fire_counter >= 100) { fire_active = true; }
+    fire_cores[source_entity_id].fire_counter += 1;
+    if(fire_cores[source_entity_id].fire_counter >= 100) { 
+        fire_cores[source_entity_id].fire_active = true; 
+    }
 
     return;
 }
