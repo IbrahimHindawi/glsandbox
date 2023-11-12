@@ -27,8 +27,10 @@
 
 // SYSTEM
 ///////////////////////////////////
+// #define window_width 800
+// #define window_height 640
 #define window_width 800
-#define window_height 640
+#define window_height 1000
 #define FOV 45
 bool should_quit = false;
 SDL_Window *window = NULL;
