@@ -83,7 +83,7 @@ typedef struct {
     hkArray models; // mat4
 } GraphicsArchetype;
 
-void boxArchetypeAllocate(GraphicsArchetype *archetype, i32 n) {
+void graphicsArchetypeAllocate(GraphicsArchetype *archetype, i32 n) {
     // game
     archetype->vaos = hkArrayCreate(sizeof(u32), n);
     archetype->index_counts = hkArrayCreate(sizeof(u32), n);
@@ -96,7 +96,7 @@ void boxArchetypeAllocate(GraphicsArchetype *archetype, i32 n) {
     archetype->models = hkArrayCreate(sizeof(mat4), n);
 }
 
-void boxArchetypeDeallocate(GraphicsArchetype *archetype) {
+void graphicsArchetypeDeallocate(GraphicsArchetype *archetype) {
     // game
     hkArrayDestroy(&archetype->vaos);
     hkArrayDestroy(&archetype->index_counts);
@@ -369,6 +369,15 @@ void archetypeRender(u32 *vao_data, u32 *shader_program_data, u32 *texture_data,
         glBindVertexArray(vao_data[i]);
         glBindTexture(GL_TEXTURE_2D, texture_data[i]);
         glDrawElements(GL_TRIANGLES, index_count_data[i], GL_UNSIGNED_INT, 0);
+    }
+}
+
+void archetypeRenderU(u32 *shader_program_data, const Range range) {
+    for(i32 i = range.start; i < range.end; ++i) {
+        glUseProgram(shader_program_data[i]);
+        // uniforms
+        u32 time_location = glGetUniformLocation(shader_program_data[i], "time");
+        glUniform1f(time_location, SDL_GetTicks() / 1000.f);
     }
 }
 
