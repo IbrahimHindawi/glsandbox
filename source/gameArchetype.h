@@ -403,7 +403,7 @@ void archetypeRender(u32 *vao_data, u32 *shader_program_data, u32 *texture_data,
     }
 }
 
-void archetypeRenderU(u32 *shader_program_data, const Range range) {
+void archetypeSetUniform1f(u32 *shader_program_data, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         glUseProgram(shader_program_data[i]);
         // uniforms
