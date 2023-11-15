@@ -12,6 +12,7 @@
 #include "core.h"
 #include "hkArray.h"
 #include "rangeops.h"
+#include "meshops.h"
 
 #define getComponent(reference, type, attribute) (type *)reference.attribute.data
 #define getComponentPtr(reference, type, attribute) (type *)reference->attribute.data
@@ -157,12 +158,42 @@ void archetypeInitializePositionsAsGrid(GameArchetype *archetype) {
     }
 }
 
-void archetypeSetPositions(vec3 *position_data, vec3 p, const Range range) {
+void archetypeInitializeMesh(u32 *mesh_data, u32 *index_count_data, const Range range, u32 mesh_id) {
     for(i32 i = range.start; i < range.end; ++i) {
-        position_data[i][0] = p[0];
-        position_data[i][1] = p[1];
-        position_data[i][2] = p[2];
+        mesh_data[i] = MeshVAOArray[mesh_id];
+        index_count_data[i] = MeshRawDataArray[mesh_id].indices_count;
     }
+    return;
+}
+
+void archetypeInitialize1u(u32 *data, const Range range, u32 value) {
+    for(i32 i = range.start; i < range.end; ++i) {
+        data[i] = value;
+    }
+    return;
+}
+
+void archetypeInitialize1i(i32 *data, const Range range, u32 value) {
+    for(i32 i = range.start; i < range.end; ++i) {
+        data[i] = value;
+    }
+    return;
+}
+
+void archetypeInitialize1f(f32 *data, const Range range, f32 value) {
+    for(i32 i = range.start; i < range.end; ++i) {
+        data[i] = value;
+        // printf("step %f\n", a);
+    }
+}
+
+void archetypeInitialize3f(vec3 *vector_data, const Range range, vec3 vector_value) {
+    for(i32 i = range.start; i < range.end; ++i) {
+        vector_data[i][0] = vector_value[0];
+        vector_data[i][1] = vector_value[1];
+        vector_data[i][2] = vector_value[2];
+    }
+    return;
 }
 
 void gameArchetypeInitializeRotations(GameArchetype *archetype, vec3 r) {
@@ -456,5 +487,54 @@ void archetypeSpawnProjectileAtEntityAI(i32 source_entity_id, FireCore *fire_cor
         fire_cores[source_entity_id].fire_active = true; 
     }
 
+    return;
+}
+//    archetypeInitalizeGameAndGraphics(
+//       game_archetype, 
+//       graphics_archetype,
+//       Plane, shader_program_box, texture,
+//       (vec3){0.f, -3.f, 0.f}, 
+//       (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
+//       (vec3){.35f, 1.f, .35f},
+//       Ship, shader_program, texture,
+//       (vec3){0.f, 0.f, 0.f}, 
+//       (vec3){pi * 0.5f, pi, 0.f}, 
+//       (vec3){.15f, .15f, .15f},
+//       hero_range);
+
+void archetypeInitalizeGameAndGraphics(
+    GameArchetype game_archetype, 
+    GraphicsArchetype graphics_archetype,
+    i32 gm_mesh, i32 gm_shader, i32 gm_texture,
+    vec3 gm_pos, vec3 gm_rot, vec3 gm_scale,
+    i32 gfx_mesh, i32 gfx_shader, i32 gfx_texture,
+    vec3 gfx_pos, vec3 gfx_rot, vec3 gfx_scale,
+    const Range *range) {
+    // Game
+    archetypeInitalizeMeshesShadersTextures(
+        (u32 *)game_archetype.vaos.data, MeshVAOArray[gm_mesh], 
+        (u32 *)game_archetype.index_counts.data, MeshRawDataArray[gm_mesh].indices_count, 
+        (u32 *)game_archetype.shaders.data, gm_shader,
+        (u32 *)game_archetype.textures.data, gm_texture,
+        *range);
+    archetypeInitializeTransforms(
+        (vec3 *)game_archetype.positions.data,
+        (vec3 *)game_archetype.rotations.data,
+        (vec3 *)game_archetype.scales.data,
+        gm_pos, gm_rot, gm_scale,
+        *range);
+    // Graphics
+    archetypeInitalizeMeshesShadersTextures(
+        (u32 *)graphics_archetype.vaos.data, MeshVAOArray[gfx_mesh],
+        (u32 *)graphics_archetype.index_counts.data, MeshRawDataArray[gfx_mesh].indices_count,
+        (u32 *)graphics_archetype.shaders.data, gfx_shader,
+        (u32 *)graphics_archetype.textures.data, gfx_texture,
+        *range);
+    archetypeInitializeTransforms(
+        (vec3 *)graphics_archetype.positions.data,
+        (vec3 *)graphics_archetype.rotations.data,
+        (vec3 *)graphics_archetype.scales.data,
+        gfx_pos, gfx_rot, gfx_scale,
+        *range);
     return;
 }

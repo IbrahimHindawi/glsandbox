@@ -1,3 +1,5 @@
+#pragma once
+
 #include <glad/glad.h>
 
 #include <cglm/vec3.h>

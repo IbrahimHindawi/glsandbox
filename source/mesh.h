@@ -109,4 +109,3 @@ void meshesCreate(Meshes *meshes, f32 *vertices, u32 vertex_count, i32 *indices,
     }
     return;
 }
-
