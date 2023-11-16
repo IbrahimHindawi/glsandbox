@@ -235,23 +235,6 @@ void archetypeInitializeTransforms(vec3 *position_data, vec3 *rotation_data, vec
     }
 }
 
-void archetypeInitializeSpeeds(f32 *speeds, f32 input_speed, const Range range) {
-    for(i32 i = range.start; i < range.end; ++i) {
-        speeds[i] = input_speed;
-        // printf("step %f\n", a);
-    }
-}
-
-void archetypeInitializeVelocities(vec3 *velocities, vec3 v, const Range range) {
-    // initalize velocity
-    for(i32 i = range.start; i < range.end; ++i) {
-        velocities[i][0] = v[0];
-        velocities[i][1] = v[1];
-        velocities[i][2] = v[2];
-        // printf("step %f\n", a);
-    }
-}
-
 void archetypeInitializePositionsAsLine(vec3 *position_data, const f32 s, const f32 y, const Range range) {
     f32 a = -1.f;
     const i32 n = range.length;
@@ -451,7 +434,7 @@ void gameArchetypeRenderBG(GameArchetype *archetype, u32 shader_program, mat4 vi
     }
 }
 
-void archetypeSpawnProjectileAtEntity(i32 source_entity_id, i32 *fire_index_data, vec3 *positions, const Range projectile_range) {
+void archetypeSpawnProjectileAtEntity(vec3 *positions, i32 *fire_index_data, const Range projectile_range, i32 source_entity_id) {
     // printf("fire_index_data[i] = %d. ", *fire_index_data);
     // printf("fire_index_data[i + projectile_range.start] = %d. ", *fire_index_data+projectile_range.start);
     // printf("address: %p\n", fire_index_data);
@@ -464,7 +447,7 @@ void archetypeSpawnProjectileAtEntity(i32 source_entity_id, i32 *fire_index_data
     return;
 }
 
-void archetypeSpawnProjectileAtEntityAI(i32 source_entity_id, FireCore *fire_cores, vec3 *positions, const Range projectile_range) {
+void archetypeSpawnProjectileAtEntityAI(vec3 *positions, FireCore *fire_cores, const Range projectile_range, i32 source_entity_id) {
     vec3 *source_position = positions;
     vec3 *dest_position = positions;
 

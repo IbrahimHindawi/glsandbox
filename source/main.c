@@ -195,15 +195,9 @@ void setup() {
     ((FireCore *)game_archetype.fire_cores.data)[enemy_range->start].fire_rate = 20;
     ((FireCore *)game_archetype.fire_cores.data)[enemy_range->start].fire_burst_count = 3;
     ((FireCore *)game_archetype.fire_cores.data)[enemy_range->start].fire_burst_rate = 3;
-    archetypeInitializeVelocities(
-        game_archetype.velocities.data, 
-        (vec3){0.f, -1.f, 0.f}, 
-        *enemy_range);
-    /*
-       archetypeInitializePositionsAsLine(
-       (vec3 *)game_archetype.positions.data, 2.f, 1.f, 
-       ((Range *)range_arena_game->ranges.data)[id.enemy]);
-    */
+    ((FireCore *)game_archetype.fire_cores.data)[enemy_range->start].fire_counter = 10;
+    archetypeInitialize3f(game_archetype.velocities.data, *enemy_range, (vec3){0.f, -1.f, 0.f});
+    // archetypeInitializePositionsAsLine((vec3 *)game_archetype.positions.data, 2.f, 1.f, ((Range *)range_arena_game->ranges.data)[id.enemy]);
 
     id.projectile_enemy = rangeArenaAppend(range_arena_game, 8);
     rangeArenaIndexPrint("projectile_enemy", range_arena_game, id.projectile_enemy);
@@ -284,10 +278,10 @@ void input() {
                         // printf("%s", "coll: ");
                         // rangeArenaIndexPrint(range_arena_game, id.colliders);
                         archetypeSpawnProjectileAtEntity(
-                            hero_start,
-                            &((FireCore *)game_archetype.fire_cores.data)[id.hero].fire_index,
                             (vec3 *)game_archetype.positions.data,
-                            ((Range *)range_arena_game->ranges.data)[id.projectile_hero]);
+                            &((FireCore *)game_archetype.fire_cores.data)[id.hero].fire_index,
+                            ((Range *)range_arena_game->ranges.data)[id.projectile_hero],
+                            hero_start);
                     }
                 }
                 break;
@@ -350,10 +344,10 @@ void update() {
     */
     // update(game_archetype|graphics_archetype)
     archetypeSpawnProjectileAtEntityAI(
-        ((Range *)range_arena_game->ranges.data)[id.enemy].start,
-        (FireCore *)game_archetype.fire_cores.data, 
         (vec3 *)game_archetype.positions.data,
-        ((Range *)range_arena_game->ranges.data)[id.projectile_enemy]);
+        (FireCore *)game_archetype.fire_cores.data, 
+        ((Range *)range_arena_game->ranges.data)[id.projectile_enemy],
+        ((Range *)range_arena_game->ranges.data)[id.enemy].start);
 
     Range total_range = (Range){ .start = 0, .end = range_arena_game->border };
     // integrate movement
