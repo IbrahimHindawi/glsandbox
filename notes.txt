@@ -1,0 +1,34 @@
+alloc(MAX)
+
+group_0
+[:][:][:][:][:][:][:][:][:] ranges
+[0][1][2][3][4][5][6][7][8] identities
+[h][p][e][p][x][x][x][x][x] game_arche
+[h][p][e][p][x][x][x][x][x] grph_arche
+
+group_1
+[:][:][:][:][:][:][:][:][:] ranges
+[0][1][2][3][4][5][6][7][8] identities
+[h][p][e][p][x][x][x][x][x] stat_arche
+
+gg_ranges_arena {
+    border = 18,
+    ranges {
+        "hero" : range[0:1],
+        "phero" : range[1:9],
+        "enemy": range[9:10],
+        "penemy" : range[10:18],
+    }
+}
+
+update() {
+    sys();
+}
+render() {
+    sys();
+}
+
+   horizontal relation: ownership
+  /\ 
+[h][p]\_vertical relation: unification
+[h][p]/

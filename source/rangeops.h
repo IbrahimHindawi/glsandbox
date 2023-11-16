@@ -3,6 +3,10 @@
 #include "core.h"
 #include "hkArray.h"
 
+/*
+ * TODO(Ibrahim): simplify rangeArenaInitalize & rangeArenaAppend API into
+ * one coherent function call & eliminate that struct. Might require a HashMap.
+ */
 
 typedef struct {
     i32 start;
