@@ -2,17 +2,21 @@
 
 #include "core.h"
 #include "hkArray.h"
+#include <string.h>
 
 /*
  * TODO(Ibrahim): simplify rangeArenaInitalize & rangeArenaAppend API into
  * one coherent function call & eliminate that struct. Might require a HashMap.
  */
 
+typedef char name[32];
+
 typedef struct {
     i32 start;
     i32 end;
     i32 length;
     i32 index;
+    name rname;
 } Range;
 
 typedef struct {
@@ -37,28 +41,48 @@ RangeArena *rangeArenaAllocate(u64 count) {
     return range_arena;
 }
 
-u32 rangeArenaInitalize(RangeArena *range_arena, u32 new_size) {
-    range_arena->border += new_size;
-    ((Range *)range_arena->ranges.data)[0] = (Range) { 
-        .end = new_size, 
-        .length = new_size 
-    };
-    return 0;
+u32 rangeArenaAppend(RangeArena *range_arena, name new_range_name, u32 new_size) {
+    if( range_arena->border == 0 ) {
+        range_arena->border += new_size;
+        ( (Range *)range_arena->ranges.data )[0] = (Range) { 
+            .end = new_size, 
+            .length = new_size,
+        };
+        strcpy(((Range *)range_arena->ranges.data)[0].rname, new_range_name);
+        return 0;
+    } else {
+        u32 old_size = range_arena->border;
+        range_arena->border += new_size;
+        assert(range_arena->border < range_arena->maximum);
+        range_arena->last_index += 1;
+        ((Range *)range_arena->ranges.data)[range_arena->last_index] = (Range){ 
+            .start = old_size, 
+            .end = old_size + new_size, 
+            .length = (new_size + old_size) - old_size, 
+            .index = range_arena->last_index 
+        };
+        strcpy(((Range *)range_arena->ranges.data)[range_arena->last_index].rname, new_range_name);
+        return range_arena->last_index;
+    }
+};
+
+// TODO(Ibrahim): optimize linear search to binary search
+i32 rangeArenaGet(RangeArena *range_arena, name key) {
+    for( size_t i = 0; i < range_arena->ranges.length; i++ ) {
+        if( strcmp(((Range *)range_arena->ranges.data)[i].rname, key ) == 0 ) {
+            return i;
+        }
+    }
+    return -1;
 }
 
-u32 rangeArenaAppend(RangeArena *range_arena, u32 new_size) {
-    u32 old_size = range_arena->border;
-    range_arena->border += new_size;
-    assert(range_arena->border < range_arena->maximum);
-    range_arena->last_index += 1;
-    ((Range *)range_arena->ranges.data)[range_arena->last_index] = (Range){ 
-        .start = old_size, 
-        .end = old_size + new_size, 
-        .length = (new_size + old_size) - old_size, 
-        .index = range_arena->last_index 
-    };
-    return range_arena->last_index;
-};
+void rangeArenaPrint(RangeArena *range_arena, name key) {
+    i32 range_index = rangeArenaGet(range_arena, key);
+    Range range = ((Range *)range_arena->ranges.data)[range_index];
+    printf("range = { rname: %s, start: %d, end: %d, length: %d, index: %d }\n", 
+            range.rname, range.start, range.end, range.length, range.index);
+    return;
+}
 
 #define rangeArenaIndexPrint(name, range_arena, range_index) { \
     printf("range: %s.\nstart: %d, end: %d, length: %d, index: %d.\n\n", \

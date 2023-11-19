@@ -26,6 +26,7 @@ find_package(cglm CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE cglm::cglm)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
     set_target_properties(${PROJECT_NAME} PROPERTIES VS_GLOBAL_VcpkgEnabled true)
     find_package(SDL2 CONFIG REQUIRED)
     target_link_libraries(${PROJECT_NAME}
