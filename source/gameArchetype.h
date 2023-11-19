@@ -323,7 +323,7 @@ int boxAABBCollision2(vec3 posa, vec3 scla, vec3 posb, vec3 sclb) {
     }
 }
 
-i32 gameArchetypeCheckCollisions2(vec3 *posa, vec3 *scla, const Range na, vec3 *posb, vec3 *sclb, const Range nb) {// u32 na, vec4 *boxa, u32 nb, vec4 *boxb) {
+i32 archetypeCheckCollisions(vec3 *posa, vec3 *scla, const Range na, vec3 *posb, vec3 *sclb, const Range nb) {// u32 na, vec4 *boxa, u32 nb, vec4 *boxb) {
     i32 coll_id = -1;
     for(i32 i = na.start; i < na.end; ++i) {
         for(i32 j = nb.start; j < nb.end; ++j) {
@@ -331,9 +331,9 @@ i32 gameArchetypeCheckCollisions2(vec3 *posa, vec3 *scla, const Range na, vec3 *
                 // printf("boxa {%f, %f, %f, %f}\n", boxa[i][0], boxa[i][1], boxa[i][2], boxa[i][3]);
                 // printf("boxb {%f, %f, %f, %f}\n", boxb[j][0], boxb[j][1], boxb[j][2], boxb[j][3]);
                 // printf("HIT!\n");
-                coll_id = j;
                 // printf("collision id = %d\n", coll_id);
                 // break;
+                coll_id = j;
                 goto collision_exit;
             } else {
                 coll_id = -1;
