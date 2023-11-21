@@ -12,13 +12,14 @@
 
 #include "models/ship.h"
 #include "models/streak.h"
+#include "models/box.h"
 
 // box
-i32 box_indices[] = { 
+i32 plane_indices[] = { 
     0, 1, 3,
     1, 2, 3
 };
-f32 box_vertices[] = {
+f32 plane_vertices[] = {
     //  x     y      z     s     t     u    nx    ny    nz
      1.0f, 0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
      1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
@@ -31,6 +32,7 @@ enum MeshName {
     Ship, 
     Streak,
     Plane, 
+    Box, 
     MeshCount 
 };
 
