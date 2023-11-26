@@ -29,11 +29,11 @@ f32 plane_vertices[] = {
 
 enum MeshName { 
     // #include "config.ini"
-    Ship, 
+    Ship,
     Streak,
-    Plane, 
-    Box, 
-    MeshCount 
+    Plane,
+    Box,
+    MeshCount
 };
 
 typedef struct {
