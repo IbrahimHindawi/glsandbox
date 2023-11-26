@@ -312,11 +312,49 @@ collision_exit:
 }
 
 // vec4 box {x, y, w, h}
-int boxAABBCollision2(vec3 posa, vec3 scla, vec3 posb, vec3 sclb) {
+int boxAABBCollision2d(vec3 posa, vec3 scla, vec3 posb, vec3 sclb) {
     if (posa[0] < posb[0] +       sclb[0] * 2.f &&
         posa[0] + scla[0] * 2.f > posb[0]       &&
         posa[1] < posb[1] +       sclb[2] * 2.f &&
         posa[1] + scla[2] * 2.f > posb[1]) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+//
+// vec4 box {x, y, w, h}
+// function intersect(a, b) {
+//   return (
+//     a.minX <= b.maxX &&
+//     a.maxX >= b.minX &&
+//     a.minY <= b.maxY &&
+//     a.maxY >= b.minY &&
+//     a.minZ <= b.maxZ &&
+//     a.maxZ >= b.minZ
+//   );
+// }
+int boxAABBCollision3d(vec3 posa, vec3 scla, vec3 posb, vec3 sclb) {
+    float a_minX = posa[0] + -(scla[0] * 0.5f);
+    float a_maxX = posa[0] +   scla[0] * 0.5f;
+    float a_minY = posa[1] + -(scla[1] * 0.5f);
+    float a_maxY = posa[1] +   scla[1] * 0.5f;
+    float a_minZ = posa[2] + -(scla[2] * 0.5f);
+    float a_maxZ = posa[2] +   scla[2] * 0.5f;
+    float b_minX = posb[0] + -(sclb[0] * 0.5f);
+    float b_maxX = posb[0] +   sclb[0] * 0.5f;
+    float b_minY = posb[1] + -(sclb[1] * 0.5f);
+    float b_maxY = posb[1] +   sclb[1] * 0.5f;
+    float b_minZ = posb[2] + -(sclb[2] * 0.5f);
+    float b_maxZ = posb[2] +   sclb[2] * 0.5f;
+    if (
+        a_minX <= b_maxX &&
+        a_maxX >= b_minX &&
+        a_minY <= b_maxY &&
+        a_maxY >= b_minY &&
+        a_minZ <= b_maxZ &&
+        a_maxZ >= b_minZ
+    ) {
         return 1;
     } else {
         return 0;
@@ -327,7 +365,7 @@ i32 archetypeCheckCollisions(vec3 *posa, vec3 *scla, const Range na, vec3 *posb,
     i32 coll_id = -1;
     for(i32 i = na.start; i < na.end; ++i) {
         for(i32 j = nb.start; j < nb.end; ++j) {
-            if(boxAABBCollision2(posa[i], scla[i], posb[j], sclb[j])) {
+            if(boxAABBCollision3d(posa[i], scla[i], posb[j], sclb[j])) {
                 // printf("boxa {%f, %f, %f, %f}\n", boxa[i][0], boxa[i][1], boxa[i][2], boxa[i][3]);
                 // printf("boxb {%f, %f, %f, %f}\n", boxb[j][0], boxb[j][1], boxb[j][2], boxb[j][3]);
                 // printf("HIT!\n");
