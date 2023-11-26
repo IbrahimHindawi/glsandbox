@@ -463,6 +463,25 @@ void update() {
             // A
             (vec3 *)game_archetype.positions.data,
             (vec3 *)game_archetype.scales.data,
+            ((Range *)range_arena_game->ranges.data)[hero_index],
+            // B
+            (vec3 *)game_archetype.positions.data,
+            (vec3 *)game_archetype.scales.data,
+            ((Range *)range_arena_game->ranges.data)[enemy1_index]);
+        // printf("collision id = %d\n", coll_id);
+        if (coll_id != -1) {
+            ((vec3 *)game_archetype.positions.data)[coll_id][0] = -1000.f;
+            ((vec3 *)game_archetype.positions.data)[coll_id][1] = -1000.f;
+            // printf("collision id = %d\n", coll_id);
+            coll_id = -1;
+        }
+    }
+    {
+        // check collisions
+        i32 coll_id = archetypeCheckCollisions(
+            // A
+            (vec3 *)game_archetype.positions.data,
+            (vec3 *)game_archetype.scales.data,
             ((Range *)range_arena_game->ranges.data)[hero_projectiles_index],
             // B
             (vec3 *)game_archetype.positions.data,
