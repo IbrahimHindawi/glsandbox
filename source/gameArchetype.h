@@ -385,6 +385,23 @@ collision_exit:
     return coll_id;
 }
 
+void archetypeProcessCollisions(GameArchetype *game_archetype, RangeArena *range_arena_game, i32 a_index, i32 b_index) {
+    // check collisions
+    i32 coll_id = archetypeCheckCollisions(
+        (vec3 *)game_archetype->positions.data,
+        (vec3 *)game_archetype->scales.data,
+        ((Range *)range_arena_game->ranges.data)[a_index],
+        (vec3 *)game_archetype->positions.data,
+        (vec3 *)game_archetype->scales.data,
+        ((Range *)range_arena_game->ranges.data)[b_index]);
+    // printf("collision id = %d\n", coll_id);
+    if (coll_id != -1) {
+        ((vec3 *)game_archetype->positions.data)[coll_id][0] = -1000.f;
+        ((vec3 *)game_archetype->positions.data)[coll_id][1] = -1000.f;
+        // printf("collision id = %d\n", coll_id);
+        coll_id = -1;
+    }
+}
 
 void archetypeUpdateTransforms(vec3 *position_data, vec3 *rotation_data, vec3 *scale_data, mat4 *model_data, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {

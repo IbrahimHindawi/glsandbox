@@ -1,11 +1,16 @@
-#include "SDL2/SDL_events.h"
-#include "SDL2/SDL_video.h"
+/*
+ * SpaceShooter:
+ * TODO(Ibrahim): implement collision system buffer (bump allocator) & processor (check tags and output collision indices)
+ * TODO(Ibrahim): implement timer based enemy spawner
+ * TODO(Ibrahim): implement entity active/inactive flags optimization
+ * TODO(Ibrahim): implement config initialization
+ */
+
 #ifdef _MSC_VER
     #define SDL_MAIN_HANDLED
-    // #define _CRT_SECURE_NO_WARNINGS
 #endif
-
 #include <SDL2/SDL.h>
+
 #include <glad/glad.h>
 
 #include <cglm/vec3.h>
@@ -22,10 +27,8 @@
 #include "rangeops.h"
 
 #include "gameArchetype.h"
-
 #include "core.h"
 #include "hkArray.h"
-#include "hkHashTableLinear.h"
 
 // SYSTEM
 ///////////////////////////////////
@@ -418,14 +421,14 @@ void update() {
         total_range);
     i32 hero_index = rangeArenaGet(range_arena_game, "hero");
     i32 hero_projectiles_index = rangeArenaGet(range_arena_game, "hero_projectiles");
+    archetypeProcessCollisions(&game_archetype, range_arena_game, hero_index, enemy_index);
+    /*
     {
         // check collisions
         i32 coll_id = archetypeCheckCollisions(
-            // A
             (vec3 *)game_archetype.positions.data,
             (vec3 *)game_archetype.scales.data,
             ((Range *)range_arena_game->ranges.data)[hero_index],
-            // B
             (vec3 *)game_archetype.positions.data,
             (vec3 *)game_archetype.scales.data,
             ((Range *)range_arena_game->ranges.data)[enemy_index]);
@@ -437,6 +440,7 @@ void update() {
             coll_id = -1;
         }
     }
+    */
     {
         // check collisions
         i32 coll_id = archetypeCheckCollisions(
