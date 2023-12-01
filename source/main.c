@@ -149,9 +149,9 @@ void setup() {
     // printf("node={key:%s, value:%d}\n", result2->key, result2->value);
 
     // setup: game_archetype & graphics_archetype
-    i32 hero_index = rangeArenaAppend(range_arena_game, "hero", 1);
+    i32 hero_arena_index = rangeArenaAppend(range_arena_game, "hero", 1);
     rangeArenaPrint(range_arena_game, "hero");
-    Range *hero_range = &((Range *)range_arena_game->ranges.data)[hero_index];
+    Range *hero_range = &((Range *)range_arena_game->ranges.data)[hero_arena_index];
     archetypeInitializeMesh((u32 *)game_archetype.vaos.data, 
             (u32 *)game_archetype.index_counts.data, *hero_range, Box);
     archetypeInitialize1u((u32 *)game_archetype.shaders.data, *hero_range, shader_program_box);
@@ -168,9 +168,9 @@ void setup() {
     archetypeInitialize3f((vec3 *)graphics_archetype.rotations.data, *hero_range, (vec3){pi * .5f, pi, 0.f});
     archetypeInitialize3f((vec3 *)graphics_archetype.scales.data, *hero_range, (vec3){0.15f, 0.15f, 0.15f});
 
-    i32 hero_projectiles_index = rangeArenaAppend(range_arena_game, "hero_projectiles", 8);
+    i32 hero_projectiles_arena_index = rangeArenaAppend(range_arena_game, "hero_projectiles", 8);
     rangeArenaPrint(range_arena_game, "hero_projectiles");
-    Range *projectile_range = &((Range *)range_arena_game->ranges.data)[hero_projectiles_index];
+    Range *projectile_range = &((Range *)range_arena_game->ranges.data)[hero_projectiles_arena_index];
     archetypeInitializeMesh((u32 *)game_archetype.vaos.data, 
                             (u32 *)game_archetype.index_counts.data, *projectile_range, Box);
     archetypeInitialize1u((u32 *)game_archetype.shaders.data, *projectile_range, shader_program_box);
@@ -188,9 +188,9 @@ void setup() {
     archetypeInitialize3f((vec3 *)graphics_archetype.rotations.data, *projectile_range, (vec3){-1.f * pi * .5f, pi, 0.f});
     archetypeInitialize3f((vec3 *)graphics_archetype.scales.data, *projectile_range, (vec3){.25f, 1.f, .25f});
 
-    i32 enemy_index = rangeArenaAppend(range_arena_game, "enemy", 10);
+    i32 enemy_arena_index = rangeArenaAppend(range_arena_game, "enemy", 10);
     rangeArenaPrint(range_arena_game, "enemy");
-    Range *enemy_range = &((Range *)range_arena_game->ranges.data)[enemy_index];
+    Range *enemy_range = &((Range *)range_arena_game->ranges.data)[enemy_arena_index];
     archetypeInitializeMesh((u32 *)game_archetype.vaos.data, 
         (u32 *)game_archetype.index_counts.data, *enemy_range, Box);
     archetypeInitialize1u((u32 *)game_archetype.shaders.data, *enemy_range, shader_program_box);
@@ -214,11 +214,11 @@ void setup() {
         ((FireCore *)game_archetype.fire_cores.data)[enemy_range->start + i].fire_counter = 10;
         ((vec3 *)game_archetype.positions.data)[enemy_range->start + i][0] = i * 0.4f -2.f;
     }
-    // archetypeInitializePositionsAsLine((vec3 *)game_archetype.positions.data, 2.f, 1.f, ((Range *)range_arena_game->ranges.data)[enemy_index]);
+    // archetypeInitializePositionsAsLine((vec3 *)game_archetype.positions.data, 2.f, 1.f, ((Range *)range_arena_game->ranges.data)[enemy_arena_index]);
 
-    i32 enemy_projectiles_index = rangeArenaAppend(range_arena_game, "enemy_projectiles", 3 * 10);
+    i32 enemy_projectiles_arena_index = rangeArenaAppend(range_arena_game, "enemy_projectiles", 3 * 10);
     rangeArenaPrint(range_arena_game, "enemy_projectiles");
-    Range *projectile_enemy_range = &((Range *)range_arena_game->ranges.data)[enemy_projectiles_index];
+    Range *projectile_enemy_range = &((Range *)range_arena_game->ranges.data)[enemy_projectiles_arena_index];
     archetypeInitializeMesh((u32 *)game_archetype.vaos.data, 
         (u32 *)game_archetype.index_counts.data, *projectile_enemy_range, Box);
     archetypeInitialize1u((u32 *)game_archetype.shaders.data, *projectile_enemy_range, shader_program_box);
@@ -254,10 +254,10 @@ void setup() {
 
 void input() {
     vec3 *velocities = ((vec3 *)game_archetype.velocities.data);
-    i32 hero_index = rangeArenaGet(range_arena_game, "hero");
-    i32 projectile_hero_index = rangeArenaGet(range_arena_game, "hero_projectiles");
-    const i32 hero_start = ((Range *)range_arena_game->ranges.data)[hero_index].start;
-    const i32 hero_end = ((Range *)range_arena_game->ranges.data)[hero_index].end;
+    i32 hero_arena_index = rangeArenaGet(range_arena_game, "hero");
+    i32 hero_projectiles_arena_index = rangeArenaGet(range_arena_game, "hero_projectiles");
+    const i32 hero_start = ((Range *)range_arena_game->ranges.data)[hero_arena_index].start;
+    const i32 hero_end = ((Range *)range_arena_game->ranges.data)[hero_arena_index].end;
     const f32 base = 1.f;
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -290,8 +290,8 @@ void input() {
                         // rangeArenaPrint(range_arena_game, "background");
                         archetypeSpawnProjectileAtEntity(
                             (vec3 *)game_archetype.positions.data,
-                            &((FireCore *)game_archetype.fire_cores.data)[hero_index].fire_index,
-                            ((Range *)range_arena_game->ranges.data)[projectile_hero_index],
+                            &((FireCore *)game_archetype.fire_cores.data)[hero_arena_index].fire_index,
+                            ((Range *)range_arena_game->ranges.data)[hero_projectiles_arena_index],
                             hero_start);
                     }
                 }
@@ -359,18 +359,18 @@ void update() {
     archetypeUpdateVelocities(
         (vec3 *)game_archetype.velocities.data,
         SDL_GetTicks() / 1000.f, 
-        ((Range *)range_arena_game->ranges.data)[enemy_index]);
+        ((Range *)range_arena_game->ranges.data)[enemy_arena_index]);
     */
     // update(game_archetype|graphics_archetype)
-    i32 enemy_index = rangeArenaGet(range_arena_game, "enemy");
-    i32 enemy_projectiles_index = rangeArenaGet(range_arena_game, "enemy_projectiles");
+    i32 enemy_arena_index = rangeArenaGet(range_arena_game, "enemy");
+    i32 enemy_projectiles_arena_index = rangeArenaGet(range_arena_game, "enemy_projectiles");
     for(int i = 0; i < 10; ++i) {
         // TODO(Ibrahim): fix function internals
         archetypeSpawnProjectileAtEntityAI(
             (vec3 *)game_archetype.positions.data,
             (FireCore *)game_archetype.fire_cores.data, 
-            ((Range *)range_arena_game->ranges.data)[enemy_projectiles_index],
-            ((Range *)range_arena_game->ranges.data)[enemy_index].start + i, i * 3);
+            ((Range *)range_arena_game->ranges.data)[enemy_projectiles_arena_index],
+            ((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + i, i * 3);
     }
 
     Range total_range = (Range){ .start = 0, .end = range_arena_game->border };
@@ -387,19 +387,19 @@ void update() {
         total_range);
 
     // Collision Detection
-    i32 hero_index = rangeArenaGet(range_arena_game, "hero");
-    i32 hero_projectiles_index = rangeArenaGet(range_arena_game, "hero_projectiles");
-    archetypeProcessCollisions(&game_archetype, range_arena_game, hero_index, enemy_index);
-    archetypeProcessCollisions(&game_archetype, range_arena_game, enemy_projectiles_index, hero_index);
-    archetypeProcessCollisions(&game_archetype, range_arena_game, hero_projectiles_index, enemy_index);
+    i32 hero_arena_index = rangeArenaGet(range_arena_game, "hero");
+    i32 hero_projectiles_arena_index = rangeArenaGet(range_arena_game, "hero_projectiles");
+    archetypeProcessCollisions(&game_archetype, range_arena_game, hero_arena_index, enemy_arena_index);
+    archetypeProcessCollisions(&game_archetype, range_arena_game, enemy_projectiles_arena_index, hero_arena_index);
+    archetypeProcessCollisions(&game_archetype, range_arena_game, hero_projectiles_arena_index, enemy_arena_index);
 
     counter += 1;
     if(counter == 100) {
         // printf("OK\n");
         // printf("iter = %d\n", iter);
-        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_index].start + iter][0] = (float)((rand() % (spawn_range - -spawn_range + 1)) + -spawn_range);
-        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_index].start + iter][1] = 8.f;
-        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_index].start + iter][2] = 0.f;
+        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][0] = (float)((rand() % (spawn_range - -spawn_range + 1)) + -spawn_range);
+        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][1] = 8.f;
+        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][2] = 0.f;
         counter = 0;
         iter += 1;
         if(iter % 10 == 0) { iter = 0; }
