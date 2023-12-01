@@ -361,7 +361,7 @@ int boxAABBCollision3d(vec3 posa, vec3 scla, vec3 posb, vec3 sclb) {
     }
 }
 
-i32 archetypeCheckCollisions(vec3 *posa, vec3 *scla, const Range na, vec3 *posb, vec3 *sclb, const Range nb) {// u32 na, vec4 *boxa, u32 nb, vec4 *boxb) {
+i32 archetypeCheckCollision(vec3 *posa, vec3 *scla, const Range na, vec3 *posb, vec3 *sclb, const Range nb) {
     i32 coll_id = -1;
     for(i32 i = na.start; i < na.end; ++i) {
         for(i32 j = nb.start; j < nb.end; ++j) {
@@ -387,7 +387,7 @@ collision_exit:
 
 void archetypeProcessCollisions(GameArchetype *game_archetype, RangeArena *range_arena_game, i32 a_index, i32 b_index) {
     // check collisions
-    i32 coll_id = archetypeCheckCollisions(
+    i32 coll_id = archetypeCheckCollision(
         (vec3 *)game_archetype->positions.data,
         (vec3 *)game_archetype->scales.data,
         ((Range *)range_arena_game->ranges.data)[a_index],
@@ -502,17 +502,20 @@ void archetypeSpawnProjectileAtEntity(vec3 *positions, i32 *fire_index_data, con
     return;
 }
 
-void archetypeSpawnProjectileAtEntityAI(vec3 *positions, FireCore *fire_cores, const Range projectile_range, i32 source_entity_id) {
+void archetypeSpawnProjectileAtEntityAI(vec3 *positions, FireCore *fire_cores, const Range projectile_range, i32 source_entity_id, i32 off) {
     vec3 *source_position = positions;
     vec3 *dest_position = positions;
 
     if((fire_cores[source_entity_id].fire_counter % fire_cores[source_entity_id].fire_rate) == 0 && fire_cores[source_entity_id].fire_active == true) {
         fire_cores[source_entity_id].fire_counter = 0;
         // fire start
-        fire_cores[source_entity_id].fire_index = (fire_cores[source_entity_id].fire_index + 1) % projectile_range.length; // + projectile_range.start;
-        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start][0] = source_position[source_entity_id][0];
-        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start][1] = source_position[source_entity_id][1];
-        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start][2] = source_position[source_entity_id][2];
+        // printf("%d\n", projectile_range.start + off);
+        // printf("%d\n", projectile_range.start);
+        // printf("%d\n", projectile_range.length);
+        fire_cores[source_entity_id].fire_index = (fire_cores[source_entity_id].fire_index + 1) % 3; // + projectile_range.start;
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start + off][0] = source_position[source_entity_id][0];
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start + off][1] = source_position[source_entity_id][1];
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start + off][2] = source_position[source_entity_id][2];
         // fire end
         fire_cores[source_entity_id].fire_burst_count -= 1;
         if(fire_cores[source_entity_id].fire_burst_count == 0) { 
@@ -527,18 +530,6 @@ void archetypeSpawnProjectileAtEntityAI(vec3 *positions, FireCore *fire_cores, c
 
     return;
 }
-//    archetypeInitalizeGameAndGraphics(
-//       game_archetype, 
-//       graphics_archetype,
-//       Plane, shader_program_box, texture,
-//       (vec3){0.f, -3.f, 0.f}, 
-//       (vec3){-1.f * pi * 0.5f, pi, 0.f}, 
-//       (vec3){.35f, 1.f, .35f},
-//       Ship, shader_program, texture,
-//       (vec3){0.f, 0.f, 0.f}, 
-//       (vec3){pi * 0.5f, pi, 0.f}, 
-//       (vec3){.15f, .15f, .15f},
-//       hero_range);
 
 void archetypeInitalizeGameAndGraphics(
     GameArchetype game_archetype, 
