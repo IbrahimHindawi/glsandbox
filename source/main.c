@@ -34,8 +34,10 @@
 ///////////////////////////////////
 // #define window_width 800
 // #define window_height 640
-#define window_width 800
-#define window_height 1000
+#define window_width 1280
+#define window_height 720
+// #define window_width 1920
+// #define window_height 1080
 #define FOV 45
 bool should_quit = false;
 SDL_Window *window = NULL;
@@ -362,8 +364,11 @@ void update() {
         ((Range *)range_arena_game->ranges.data)[enemy_arena_index]);
     */
     // update(game_archetype|graphics_archetype)
+    i32 hero_arena_index = rangeArenaGet(range_arena_game, "hero");
+    i32 hero_projectiles_arena_index = rangeArenaGet(range_arena_game, "hero_projectiles");
     i32 enemy_arena_index = rangeArenaGet(range_arena_game, "enemy");
     i32 enemy_projectiles_arena_index = rangeArenaGet(range_arena_game, "enemy_projectiles");
+
     for(int i = 0; i < 10; ++i) {
         // TODO(Ibrahim): fix function internals
         archetypeSpawnProjectileAtEntityAI(
@@ -374,6 +379,20 @@ void update() {
     }
 
     Range total_range = (Range){ .start = 0, .end = range_arena_game->border };
+
+    // keep hero in box
+    vec3 *hero_position = &((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[hero_arena_index].start];
+    if ((*hero_position)[0] > 3.f){
+        (*hero_position)[0] = 3.f;
+    } else if ((*hero_position)[0] < -3.f) {
+        (*hero_position)[0] = -3.f;
+    } else if ((*hero_position)[1] > 4.f) {
+        (*hero_position)[1] = 4.f;
+    } else if ((*hero_position)[1] < -4.f) {
+        (*hero_position)[1] = -4.f;
+    }
+
+
     // integrate movement
     archetypeIntegrateVelocity(
         (vec3 *)game_archetype.positions.data,
@@ -387,8 +406,7 @@ void update() {
         total_range);
 
     // Collision Detection
-    i32 hero_arena_index = rangeArenaGet(range_arena_game, "hero");
-    i32 hero_projectiles_arena_index = rangeArenaGet(range_arena_game, "hero_projectiles");
+
     archetypeProcessCollisions(&game_archetype, range_arena_game, hero_arena_index, enemy_arena_index);
     archetypeProcessCollisions(&game_archetype, range_arena_game, enemy_projectiles_arena_index, hero_arena_index);
     archetypeProcessCollisions(&game_archetype, range_arena_game, hero_projectiles_arena_index, enemy_arena_index);
