@@ -1,7 +1,6 @@
 /*
  * SpaceShooter:
  * TODO(Ibrahim): implement collision system buffer (bump allocator) & processor (check tags and output collision indices)
- * TODO(Ibrahim): implement timer based enemy spawner
  * TODO(Ibrahim): implement entity active/inactive flags optimization
  * TODO(Ibrahim): implement config initialization
  */
@@ -330,6 +329,7 @@ void input() {
 }
 
 void update() {
+    // Prologue
     // delta time
     frameDelay = frameTime - (SDL_GetTicks() - framePrevTime);
     if(frameDelay > 0) {
@@ -357,12 +357,6 @@ void update() {
     // }
 
     // update attributes
-    /*
-    archetypeUpdateVelocities(
-        (vec3 *)game_archetype.velocities.data,
-        SDL_GetTicks() / 1000.f, 
-        ((Range *)range_arena_game->ranges.data)[enemy_arena_index]);
-    */
     // update(game_archetype|graphics_archetype)
     i32 hero_arena_index = rangeArenaGet(range_arena_game, "hero");
     i32 hero_projectiles_arena_index = rangeArenaGet(range_arena_game, "hero_projectiles");
@@ -392,7 +386,29 @@ void update() {
         (*hero_position)[1] = -4.f;
     }
 
+    // Collision Detection
+    u8 hit_hero_enemy = archetypeProcessCollisions(&game_archetype, range_arena_game, hero_arena_index, enemy_arena_index);
+    u8 hit_hero_eproj = archetypeProcessCollisions(&game_archetype, range_arena_game, hero_arena_index, enemy_projectiles_arena_index);
+    if (hit_hero_enemy || hit_hero_eproj) {
+        printf("Hero Lives - 1\n");
+        // hero_lives -= 1;
+        // reset hero position
+    }
+    archetypeProcessCollisions(&game_archetype, range_arena_game, hero_projectiles_arena_index, enemy_arena_index);
 
+    counter += 1;
+    if(counter == 50) {
+        // printf("OK\n");
+        // printf("iter = %d\n", iter);
+        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][0] = (float)((rand() % (spawn_range - -spawn_range + 1)) + -spawn_range);
+        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][1] = 8.f;
+        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][2] = 0.f;
+        counter = 0;
+        iter += 1;
+        if(iter % 10 == 0) { iter = 0; }
+    }
+
+    // Epilogue
     // integrate movement
     archetypeIntegrateVelocity(
         (vec3 *)game_archetype.positions.data,
@@ -404,24 +420,6 @@ void update() {
         (vec3 *)game_archetype.positions.data,
         (vec3 *)graphics_archetype.positions.data,
         total_range);
-
-    // Collision Detection
-
-    archetypeProcessCollisions(&game_archetype, range_arena_game, hero_arena_index, enemy_arena_index);
-    archetypeProcessCollisions(&game_archetype, range_arena_game, enemy_projectiles_arena_index, hero_arena_index);
-    archetypeProcessCollisions(&game_archetype, range_arena_game, hero_projectiles_arena_index, enemy_arena_index);
-
-    counter += 1;
-    if(counter == 100) {
-        // printf("OK\n");
-        // printf("iter = %d\n", iter);
-        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][0] = (float)((rand() % (spawn_range - -spawn_range + 1)) + -spawn_range);
-        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][1] = 8.f;
-        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][2] = 0.f;
-        counter = 0;
-        iter += 1;
-        if(iter % 10 == 0) { iter = 0; }
-    }
 
     // finalize transformation matrices
     archetypeUpdateTransforms(

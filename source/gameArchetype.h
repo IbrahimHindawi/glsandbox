@@ -385,7 +385,12 @@ collision_exit:
     return coll_id;
 }
 
-void archetypeProcessCollisions(GameArchetype *game_archetype, RangeArena *range_arena_game, i32 a_index, i32 b_index) {
+/*
+ * archetypeCheckCollision(A, B) -> bool
+ * returns true if collision happened with A
+ * side effect: does something to the collided B
+ */
+u8 archetypeProcessCollisions(GameArchetype *game_archetype, RangeArena *range_arena_game, i32 a_index, i32 b_index) {
     // check collisions
     i32 coll_id = archetypeCheckCollision(
         (vec3 *)game_archetype->positions.data,
@@ -400,7 +405,9 @@ void archetypeProcessCollisions(GameArchetype *game_archetype, RangeArena *range
         ((vec3 *)game_archetype->positions.data)[coll_id][1] = -1000.f;
         // printf("collision id = %d\n", coll_id);
         coll_id = -1;
+        return true;
     }
+    return false;
 }
 
 void archetypeUpdateTransforms(vec3 *position_data, vec3 *rotation_data, vec3 *scale_data, mat4 *model_data, const Range range) {
