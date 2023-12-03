@@ -2,6 +2,7 @@
  * SpaceShooter:
  * TODO(Ibrahim): implement collision system buffer (bump allocator) & processor (check tags and output collision indices)
  * TODO(Ibrahim): implement entity active/inactive flags optimization
+ * TODO(Ibrahim): implement entity health
  * TODO(Ibrahim): implement config initialization
  */
 
@@ -70,6 +71,7 @@ u32 shader_program_box;
 u32 shader_program_ui_bg;
 u32 texture;
 u32 texture2;
+u32 texture_gradient;
 mat4 view;
 mat4 proj_persp;
 mat4 proj_ortho;
@@ -119,6 +121,7 @@ void setup() {
     /////////////////////////////////////////////
     texture_create(&texture, "resource/Ship_BaseColor_purple_mid.jpg");
     texture_create(&texture2, "resource/Ship_BaseColor_orange_mid.jpg");
+    texture_create(&texture_gradient, "resource/Gradient.jpg");
 
     // XFORMS
     //////////////////////////////////////////////
@@ -159,7 +162,7 @@ void setup() {
     archetypeInitialize3f((vec3 *)game_archetype.positions.data, *hero_range, (vec3){0.f, -3.f, 0.f});
     archetypeInitialize3f((vec3 *)game_archetype.rotations.data, *hero_range, (vec3){0.f, 0.f, 0.f});
     archetypeInitialize3f((vec3 *)game_archetype.scales.data, *hero_range, (vec3){0.35f, 0.35f, 0.35f});
-    archetypeInitialize1f((f32 *)game_archetype.speeds.data, *hero_range, 6.f);
+    archetypeInitialize1f((f32 *)game_archetype.speeds.data, *hero_range, 8.f);
     archetypeInitializeMesh((u32 *)graphics_archetype.vaos.data, 
             (u32 *)graphics_archetype.index_counts.data, *hero_range, Ship);
     archetypeInitialize1u((u32 *)graphics_archetype.shaders.data, *hero_range, shader_program_ship);
@@ -167,8 +170,12 @@ void setup() {
     archetypeInitialize3f((vec3 *)graphics_archetype.positions.data, *hero_range, (vec3){0.f, 0.f, 0.f});
     archetypeInitialize3f((vec3 *)graphics_archetype.rotations.data, *hero_range, (vec3){pi * .5f, pi, 0.f});
     archetypeInitialize3f((vec3 *)graphics_archetype.scales.data, *hero_range, (vec3){0.15f, 0.15f, 0.15f});
+    ((FireCore *)game_archetype.fire_cores.data)[hero_range->start].fire_rate = 5;
+    ((FireCore *)game_archetype.fire_cores.data)[hero_range->start].fire_burst_count = 0;
+    ((FireCore *)game_archetype.fire_cores.data)[hero_range->start].fire_burst_rate = 0;
+    ((FireCore *)game_archetype.fire_cores.data)[hero_range->start].fire_counter = 10;
 
-    i32 hero_projectiles_arena_index = rangeArenaAppend(range_arena_game, "hero_projectiles", 8);
+    i32 hero_projectiles_arena_index = rangeArenaAppend(range_arena_game, "hero_projectiles", 16);
     rangeArenaPrint(range_arena_game, "hero_projectiles");
     Range *projectile_range = &((Range *)range_arena_game->ranges.data)[hero_projectiles_arena_index];
     archetypeInitializeMesh((u32 *)game_archetype.vaos.data, 
@@ -183,7 +190,7 @@ void setup() {
     archetypeInitializeMesh((u32 *)graphics_archetype.vaos.data, 
                             (u32 *)graphics_archetype.index_counts.data, *projectile_range, Streak);
     archetypeInitialize1u((u32 *)graphics_archetype.shaders.data, *projectile_range, shader_program_projectile);
-    archetypeInitialize1u((u32 *)graphics_archetype.textures.data, *projectile_range, texture);
+    archetypeInitialize1u((u32 *)graphics_archetype.textures.data, *projectile_range, texture_gradient);
     archetypeInitialize3f((vec3 *)graphics_archetype.positions.data, *projectile_range, (vec3){0.f, 0.f, 0.f});
     archetypeInitialize3f((vec3 *)graphics_archetype.rotations.data, *projectile_range, (vec3){-1.f * pi * .5f, pi, 0.f});
     archetypeInitialize3f((vec3 *)graphics_archetype.scales.data, *projectile_range, (vec3){.25f, 1.f, .25f});
@@ -208,7 +215,7 @@ void setup() {
     archetypeInitialize3f((vec3 *)graphics_archetype.rotations.data, *enemy_range, (vec3){pi * .5f, 0.f, 0.f});
     archetypeInitialize3f((vec3 *)graphics_archetype.scales.data, *enemy_range, (vec3){.15f, .15f, .15f});
     for(int i = 0; i < 10; ++i) {
-        ((FireCore *)game_archetype.fire_cores.data)[enemy_range->start + i].fire_rate = 30;
+        ((FireCore *)game_archetype.fire_cores.data)[enemy_range->start + i].fire_rate = 10;
         ((FireCore *)game_archetype.fire_cores.data)[enemy_range->start + i].fire_burst_count = 3;
         ((FireCore *)game_archetype.fire_cores.data)[enemy_range->start + i].fire_burst_rate = 3;
         ((FireCore *)game_archetype.fire_cores.data)[enemy_range->start + i].fire_counter = 10;
@@ -231,9 +238,9 @@ void setup() {
     archetypeInitializeMesh((u32 *)graphics_archetype.vaos.data, 
         (u32 *)graphics_archetype.index_counts.data, *projectile_enemy_range, Streak);
     archetypeInitialize1u((u32 *)graphics_archetype.shaders.data, *projectile_enemy_range, shader_program_projectile_red);
-    archetypeInitialize1u((u32 *)graphics_archetype.textures.data, *projectile_enemy_range, texture);
+    archetypeInitialize1u((u32 *)graphics_archetype.textures.data, *projectile_enemy_range, texture_gradient);
     archetypeInitialize3f((vec3 *)graphics_archetype.positions.data, *projectile_enemy_range, (vec3){0.f, 0.f, 0.f});
-    archetypeInitialize3f((vec3 *)graphics_archetype.rotations.data, *projectile_enemy_range, (vec3){-1.f * pi * .5f, pi, 0.f});
+    archetypeInitialize3f((vec3 *)graphics_archetype.rotations.data, *projectile_enemy_range, (vec3){-1.f * pi * .5f, 0.f, 0.f});
     archetypeInitialize3f((vec3 *)graphics_archetype.scales.data, *projectile_enemy_range, (vec3){.25f, 1.f, .25f});
 
     // setup(static_archetype)
@@ -309,15 +316,16 @@ void input() {
                     for(i32 i = hero_start; i < hero_end; ++i) {
                         velocities[hero_start][1] = -base;
                     }
+                /*
                 } else if(event.key.keysym.sym == SDLK_SPACE) {
                     for(i32 i = hero_start; i < hero_end; ++i) {
                         // rangeArenaPrint(range_arena_game, "background");
                         archetypeSpawnProjectileAtEntity(
                             (vec3 *)game_archetype.positions.data,
                             &((FireCore *)game_archetype.fire_cores.data)[hero_arena_index].fire_index,
-                            ((Range *)range_arena_game->ranges.data)[hero_projectiles_arena_index],
-                            hero_start);
+                            ((Range *)range_arena_game->ranges.data)[hero_projectiles_arena_index], hero_start);
                     }
+                    */
                 }
                 break;
             }
@@ -347,6 +355,14 @@ void input() {
                 break;
             }
         }
+    }
+    const u8 *key_states = SDL_GetKeyboardState(NULL);
+    if(key_states[SDL_SCANCODE_SPACE]) {
+        archetypeSpawnProjectileAtEntityAuto(
+            (vec3 *)game_archetype.positions.data,
+            /* &((FireCore *)game_archetype.fire_cores.data)[hero_arena_index].fire_index, */
+            &((FireCore *)game_archetype.fire_cores.data)[hero_arena_index],
+            ((Range *)range_arena_game->ranges.data)[hero_projectiles_arena_index], hero_start);
     }
     return;
 }
@@ -413,7 +429,7 @@ void update() {
     u8 hit_hero_enemy = archetypeProcessCollisions(&game_archetype, range_arena_game, hero_arena_index, enemy_arena_index);
     u8 hit_hero_eproj = archetypeProcessCollisions(&game_archetype, range_arena_game, hero_arena_index, enemy_projectiles_arena_index);
     if (hit_hero_enemy || hit_hero_eproj) {
-        printf("Hero Lives - 1\n");
+        // printf("Hero Lives - 1\n");
         (*hero_position)[0] = 0.f;
         (*hero_position)[1] = -3.f;
         // hero_lives -= 1;
@@ -425,7 +441,13 @@ void update() {
     if(counter == 50) {
         // printf("OK\n");
         // printf("iter = %d\n", iter);
-        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][0] = (float)((rand() % (spawn_range - -spawn_range + 1)) + -spawn_range);
+        // float random_x = (float)((rand() % (spawn_range - -spawn_range + 1)) + -spawn_range);
+        // int sign = (rand() % (1 - -1 + 1)) + -1;
+        int sign = (rand() % 2) == 1 ? 1 : -1;
+        // printf("sign = %d\n", sign);
+        float random_x = ((float)rand()/(float)(RAND_MAX)) * 3 * sign;
+        // printf("random_x = %f\n", random_x);
+        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][0] = random_x;
         ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][1] = 8.f;
         ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][2] = 0.f;
         counter = 0;

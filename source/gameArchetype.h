@@ -509,6 +509,25 @@ void archetypeSpawnProjectileAtEntity(vec3 *positions, i32 *fire_index_data, con
     return;
 }
 
+void archetypeSpawnProjectileAtEntityAuto(vec3 *positions, FireCore *fire_cores, const Range projectile_range, i32 source_entity_id) {
+    // printf("fire_cores[source_entity_id].fire_index[i] = %d. ", *fire_cores[source_entity_id].fire_index);
+    // printf("fire_cores[source_entity_id].fire_index[i + projectile_range.start] = %d. ", *fire_cores[source_entity_id].fire_index+projectile_range.start);
+    // printf("address: %p\n", fire_cores[source_entity_id].fire_index);
+    vec3 *source_position = positions;
+    vec3 *dest_position = positions;
+
+    if((fire_cores[source_entity_id].fire_counter % fire_cores[source_entity_id].fire_rate) == 0) {
+        fire_cores[source_entity_id].fire_counter = 0;
+        fire_cores[source_entity_id].fire_index = (fire_cores[source_entity_id].fire_index + 1) % projectile_range.length;
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start][0] = source_position[source_entity_id][0];
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start][1] = source_position[source_entity_id][1];
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start][2] = source_position[source_entity_id][2];
+    }
+    fire_cores[source_entity_id].fire_counter += 1;
+    return;
+}
+
+
 void archetypeSpawnProjectileAtEntityAI(vec3 *positions, FireCore *fire_cores, const Range projectile_range, i32 source_entity_id, i32 off) {
     vec3 *source_position = positions;
     vec3 *dest_position = positions;
@@ -519,7 +538,7 @@ void archetypeSpawnProjectileAtEntityAI(vec3 *positions, FireCore *fire_cores, c
         // printf("%d\n", projectile_range.start + off);
         // printf("%d\n", projectile_range.start);
         // printf("%d\n", projectile_range.length);
-        fire_cores[source_entity_id].fire_index = (fire_cores[source_entity_id].fire_index + 1) % 3; // + projectile_range.start;
+        fire_cores[source_entity_id].fire_index = (fire_cores[source_entity_id].fire_index + 1) % 3; // + projectile_range.length;
         dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start + off][0] = source_position[source_entity_id][0];
         dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start + off][1] = source_position[source_entity_id][1];
         dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start + off][2] = source_position[source_entity_id][2];

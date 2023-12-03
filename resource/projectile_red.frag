@@ -9,5 +9,6 @@ void main() {
     // newCoord.x *= -1.f;
     newCoord.y *= -1.f; // flip texture!
     // FragColor = texture(utexture, newCoord);
-    FragColor = vec4(1.0, 0.0, 0.0, 1.);
+    vec4 Color = vec4(1.0, 0.0, 0.0, 1.);
+    FragColor = texture(utexture, newCoord) * Color;
 }
