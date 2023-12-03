@@ -448,12 +448,12 @@ void archetypeRender(u32 *vao_data, u32 *shader_program_data, u32 *texture_data,
     }
 }
 
-void archetypeSetUniform1f(u32 *shader_program_data, const Range range) {
+void archetypeSetUniform1f(u32 *shader_program_data, const Range range, const char *uniform_name, f32 uniform_value) {
     for(i32 i = range.start; i < range.end; ++i) {
         glUseProgram(shader_program_data[i]);
         // uniforms
-        u32 time_location = glGetUniformLocation(shader_program_data[i], "time");
-        glUniform1f(time_location, SDL_GetTicks() / 1000.f);
+        u32 uniform_location = glGetUniformLocation(shader_program_data[i], uniform_name);
+        glUniform1f(uniform_location, uniform_value);
     }
 }
 

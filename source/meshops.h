@@ -13,9 +13,13 @@
 #include "models/ship.h"
 #include "models/streak.h"
 #include "models/box.h"
+#include "models/planexy.h"
+#include "models/planeyz.h"
+#include "models/planezx.h"
 
+/*
 // box
-i32 plane_indices[] = { 
+u32 plane_indices[] = { 
     0, 1, 3,
     1, 2, 3
 };
@@ -26,12 +30,15 @@ f32 plane_vertices[] = {
     -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
     -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 
 };
+*/
 
 enum MeshName { 
     // #include "config.ini"
     Ship,
     Streak,
-    Plane,
+    PlaneXY,
+    PlaneYZ,
+    PlaneZX,
     Box,
     MeshCount
 };
@@ -39,14 +46,14 @@ enum MeshName {
 typedef struct {
     f32 *vertices;
     u32 vertices_count;
-    i32 *indices;
+    u32 *indices;
     u32 indices_count;
 } MeshRawData;
 
 MeshRawData MeshRawDataArray[MeshCount];
 u32 MeshVAOArray[MeshCount];
 
-MeshRawData MeshDataInitialize(f32 *vertices, u32 vertices_count, i32 *indices, u32 indices_count) {
+MeshRawData MeshDataInitialize(f32 *vertices, u32 vertices_count, u32 *indices, u32 indices_count) {
     MeshRawData result = {0};
     result.vertices = vertices;
     result.vertices_count = vertices_count;

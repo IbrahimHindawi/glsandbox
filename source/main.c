@@ -69,7 +69,8 @@ u32 shader_program_box;
 u32 texture;
 u32 texture2;
 mat4 view;
-mat4 proj;
+mat4 proj_persp;
+mat4 proj_ortho;
 f32 angle;
 
 // camera
@@ -91,12 +92,16 @@ void setup() {
     /////////////////////
     MeshRawDataArray[Ship] = MeshDataInitialize(ship_vertices, sizeofarray(ship_vertices, f32), ship_indices, sizeofarray(ship_indices, u32));
     MeshRawDataArray[Streak] = MeshDataInitialize(streak_vertices, sizeofarray(streak_vertices, f32), streak_indices, sizeofarray(streak_indices, u32));
-    MeshRawDataArray[Plane] = MeshDataInitialize(plane_vertices, sizeofarray(plane_vertices, f32), plane_indices, sizeofarray(plane_indices, u32));
+    MeshRawDataArray[PlaneXY] = MeshDataInitialize(planexy_vertices, sizeofarray(planexy_vertices, f32), planexy_indices, sizeofarray(planexy_indices, u32));
+    MeshRawDataArray[PlaneYZ] = MeshDataInitialize(planeyz_vertices, sizeofarray(planeyz_vertices, f32), planeyz_indices, sizeofarray(planeyz_indices, u32));
+    MeshRawDataArray[PlaneZX] = MeshDataInitialize(planezx_vertices, sizeofarray(planezx_vertices, f32), planezx_indices, sizeofarray(planezx_indices, u32));
     MeshRawDataArray[Box] = MeshDataInitialize(box_vertices, sizeofarray(box_vertices, f32), box_indices, sizeofarray(box_indices, u32));
 
     MeshVAOGen(&MeshVAOArray[Ship], &MeshRawDataArray[Ship]);
     MeshVAOGen(&MeshVAOArray[Streak], &MeshRawDataArray[Streak]);
-    MeshVAOGen(&MeshVAOArray[Plane], &MeshRawDataArray[Plane]);
+    MeshVAOGen(&MeshVAOArray[PlaneXY], &MeshRawDataArray[PlaneXY]);
+    MeshVAOGen(&MeshVAOArray[PlaneYZ], &MeshRawDataArray[PlaneYZ]);
+    MeshVAOGen(&MeshVAOArray[PlaneZX], &MeshRawDataArray[PlaneZX]);
     MeshVAOGen(&MeshVAOArray[Box], &MeshRawDataArray[Box]);
 
     //  SHADER
@@ -125,8 +130,9 @@ void setup() {
     camera_forward[2] = -1.0f;
 
     glm_mat4_identity(view);
-    glm_mat4_identity(proj);
-    glm_perspective(glm_rad((f32)FOV), (f32)window_width / (f32)window_height, 0.1f, 100.0f, proj);
+    glm_mat4_identity(proj_persp);
+    glm_perspective(glm_rad((f32)FOV), (f32)window_width / (f32)window_height, 0.1f, 100.0f, proj_persp);
+    glm_ortho_default((f32)window_width / (f32)window_height, proj_ortho);
 
     //  setup(allocations)
     //-------------------------------------------
@@ -243,12 +249,12 @@ void setup() {
     Range *static_range = &((Range *)range_arena_static->ranges.data)[background];
     // Graphics
     archetypeInitializeMesh((u32 *)static_archetype.vaos.data, 
-        (u32 *)static_archetype.index_counts.data, *static_range, Plane);
+        (u32 *)static_archetype.index_counts.data, *static_range, PlaneXY);
     archetypeInitialize1u((u32 *)static_archetype.shaders.data, *static_range, shader_program_starfield);
     archetypeInitialize1u((u32 *)static_archetype.textures.data, *static_range, texture);
-    archetypeInitialize3f((vec3 *)static_archetype.positions.data, *static_range, (vec3){0.f, 0.f, -10.f});
-    archetypeInitialize3f((vec3 *)static_archetype.rotations.data, *static_range, (vec3){pi * 0.5f, pi, 0.f});
-    archetypeInitialize3f((vec3 *)static_archetype.scales.data, *static_range, (vec3){100.f, 100.f, 100.f});
+    archetypeInitialize3f((vec3 *)static_archetype.positions.data, *static_range, (vec3){0.f, 0.f, -89.f});
+    archetypeInitialize3f((vec3 *)static_archetype.rotations.data, *static_range, (vec3){0.f, 0.f, 0.f});
+    archetypeInitialize3f((vec3 *)static_archetype.scales.data, *static_range, (vec3){10.f, 10.f, 10.f});
 
     return;
 }
@@ -453,33 +459,32 @@ void render() {
     glEnable(GL_DEPTH_TEST);
     // bind
     // render(graphics_archetype|game_archetype)
-    // gameArchetypeRenderBG(&archetype_plane, shader_program_starfield, view, proj);
     archetypeRender(
         (u32 *)graphics_archetype.vaos.data,
         (u32 *)graphics_archetype.shaders.data,
         (u32 *)graphics_archetype.textures.data,
         (u32 *)graphics_archetype.index_counts.data,
         (mat4 *)graphics_archetype.models.data,
-        view, proj, (Range){0, range_arena_game->border});
+        view, proj_persp, (Range){0, range_arena_game->border});
     archetypeRenderWires(
         (u32 *)game_archetype.vaos.data,
         (u32 *)game_archetype.shaders.data,
         (u32 *)game_archetype.textures.data,
         (u32 *)game_archetype.index_counts.data,
         (mat4 *)game_archetype.models.data,
-        view, proj, (Range){0, range_arena_game->border});
-    // gameArchetypeRenderBoxes(&game_archetype, shader_program_projectile, view, proj, texture2);
+        view, proj_persp, (Range){0, range_arena_game->border});
     // render(static_archetype)
     archetypeSetUniform1f(
         (u32 *)static_archetype.shaders.data,
-        (Range){0, range_arena_static->border});
+        (Range){0, range_arena_static->border},
+        "time", SDL_GetTicks() / 1000.f);
     archetypeRender(
         (u32 *)static_archetype.vaos.data,
         (u32 *)static_archetype.shaders.data,
         (u32 *)static_archetype.textures.data,
         (u32 *)static_archetype.index_counts.data,
         (mat4 *)static_archetype.models.data,
-        view, proj, (Range){0, range_arena_static->border});
+        view, proj_ortho, (Range){0, range_arena_static->border});
     // end
     SDL_GL_SwapWindow(window);
 }
