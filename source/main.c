@@ -65,6 +65,7 @@ GraphicsArchetype static_archetype;
 u32 shader_program_ship;
 u32 shader_program_starfield;
 u32 shader_program_projectile;
+u32 shader_program_projectile_red;
 u32 shader_program_box;
 u32 shader_program_ui_bg;
 u32 texture;
@@ -110,6 +111,7 @@ void setup() {
     shader_create(&shader_program_ship, "resource/simple.vert", "resource/simple.frag");
     shader_create(&shader_program_starfield, "resource/simple.vert", "resource/starfield.frag");
     shader_create(&shader_program_projectile, "resource/simple.vert", "resource/projectile.frag");
+    shader_create(&shader_program_projectile_red, "resource/simple.vert", "resource/projectile_red.frag");
     shader_create(&shader_program_box, "resource/simple.vert", "resource/box.frag");
     shader_create(&shader_program_ui_bg, "resource/simple.vert", "resource/ui_bg.frag");
 
@@ -228,7 +230,7 @@ void setup() {
     archetypeInitialize1f((f32 *)game_archetype.speeds.data, *projectile_enemy_range, 8.f);
     archetypeInitializeMesh((u32 *)graphics_archetype.vaos.data, 
         (u32 *)graphics_archetype.index_counts.data, *projectile_enemy_range, Streak);
-    archetypeInitialize1u((u32 *)graphics_archetype.shaders.data, *projectile_enemy_range, shader_program_projectile);
+    archetypeInitialize1u((u32 *)graphics_archetype.shaders.data, *projectile_enemy_range, shader_program_projectile_red);
     archetypeInitialize1u((u32 *)graphics_archetype.textures.data, *projectile_enemy_range, texture);
     archetypeInitialize3f((vec3 *)graphics_archetype.positions.data, *projectile_enemy_range, (vec3){0.f, 0.f, 0.f});
     archetypeInitialize3f((vec3 *)graphics_archetype.rotations.data, *projectile_enemy_range, (vec3){-1.f * pi * .5f, pi, 0.f});
@@ -412,6 +414,8 @@ void update() {
     u8 hit_hero_eproj = archetypeProcessCollisions(&game_archetype, range_arena_game, hero_arena_index, enemy_projectiles_arena_index);
     if (hit_hero_enemy || hit_hero_eproj) {
         printf("Hero Lives - 1\n");
+        (*hero_position)[0] = 0.f;
+        (*hero_position)[1] = -3.f;
         // hero_lives -= 1;
         // reset hero position
     }
@@ -481,6 +485,7 @@ void render() {
         (u32 *)graphics_archetype.index_counts.data,
         (mat4 *)graphics_archetype.models.data,
         view, proj_persp, (Range){0, range_arena_game->border});
+    /*
     archetypeRenderWires(
         (u32 *)game_archetype.vaos.data,
         (u32 *)game_archetype.shaders.data,
@@ -488,6 +493,7 @@ void render() {
         (u32 *)game_archetype.index_counts.data,
         (mat4 *)game_archetype.models.data,
         view, proj_persp, (Range){0, range_arena_game->border});
+    */
     // render(static_archetype)
     archetypeSetUniform1f(
         (u32 *)static_archetype.shaders.data,
