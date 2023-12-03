@@ -66,6 +66,7 @@ u32 shader_program_ship;
 u32 shader_program_starfield;
 u32 shader_program_projectile;
 u32 shader_program_box;
+u32 shader_program_ui_bg;
 u32 texture;
 u32 texture2;
 mat4 view;
@@ -110,6 +111,7 @@ void setup() {
     shader_create(&shader_program_starfield, "resource/simple.vert", "resource/starfield.frag");
     shader_create(&shader_program_projectile, "resource/simple.vert", "resource/projectile.frag");
     shader_create(&shader_program_box, "resource/simple.vert", "resource/box.frag");
+    shader_create(&shader_program_ui_bg, "resource/simple.vert", "resource/ui_bg.frag");
 
     // TEXTURE
     /////////////////////////////////////////////
@@ -143,17 +145,6 @@ void setup() {
     graphicsArchetypeAllocate(&static_archetype, MAX);
     range_arena_game = rangeArenaAllocate(MAX);
     range_arena_static = rangeArenaAllocate(MAX);
-
-    // simple hash indexing
-    // const i32 table_length = 8;
-    // hkHashTableLinearNode *nodes = hkHashTableLinearCreate(table_length);
-    // hkHashTableLinearInitialize(nodes, table_length);
-    // hkHashTableLinearSet(nodes, "hero", 0);
-    // hkHashTableLinearSet(nodes, "enemy", 1);
-    // hkHashTableLinearNode *result = hkHashTableLinearSearch(nodes, "hero", table_length);
-    // printf("node={key:%s, value:%d}\n", result->key, result->value);
-    // hkHashTableLinearNode *result2 = hkHashTableLinearSearch(nodes, "enemy", table_length);
-    // printf("node={key:%s, value:%d}\n", result2->key, result2->value);
 
     // setup: game_archetype & graphics_archetype
     i32 hero_arena_index = rangeArenaAppend(range_arena_game, "hero", 1);
@@ -246,15 +237,39 @@ void setup() {
     // setup(static_archetype)
     i32 background = rangeArenaAppend(range_arena_static, "background", 1);
     rangeArenaPrint(range_arena_static, "background");
-    Range *static_range = &((Range *)range_arena_static->ranges.data)[background];
+    Range *background_range = &((Range *)range_arena_static->ranges.data)[background];
     // Graphics
     archetypeInitializeMesh((u32 *)static_archetype.vaos.data, 
-        (u32 *)static_archetype.index_counts.data, *static_range, PlaneXY);
-    archetypeInitialize1u((u32 *)static_archetype.shaders.data, *static_range, shader_program_starfield);
-    archetypeInitialize1u((u32 *)static_archetype.textures.data, *static_range, texture);
-    archetypeInitialize3f((vec3 *)static_archetype.positions.data, *static_range, (vec3){0.f, 0.f, -89.f});
-    archetypeInitialize3f((vec3 *)static_archetype.rotations.data, *static_range, (vec3){0.f, 0.f, 0.f});
-    archetypeInitialize3f((vec3 *)static_archetype.scales.data, *static_range, (vec3){10.f, 10.f, 10.f});
+        (u32 *)static_archetype.index_counts.data, *background_range, PlaneXY);
+    archetypeInitialize1u((u32 *)static_archetype.shaders.data, *background_range, shader_program_starfield);
+    archetypeInitialize1u((u32 *)static_archetype.textures.data, *background_range, texture);
+    archetypeInitialize3f((vec3 *)static_archetype.positions.data, *background_range, (vec3){0.f, 0.f, -89.f});
+    archetypeInitialize3f((vec3 *)static_archetype.rotations.data, *background_range, (vec3){0.f, 0.f, 0.f});
+    archetypeInitialize3f((vec3 *)static_archetype.scales.data, *background_range, (vec3){10.f, 10.f, 10.f});
+
+    i32 ui_l_plane = rangeArenaAppend(range_arena_static, "ui_l_plane", 1);
+    rangeArenaPrint(range_arena_static, "ui_l_plane");
+    Range *ui_l_plane_range = &((Range *)range_arena_static->ranges.data)[ui_l_plane];
+    // Graphics
+    archetypeInitializeMesh((u32 *)static_archetype.vaos.data, 
+        (u32 *)static_archetype.index_counts.data, *ui_l_plane_range, PlaneXY);
+    archetypeInitialize1u((u32 *)static_archetype.shaders.data, *ui_l_plane_range, shader_program_ui_bg);
+    archetypeInitialize1u((u32 *)static_archetype.textures.data, *ui_l_plane_range, texture);
+    archetypeInitialize3f((vec3 *)static_archetype.positions.data, *ui_l_plane_range, (vec3){1.8f, 0.f, 0.f});
+    archetypeInitialize3f((vec3 *)static_archetype.rotations.data, *ui_l_plane_range, (vec3){0.f, 0.f, 0.f});
+    archetypeInitialize3f((vec3 *)static_archetype.scales.data, *ui_l_plane_range, (vec3){2.f, 2.f, 1.f});
+
+    i32 ui_r_plane = rangeArenaAppend(range_arena_static, "ui_r_plane", 1);
+    rangeArenaPrint(range_arena_static, "ui_r_plane");
+    Range *ui_r_plane_range = &((Range *)range_arena_static->ranges.data)[ui_r_plane];
+    // Graphics
+    archetypeInitializeMesh((u32 *)static_archetype.vaos.data, 
+        (u32 *)static_archetype.index_counts.data, *ui_r_plane_range, PlaneXY);
+    archetypeInitialize1u((u32 *)static_archetype.shaders.data, *ui_r_plane_range, shader_program_ui_bg);
+    archetypeInitialize1u((u32 *)static_archetype.textures.data, *ui_r_plane_range, texture);
+    archetypeInitialize3f((vec3 *)static_archetype.positions.data, *ui_r_plane_range, (vec3){-1.8f, 0.f, 0.f});
+    archetypeInitialize3f((vec3 *)static_archetype.rotations.data, *ui_r_plane_range, (vec3){0.f, 0.f, 0.f});
+    archetypeInitialize3f((vec3 *)static_archetype.scales.data, *ui_r_plane_range, (vec3){2.f, 2.f, 1.f});
 
     return;
 }
