@@ -22,7 +22,7 @@ typedef struct {
 typedef struct {
     i32 border;
     i32 last_index;
-    i32 maximum;
+    usize maximum;
     hkArray ranges;
 } RangeArena;
 
@@ -67,8 +67,9 @@ u32 rangeArenaAppend(RangeArena *range_arena, name new_range_name, u32 new_size)
 };
 
 // TODO(Ibrahim): optimize linear search to binary search
+// TODO(Ibrahim): figure out signdness
 i32 rangeArenaGet(RangeArena *range_arena, name key) {
-    for( size_t i = 0; i < range_arena->ranges.length; i++ ) {
+    for( i32 i = 0; i < range_arena->ranges.length; i++ ) {
         if( strcmp(((Range *)range_arena->ranges.data)[i].rname, key ) == 0 ) {
             return i;
         }

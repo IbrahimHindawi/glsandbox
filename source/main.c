@@ -32,14 +32,15 @@
 
 // SYSTEM
 ///////////////////////////////////
-// #define window_width 800
-// #define window_height 640
-#define window_width 1280
-#define window_height 720
-// #define window_width 1920
-// #define window_height 1080
+// #define window_width_init 800
+// #define window_height_init 640
+#define window_width_init 1280
+#define window_height_init 720
+// #define window_width_init 1920
+// #define window_height_init 1080
 #define FOV 45
 bool should_quit = false;
+SDL_DisplayMode display_mode;
 SDL_Window *window = NULL;
 char fops_buffer[fops_buffer_size];
 
@@ -138,8 +139,8 @@ void setup() {
 
     glm_mat4_identity(view);
     glm_mat4_identity(proj_persp);
-    glm_perspective(glm_rad((f32)FOV), (f32)window_width / (f32)window_height, 0.1f, 100.0f, proj_persp);
-    glm_ortho_default((f32)window_width / (f32)window_height, proj_ortho);
+    glm_perspective(glm_rad((f32)FOV), (f32)display_mode.w / (f32)display_mode.h, 0.1f, 100.0f, proj_persp);
+    glm_ortho_default((f32)display_mode.w / (f32)display_mode.h, proj_ortho);
 
     //  setup(allocations)
     //-------------------------------------------
@@ -549,10 +550,12 @@ int main(int argc, char *argv[]) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
+    display_mode.h = window_height_init;
+    display_mode.w = window_width_init;
 
     // Creates a SDL window
     //-------------------------------------------
-    window = SDL_CreateWindow("glsandbox", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("glsandbox", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, display_mode.w, display_mode.h, SDL_WINDOW_OPENGL);
 
     // Checks if window has been created; if not, exits program
     //-------------------------------------------
