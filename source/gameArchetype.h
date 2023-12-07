@@ -138,7 +138,7 @@ void archetypeInitialize1u(u32 *data, const Range range, u32 value) {
     return;
 }
 
-void archetypeInitialize1i(i32 *data, const Range range, u32 value) {
+void archetypeInitialize1i(i32 *data, const Range range, i32 value) {
     for(i32 i = range.start; i < range.end; ++i) {
         data[i] = value;
     }

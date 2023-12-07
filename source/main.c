@@ -163,6 +163,7 @@ void setup() {
     archetypeInitialize3f((vec3 *)game_archetype.positions.data, *hero_range, (vec3){0.f, -3.f, 0.f});
     archetypeInitialize3f((vec3 *)game_archetype.rotations.data, *hero_range, (vec3){0.f, 0.f, 0.f});
     archetypeInitialize3f((vec3 *)game_archetype.scales.data, *hero_range, (vec3){0.35f, 0.35f, 0.35f});
+    archetypeInitialize1i(game_archetype.lives.data, *hero_range, 3);
     archetypeInitialize1f((f32 *)game_archetype.speeds.data, *hero_range, 8.f);
     archetypeInitializeMesh((u32 *)graphics_archetype.vaos.data, 
             (u32 *)graphics_archetype.index_counts.data, *hero_range, Ship);
@@ -206,8 +207,9 @@ void setup() {
     archetypeInitialize3f((vec3 *)game_archetype.positions.data, *enemy_range, (vec3){0.f, -10.f, 0.f});
     archetypeInitialize3f((vec3 *)game_archetype.rotations.data, *enemy_range, (vec3){0.f, 0.f, 0.f});
     archetypeInitialize3f((vec3 *)game_archetype.scales.data, *enemy_range, (vec3){.35f, .35f, .35f});
-    archetypeInitialize3f((vec3 *)game_archetype.velocities.data, *enemy_range, (vec3){0.f, -1.f, 0.f});
+    archetypeInitialize1i(game_archetype.lives.data, *enemy_range, 3);
     archetypeInitialize1f((f32 *)game_archetype.speeds.data, *enemy_range, 4.f);
+    archetypeInitialize3f((vec3 *)game_archetype.velocities.data, *enemy_range, (vec3){0.f, -1.f, 0.f});
     archetypeInitializeMesh((u32 *)graphics_archetype.vaos.data, 
         (u32 *)graphics_archetype.index_counts.data, *enemy_range, Ship);
     archetypeInitialize1u((u32 *)graphics_archetype.shaders.data, *enemy_range, shader_program_ship);
@@ -286,8 +288,8 @@ void setup() {
 
 void input() {
     vec3 *velocities = ((vec3 *)game_archetype.velocities.data);
-    i32 hero_arena_index = rangeArenaGet(range_arena_game, "hero");
-    i32 hero_projectiles_arena_index = rangeArenaGet(range_arena_game, "hero_projectiles");
+    i32 hero_arena_index = rangeArenaGetIndex(range_arena_game, "hero");
+    i32 hero_projectiles_arena_index = rangeArenaGetIndex(range_arena_game, "hero_projectiles");
     const i32 hero_start = ((Range *)range_arena_game->ranges.data)[hero_arena_index].start;
     const i32 hero_end = ((Range *)range_arena_game->ranges.data)[hero_arena_index].end;
     const f32 base = 1.f;
@@ -396,15 +398,22 @@ void update() {
     //     printf("OK\n");
     // }
 
-    // update attributes
+    // Interlude
     // update(game_archetype|graphics_archetype)
-    i32 hero_arena_index = rangeArenaGet(range_arena_game, "hero");
-    i32 hero_projectiles_arena_index = rangeArenaGet(range_arena_game, "hero_projectiles");
-    i32 enemy_arena_index = rangeArenaGet(range_arena_game, "enemy");
-    i32 enemy_projectiles_arena_index = rangeArenaGet(range_arena_game, "enemy_projectiles");
+    const i32 hero_arena_index = rangeArenaGetIndex(range_arena_game, "hero");
+    const Range hero_range = ((Range *)range_arena_game->ranges.data)[hero_arena_index];
 
-    for(int i = 0; i < 10; ++i) {
+    const i32 hero_projectiles_arena_index = rangeArenaGetIndex(range_arena_game, "hero_projectiles");
+
+    const i32 enemy_arena_index = rangeArenaGetIndex(range_arena_game, "enemy");
+    const Range enemy_range = ((Range *)range_arena_game->ranges.data)[enemy_arena_index];
+
+    const i32 enemy_projectiles_arena_index = rangeArenaGetIndex(range_arena_game, "enemy_projectiles");
+    const Range total_range = (Range){ .start = 0, .end = range_arena_game->border };
+
+    for(int i = 0; i < ((Range *)range_arena_game->ranges.data)[enemy_arena_index].length; ++i) {
         // TODO(Ibrahim): fix function internals
+        // TODO(Ibrahim): remove magic number ``3" -> number_of_projectile_ammo_per_enemy
         archetypeSpawnProjectileAtEntityAI(
             (vec3 *)game_archetype.positions.data,
             (FireCore *)game_archetype.fire_cores.data, 
@@ -412,10 +421,8 @@ void update() {
             ((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + i, i * 3);
     }
 
-    Range total_range = (Range){ .start = 0, .end = range_arena_game->border };
-
     // keep hero in box
-    vec3 *hero_position = &((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[hero_arena_index].start];
+    vec3 *hero_position = &((vec3 *)game_archetype.positions.data)[hero_range.start];
     if ((*hero_position)[0] > 3.f){
         (*hero_position)[0] = 3.f;
     } else if ((*hero_position)[0] < -3.f) {
@@ -430,11 +437,11 @@ void update() {
     u8 hit_hero_enemy = archetypeProcessCollisions(&game_archetype, range_arena_game, hero_arena_index, enemy_arena_index);
     u8 hit_hero_eproj = archetypeProcessCollisions(&game_archetype, range_arena_game, hero_arena_index, enemy_projectiles_arena_index);
     if (hit_hero_enemy || hit_hero_eproj) {
-        // printf("Hero Lives - 1\n");
+        // reset hero position
         (*hero_position)[0] = 0.f;
         (*hero_position)[1] = -3.f;
-        // hero_lives -= 1;
-        // reset hero position
+        // printf("hero lives = %d\n", game_archetype.lives.data[hero_range.start]);
+        game_archetype.lives.data[hero_range.start] -= 1;
     }
     archetypeProcessCollisions(&game_archetype, range_arena_game, hero_projectiles_arena_index, enemy_arena_index);
 
@@ -448,9 +455,9 @@ void update() {
         // printf("sign = %d\n", sign);
         float random_x = ((float)rand()/(float)(RAND_MAX)) * 3 * sign;
         // printf("random_x = %f\n", random_x);
-        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][0] = random_x;
-        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][1] = 8.f;
-        ((vec3 *)game_archetype.positions.data)[((Range *)range_arena_game->ranges.data)[enemy_arena_index].start + iter][2] = 0.f;
+        ((vec3 *)game_archetype.positions.data)[enemy_range.start + iter][0] = random_x;
+        ((vec3 *)game_archetype.positions.data)[enemy_range.start + iter][1] = 8.f;
+        ((vec3 *)game_archetype.positions.data)[enemy_range.start + iter][2] = 0.f;
         counter = 0;
         iter += 1;
         if(iter % 10 == 0) { iter = 0; }

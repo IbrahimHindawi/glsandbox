@@ -68,7 +68,7 @@ u32 rangeArenaAppend(RangeArena *range_arena, name new_range_name, u32 new_size)
 
 // TODO(Ibrahim): optimize linear search to binary search
 // TODO(Ibrahim): figure out signdness
-i32 rangeArenaGet(RangeArena *range_arena, name key) {
+i32 rangeArenaGetIndex(RangeArena *range_arena, name key) {
     for( i32 i = 0; i < range_arena->ranges.length; i++ ) {
         if( strcmp(((Range *)range_arena->ranges.data)[i].rname, key ) == 0 ) {
             return i;
@@ -78,7 +78,7 @@ i32 rangeArenaGet(RangeArena *range_arena, name key) {
 }
 
 void rangeArenaPrint(RangeArena *range_arena, name key) {
-    i32 range_index = rangeArenaGet(range_arena, key);
+    i32 range_index = rangeArenaGetIndex(range_arena, key);
     Range range = ((Range *)range_arena->ranges.data)[range_index];
     printf("range = { rname: %s, start: %d, end: %d, length: %d, index: %d }\n", 
             range.rname, range.start, range.end, range.length, range.index);
