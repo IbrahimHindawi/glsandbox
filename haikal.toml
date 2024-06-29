@@ -1,0 +1,11 @@
+[core]
+metapath = "extern/haikal/src/meta/"
+[meta]
+hkArray = [
+    "vec3s",
+    "mat4s",
+    "FireCore"
+]
+hkNode = []
+hkQueue = []
+hkList = []

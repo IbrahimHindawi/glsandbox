@@ -18,9 +18,10 @@ include_directories(source/)
 
 include_directories(thirdparty/glad/include)
 include_directories(thirdparty/stb/include)
+include_directories(extern/haikal/src/meta/gen)
+include_directories(extern/haikal/src)
 
 add_subdirectory(extern)
-target_link_libraries(${PROJECT_NAME} PUBLIC haikal)
 
 find_package(cglm CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE cglm::cglm)

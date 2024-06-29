@@ -1,22 +1,13 @@
 #pragma once
 
+#include <core.h>
 #include <math.h>
 #include <glad/glad.h>
-#include <cglm/vec3.h>
 #include <cglm/affine.h>
 #include <cglm/cam.h>
-#include <cglm/mat4.h>
-#include <cglm/vec3.h>
+#include <cglm/struct.h>
+#include <cglm/struct/affine-pre.h>
 #include <SDL2/SDL.h>
-
-#include "core.h"
-#include "hkArray.h"
-#include "hkArrayT-primitives.h"
-#include "rangeops.h"
-#include "meshops.h"
-
-#define getComponent(reference, type, attribute) (type *)reference.attribute.data
-#define getComponentPtr(reference, type, attribute) (type *)reference->attribute.data
 
 typedef struct {
     i32 fire_active;
@@ -27,91 +18,98 @@ typedef struct {
     i32 fire_burst_rate;
 } FireCore;
 
+#include <hkArray.h>
+#include "rangeops.h"
+#include "meshops.h"
+
+#define getComponent(reference, type, attribute) (type *)reference.attribute.data
+#define getComponentPtr(reference, type, attribute) (type *)reference->attribute.data
+
 typedef struct {
     // debug-graphics
-    hkArray vaos; // u32
-    hkArray index_counts; // u32
-    hkArray shaders; // u32
-    hkArray textures; // u32
+    hkArray_u32 vaos;
+    hkArray_u32 index_counts;
+    hkArray_u32 shaders;
+    hkArray_u32 textures;
     // game logic
-    hkArrayi32 lives;
-    hkArray speeds; // f32 
-    hkArray velocities; // vec3
-    hkArray positions; // vec3
-    hkArray rotations; // vec3
-    hkArray scales; // vec3
-    hkArray models; // mat4
-    hkArray fire_cores; // u32
+    hkArray_i32 lives;
+    hkArray_f32 speeds;
+    hkArray_vec3s velocities;
+    hkArray_vec3s positions;
+    hkArray_vec3s rotations;
+    hkArray_vec3s scales;
+    hkArray_mat4s models;
+    hkArray_u32 fire_cores;
 } GameArchetype;
 
 void gameArchetypeAllocate(GameArchetype *archetype, i32 n) {
     // game
-    archetype->vaos = hkArrayCreate(sizeof(u32), n);
-    archetype->index_counts = hkArrayCreate(sizeof(u32), n);
-    archetype->shaders = hkArrayCreate(sizeof(u32), n);
-    archetype->textures = hkArrayCreate(sizeof(u32), n);
+    archetype->vaos = hkarray_u32_create(n);
+    archetype->index_counts = hkarray_u32_create(n);
+    archetype->shaders = hkarray_u32_create(n);
+    archetype->textures = hkarray_u32_create(n);
     // graphics
-    archetype->lives = hkArrayi32Create(n);
-    archetype->speeds = hkArrayCreate(sizeof(f32), n);
-    archetype->velocities = hkArrayCreate(sizeof(vec3), n);
-    archetype->positions = hkArrayCreate(sizeof(vec3), n);
-    archetype->rotations = hkArrayCreate(sizeof(vec3), n);
-    archetype->scales = hkArrayCreate(sizeof(vec3), n);
-    archetype->models = hkArrayCreate(sizeof(mat4), n);
-    archetype->fire_cores = hkArrayCreate(sizeof(FireCore), n);
+    archetype->lives = hkarray_i32_create(n);
+    archetype->speeds = hkarray_f32_create(n);
+    archetype->velocities = hkarray_vec3s_create(n);
+    archetype->positions = hkarray_vec3s_create(n);
+    archetype->rotations = hkarray_vec3s_create(n);
+    archetype->scales = hkarray_vec3s_create(n);
+    archetype->models = hkarray_mat4s_create(n);
+    archetype->fire_cores = hkarray_u32_create(n);
 }
 
 void gameArchetypeDeallocate(GameArchetype *archetype) {
     // game
-    hkArrayDestroy(&archetype->vaos);
-    hkArrayDestroy(&archetype->index_counts);
-    hkArrayDestroy(&archetype->shaders);
-    hkArrayDestroy(&archetype->textures);
+    hkarray_u32_destroy(&archetype->vaos);
+    hkarray_u32_destroy(&archetype->index_counts);
+    hkarray_u32_destroy(&archetype->shaders);
+    hkarray_u32_destroy(&archetype->textures);
     // graphics
-    hkArrayi32Destroy(&archetype->lives);
-    hkArrayDestroy(&archetype->speeds);
-    hkArrayDestroy(&archetype->velocities);
-    hkArrayDestroy(&archetype->positions);
-    hkArrayDestroy(&archetype->rotations);
-    hkArrayDestroy(&archetype->scales);
-    hkArrayDestroy(&archetype->models);
+    hkarray_i32_destroy(&archetype->lives);
+    hkarray_f32_destroy(&archetype->speeds);
+    hkarray_vec3s_destroy(&archetype->velocities);
+    hkarray_vec3s_destroy(&archetype->positions);
+    hkarray_vec3s_destroy(&archetype->rotations);
+    hkarray_vec3s_destroy(&archetype->scales);
+    hkarray_mat4s_destroy(&archetype->models);
 }
 
 typedef struct {
-    hkArray vaos; // u32
-    hkArray index_counts; // u32
-    hkArray shaders; // u32
-    hkArray textures; // u32
-    hkArray positions; // vec3
-    hkArray rotations; // vec3
-    hkArray scales; // vec3
-    hkArray models; // mat4
+    hkArray_u32 vaos; // u32
+    hkArray_u32 index_counts; // u32
+    hkArray_u32 shaders; // u32
+    hkArray_u32 textures; // u32
+    hkArray_vec3s positions; // vec3
+    hkArray_vec3s rotations; // vec3
+    hkArray_vec3s scales; // vec3
+    hkArray_mat4s models; // mat4
 } GraphicsArchetype;
 
 void graphicsArchetypeAllocate(GraphicsArchetype *archetype, i32 n) {
     // game
-    archetype->vaos = hkArrayCreate(sizeof(u32), n);
-    archetype->index_counts = hkArrayCreate(sizeof(u32), n);
-    archetype->shaders = hkArrayCreate(sizeof(u32), n);
-    archetype->textures = hkArrayCreate(sizeof(u32), n);
+    archetype->vaos = hkarray_u32_create(n);
+    archetype->index_counts = hkarray_u32_create(n);
+    archetype->shaders = hkarray_u32_create(n);
+    archetype->textures = hkarray_u32_create(n);
     // graphics
-    archetype->positions = hkArrayCreate(sizeof(vec3), n);
-    archetype->rotations = hkArrayCreate(sizeof(vec3), n);
-    archetype->scales = hkArrayCreate(sizeof(vec3), n);
-    archetype->models = hkArrayCreate(sizeof(mat4), n);
+    archetype->positions = hkarray_vec3s_create(n);
+    archetype->rotations = hkarray_vec3s_create(n);
+    archetype->scales = hkarray_vec3s_create(n);
+    archetype->models = hkarray_mat4s_create(n);
 }
 
 void graphicsArchetypeDeallocate(GraphicsArchetype *archetype) {
     // game
-    hkArrayDestroy(&archetype->vaos);
-    hkArrayDestroy(&archetype->index_counts);
-    hkArrayDestroy(&archetype->shaders);
-    hkArrayDestroy(&archetype->textures);
+    hkarray_u32_destroy(&archetype->vaos);
+    hkarray_u32_destroy(&archetype->index_counts);
+    hkarray_u32_destroy(&archetype->shaders);
+    hkarray_u32_destroy(&archetype->textures);
     // graphics
-    hkArrayDestroy(&archetype->positions);
-    hkArrayDestroy(&archetype->rotations);
-    hkArrayDestroy(&archetype->scales);
-    hkArrayDestroy(&archetype->models);
+    hkarray_vec3s_destroy(&archetype->positions);
+    hkarray_vec3s_destroy(&archetype->rotations);
+    hkarray_vec3s_destroy(&archetype->scales);
+    hkarray_mat4s_destroy(&archetype->models);
 }
 
 void archetypeInitalizeMeshes(u32 *vao_data, u32 vao, u32 *index_count_data, u32 index_count, const Range range) {
@@ -123,40 +121,40 @@ void archetypeInitalizeMeshes(u32 *vao_data, u32 vao, u32 *index_count_data, u32
     return;
 }
 
-void archetypeInitializeMesh(u32 *mesh_data, u32 *index_count_data, const Range range, u32 mesh_id) {
+void archetypeInitializeMesh(hkArray_u32 meshes, hkArray_u32 index_counts, const Range range, u32 mesh_id) {
     for(i32 i = range.start; i < range.end; ++i) {
-        mesh_data[i] = MeshVAOArray[mesh_id];
-        index_count_data[i] = MeshRawDataArray[mesh_id].indices_count;
+        meshes.data[i] = MeshVAOArray[mesh_id];
+        index_counts.data[i] = MeshRawDataArray[mesh_id].indices_count;
     }
     return;
 }
 
-void archetypeInitialize1u(u32 *data, const Range range, u32 value) {
+void archetypeInitialize1u(hkArray_u32 numbers, const Range range, u32 value) {
     for(i32 i = range.start; i < range.end; ++i) {
-        data[i] = value;
+        numbers.data[i] = value;
     }
     return;
 }
 
-void archetypeInitialize1i(i32 *data, const Range range, i32 value) {
+void archetypeInitialize1i(hkArray_i32 numbers, const Range range, i32 value) {
     for(i32 i = range.start; i < range.end; ++i) {
-        data[i] = value;
+        numbers.data[i] = value;
     }
     return;
 }
 
-void archetypeInitialize1f(f32 *data, const Range range, f32 value) {
+void archetypeInitialize1f(hkArray_f32 numbers, const Range range, f32 value) {
     for(i32 i = range.start; i < range.end; ++i) {
-        data[i] = value;
+        numbers.data[i] = value;
         // printf("step %f\n", a);
     }
 }
 
-void archetypeInitialize3f(vec3 *vector_data, const Range range, vec3 vector_value) {
+void archetypeInitialize3f(hkArray_vec3s vectors, const Range range, vec3s vector_value) {
     for(i32 i = range.start; i < range.end; ++i) {
-        vector_data[i][0] = vector_value[0];
-        vector_data[i][1] = vector_value[1];
-        vector_data[i][2] = vector_value[2];
+        vectors.data[i].x = vector_value.x;
+        vectors.data[i].y = vector_value.y;
+        vectors.data[i].z = vector_value.z;
     }
     return;
 }
@@ -220,13 +218,13 @@ void archetypeUpdateVelocities(vec3 *velocity_data, f32 time, const Range range)
     }
 }
 
-void archetypeCopyVector(vec3 *source_position_data, vec3 *dest_position_data, const Range range) {
+void archetypeCopyVector(hkArray_vec3s source_positions, hkArray_vec3s dest_positions, const Range range) {
     // vec4 *box = (vec4 *)archetype->box.data;
     // const vec3 *positions = (vec3 *)archetype->positions.data;
     for(i32 i = range.start; i < range.end; ++i) {
-        dest_position_data[i][0] = source_position_data[i][0];
-        dest_position_data[i][1] = source_position_data[i][1];
-        dest_position_data[i][2] = source_position_data[i][2];
+        dest_positions.data[i].x = source_positions.data[i].x;
+        dest_positions.data[i].y = source_positions.data[i].y;
+        dest_positions.data[i].z = source_positions.data[i].z;
         // printf("{%f, %f, %f, %f}\n", box[i][0], box[i][1], box[i][2], box[i][3]);
     }
     // printf("\n");
@@ -375,41 +373,41 @@ u8 archetypeProcessCollisions(GameArchetype *game_archetype, RangeArena *range_a
     return false;
 }
 
-void archetypeUpdateTransforms(vec3 *position_data, vec3 *rotation_data, vec3 *scale_data, mat4 *model_data, const Range range) {
+void archetypeUpdateTransforms(hkArray_vec3s positions, hkArray_vec3s rotations, hkArray_vec3s scales, hkArray_mat4s models, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         // S T R
-        glm_mat4_identity(&model_data[i][0]);
-        glm_translate(&model_data[i][0], position_data[i]);
-        glm_rotate(&model_data[i][0], rotation_data[i][0], (vec3){1.f, 0.f, 0.f});
-        glm_rotate(&model_data[i][0], rotation_data[i][1], (vec3){0.f, 1.f, 0.f});
-        glm_rotate(&model_data[i][0], rotation_data[i][2], (vec3){0.f, 0.f, 1.f});
-        glm_scale(&model_data[i][0], scale_data[i]);
+        models.data[i] = glms_mat4_identity();
+        models.data[i] = glms_translate(models.data[i], positions.data[i]);
+        models.data[i] = glms_rotate(models.data[i], rotations.data[i].x, (vec3s){1.f, 0.f, 0.f});
+        models.data[i] = glms_rotate(models.data[i], rotations.data[i].y, (vec3s){0.f, 1.f, 0.f});
+        models.data[i] = glms_rotate(models.data[i], rotations.data[i].z, (vec3s){0.f, 0.f, 1.f});
+        models.data[i] = glms_scale(models.data[i], scales.data[i]);
     }
     return;
 }
 
-void archetypeIntegrateVelocity(vec3 *position_data, vec3 *velocity_data, f32 *speed_data, f32 delta_time, const Range range) {
+void archetypeIntegrateVelocity(hkArray_vec3s positions, hkArray_vec3s velocities, hkArray_f32 speeds, f32 delta_time, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
         // transformations
-        position_data[i][0] += velocity_data[i][0] * speed_data[i] * delta_time;
-        position_data[i][1] += velocity_data[i][1] * speed_data[i] * delta_time;
+        positions.data[i].x += velocities.data[i].x * speeds.data[i] * delta_time;
+        positions.data[i].y += velocities.data[i].y * speeds.data[i] * delta_time;
     }
 }
 
-void archetypeRender(u32 *vao_data, u32 *shader_program_data, u32 *texture_data, u32* index_count_data, mat4 *model_data, mat4 view, mat4 proj, const Range range) {
+void archetypeRender(hkArray_u32 vaos, hkArray_u32 shader_programs, hkArray_u32 textures, hkArray_u32 index_counts, hkArray_mat4s models, mat4 view, mat4 proj, const Range range) {
     for(i32 i = range.start; i < range.end; ++i) {
-        glUseProgram(shader_program_data[i]);
+        glUseProgram(shader_programs.data[i]);
         // uniforms
-        u32 view_location = glGetUniformLocation(shader_program_data[i], "view");
+        u32 view_location = glGetUniformLocation(shader_programs.data[i], "view");
         glUniformMatrix4fv(view_location, 1, GL_FALSE, view[0]);
-        u32 proj_location = glGetUniformLocation(shader_program_data[i], "proj");
+        u32 proj_location = glGetUniformLocation(shader_programs.data[i], "proj");
         glUniformMatrix4fv(proj_location, 1, GL_FALSE, proj[0]);
-        u32 model_location = glGetUniformLocation(shader_program_data[i], "model");
-        glUniformMatrix4fv(model_location, 1, GL_FALSE, model_data[i][0]);
+        u32 model_location = glGetUniformLocation(shader_programs.data[i], "model");
+        glUniformMatrix4fv(model_location, 1, GL_FALSE, &models.data[i].m00);
         // draw
-        glBindVertexArray(vao_data[i]);
-        glBindTexture(GL_TEXTURE_2D, texture_data[i]);
-        glDrawElements(GL_TRIANGLES, index_count_data[i], GL_UNSIGNED_INT, 0);
+        glBindVertexArray(vaos.data[i]);
+        glBindTexture(GL_TEXTURE_2D, textures.data[i]);
+        glDrawElements(GL_TRIANGLES, index_counts.data[i], GL_UNSIGNED_INT, 0);
     }
 }
 
@@ -474,28 +472,28 @@ void archetypeSpawnProjectileAtEntity(vec3 *positions, i32 *fire_index_data, con
     return;
 }
 
-void archetypeSpawnProjectileAtEntityAuto(vec3 *positions, FireCore *fire_cores, const Range projectile_range, i32 source_entity_id) {
+void archetypeSpawnProjectileAtEntityAuto(hkArray_vec3s positions, FireCore *fire_cores, const Range projectile_range, i32 source_entity_id) {
     // printf("fire_cores[source_entity_id].fire_index[i] = %d. ", *fire_cores[source_entity_id].fire_index);
     // printf("fire_cores[source_entity_id].fire_index[i + projectile_range.start] = %d. ", *fire_cores[source_entity_id].fire_index+projectile_range.start);
     // printf("address: %p\n", fire_cores[source_entity_id].fire_index);
-    vec3 *source_position = positions;
-    vec3 *dest_position = positions;
+    vec3s *source_position = positions.data;
+    vec3s *dest_position = positions.data;
 
     if((fire_cores[source_entity_id].fire_counter % fire_cores[source_entity_id].fire_rate) == 0) {
         fire_cores[source_entity_id].fire_counter = 0;
         fire_cores[source_entity_id].fire_index = (fire_cores[source_entity_id].fire_index + 1) % projectile_range.length;
-        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start][0] = source_position[source_entity_id][0];
-        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start][1] = source_position[source_entity_id][1];
-        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start][2] = source_position[source_entity_id][2];
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start].x = source_position[source_entity_id].x;
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start].y = source_position[source_entity_id].y;
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start].z = source_position[source_entity_id].z;
     }
     fire_cores[source_entity_id].fire_counter += 1;
     return;
 }
 
 
-void archetypeSpawnProjectileAtEntityAI(vec3 *positions, FireCore *fire_cores, const Range projectile_range, i32 source_entity_id, i32 off) {
-    vec3 *source_position = positions;
-    vec3 *dest_position = positions;
+void archetypeSpawnProjectileAtEntityAI(hkArray_vec3s positions, FireCore *fire_cores, const Range projectile_range, i32 source_entity_id, i32 off) {
+    vec3s *source_position = positions.data;
+    vec3s *dest_position = positions.data;
 
     if((fire_cores[source_entity_id].fire_counter % fire_cores[source_entity_id].fire_rate) == 0 && fire_cores[source_entity_id].fire_active == true) {
         fire_cores[source_entity_id].fire_counter = 0;
@@ -504,9 +502,9 @@ void archetypeSpawnProjectileAtEntityAI(vec3 *positions, FireCore *fire_cores, c
         // printf("%d\n", projectile_range.start);
         // printf("%d\n", projectile_range.length);
         fire_cores[source_entity_id].fire_index = (fire_cores[source_entity_id].fire_index + 1) % 3; // + projectile_range.length;
-        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start + off][0] = source_position[source_entity_id][0];
-        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start + off][1] = source_position[source_entity_id][1];
-        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start + off][2] = source_position[source_entity_id][2];
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start + off].x = source_position[source_entity_id].x;
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start + off].y = source_position[source_entity_id].y;
+        dest_position[fire_cores[source_entity_id].fire_index + projectile_range.start + off].z = source_position[source_entity_id].z;
         // fire end
         fire_cores[source_entity_id].fire_burst_count -= 1;
         if(fire_cores[source_entity_id].fire_burst_count == 0) { 

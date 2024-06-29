@@ -1,7 +1,8 @@
 #pragma once
 
-#include "core.h"
-#include "hkArray.h"
+#include <core.h>
+#include <cglm/struct.h>
+#include <hkArray.h>
 #include <string.h>
 
 /*
@@ -23,7 +24,7 @@ typedef struct {
     i32 border;
     i32 last_index;
     usize maximum;
-    hkArray ranges;
+    hkArray_i32 ranges;
 } RangeArena;
 
 // RangeArena range_arena;
@@ -36,7 +37,7 @@ RangeArena *rangeArenaAllocate(u64 count) {
     range_arena->border = 0;
     range_arena->last_index = 0;
     range_arena->maximum = count;
-    range_arena->ranges = hkArrayCreate(sizeof(Range), count);
+    range_arena->ranges = hkarray_i32_create(count);
     // range_arena->ranges = NULL;
     return range_arena;
 }
